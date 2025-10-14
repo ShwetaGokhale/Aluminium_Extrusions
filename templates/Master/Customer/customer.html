@@ -1,0 +1,117 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'Css/customer.css' %}">
+
+<!-- Popup Notification -->
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+        {% if edit_mode %}Edit Customer{% else %}Customer Form{% endif %}
+    </h3>
+
+    <form id="customerForm" method="post"
+        action="{% if edit_mode %}{% url 'customer_edit' customer.id %}{% else %}{% url 'customer' %}{% endif %}">
+        {% csrf_token %}
+
+        {% if edit_mode %}
+        <input type="hidden" name="customer_id" value="{{ customer.id }}">
+        {% endif %}
+
+        <!-- Customer ID (Auto-generated, Read-only) -->
+        <div>
+            <label for="customer_id_display">Customer ID <span class="auto-gen-label">(Auto-generated)</span></label>
+            <input type="text" id="customer_id_display" 
+                value="{% if edit_mode %}{{ customer.customer_id }}{% else %}{{ next_customer_id }}{% endif %}" 
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
+        </div>
+
+        <!-- Date -->
+        <div>
+            <label for="date">Date <span style="color: red;">*</span></label>
+            <input type="date" name="date" id="date" required
+                value="{% if edit_mode %}{{ customer.date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Name -->
+        <div>
+            <label for="name">Name <span style="color: red;">*</span></label>
+            <input type="text" name="name" id="name" required 
+                   value="{% if edit_mode %}{{ customer.name }}{% endif %}"
+                   placeholder="Enter customer name">
+        </div>
+
+        <!-- Customer Type -->
+        <div>
+            <label for="customer_type">Customer Type <span style="color: red;">*</span></label>
+            <select name="customer_type" id="customer_type" required>
+                <option value="">Select Type</option>
+                <option value="Manufacturer" {% if edit_mode and customer.customer_type == 'Manufacturer' %}selected{% endif %}>Manufacturer</option>
+                <option value="Stockist" {% if edit_mode and customer.customer_type == 'Stockist' %}selected{% endif %}>Stockist</option>
+                <option value="Supplier" {% if edit_mode and customer.customer_type == 'Supplier' %}selected{% endif %}>Supplier</option>
+                <option value="Bulk Order" {% if edit_mode and customer.customer_type == 'Bulk Order' %}selected{% endif %}>Bulk Order</option>
+                <option value="Retail" {% if edit_mode and customer.customer_type == 'Retail' %}selected{% endif %}>Retail</option>
+            </select>
+        </div>
+
+        <!-- Contact No -->
+        <div>
+            <label for="contact_no">Contact No <span style="color: red;">*</span></label>
+            <input type="text" name="contact_no" id="contact_no" required 
+                   value="{% if edit_mode %}{{ customer.contact_no }}{% endif %}"
+                   placeholder="Enter contact number">
+        </div>
+
+        <!-- Customer Contact Person -->
+        <div>
+            <label for="contact_person">Customer Contact Person</label>
+            <input type="text" name="contact_person" id="contact_person" 
+                   value="{% if edit_mode %}{{ customer.contact_person }}{% endif %}"
+                   placeholder="Enter contact person name">
+        </div>
+
+        <!-- Address -->
+        <div class="full-width">
+            <label for="address">Address <span style="color: red;">*</span></label>
+            <textarea name="address" id="address" rows="3" required 
+                      placeholder="Enter address">{% if edit_mode %}{{ customer.address }}{% endif %}</textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">
+            {% if edit_mode %}Update Customer{% else %}Save Customer{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Pass data to JavaScript -->
+{% if edit_mode %}
+<script>
+    window.editMode = true;
+    window.customerId = {{ customer.id }};
+    window.currentCustomerId = "{{ customer.customer_id }}";
+</script>
+{% else %}
+<script>
+    window.editMode = false;
+    window.nextCustomerId = "{{ next_customer_id }}";
+</script>
+{% endif %}
+
+<!-- JavaScript -->
+<script src="{% static 'Js/customer.js' %}"></script>
+
+<style>
+    .auto-gen-label {
+        font-size: 0.75rem;
+        color: #718096;
+        font-style: italic;
+        font-weight: normal;
+    }
+</style>
+
+{% endblock %}

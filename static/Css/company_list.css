@@ -1,0 +1,402 @@
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Specific table styling to match the form's aesthetic */
+.table-container {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(106, 27, 154, 0.2);
+  margin: 32px auto;
+  width: 95%;
+  max-width: 100%;
+  overflow-x: auto;
+  /* Enable horizontal scrolling for table */
+  animation: slideUp 0.5s ease forwards;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  /* table-layout: fixed; /* Removed fixed layout as it conflicts with content width in inline edit */
+  min-width: 1200px;
+  /* Ensure minimum width for desktop viewing to prevent squishing */
+}
+
+th {
+  background-color: #6a1b9a;
+  color: white;
+  padding: 12px 8px;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 1px solid #7b1fa2;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+td {
+  padding: 12px 8px;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+  font-size: 0.875rem;
+  color: #4a5568;
+  animation: slideUp 0.5s ease forwards;
+  vertical-align: middle;
+  /* Align content vertically */
+}
+
+/* Make the table corners rounded */
+table {
+  width: 100%;
+  border-collapse: separate;
+  /* Important for border-radius! */
+  border-spacing: 0;
+  min-width: 1000px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: none;
+  animation: slideUp 0.5s ease forwards;
+}
+
+/* Header style */
+th {
+  background-color: #7b1fa2;
+  /* Purple */
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: bold;
+  border: none;
+  padding: 14px 10px;
+}
+
+/* Rounded corners for header */
+th:first-child {
+  border-top-left-radius: 12px;
+}
+
+th:last-child {
+  border-top-right-radius: 12px;
+}
+
+/* Rounded corners for last row */
+tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+
+tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+td input[type="text"],
+td input[type="number"],
+td input[type="date"],
+td select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+  /* Include padding in width calculation */
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h2 {
+  animation: slideUp 0.8s ease forwards;
+  transform: translateY(20px);
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f7fafc;
+}
+
+tbody tr:hover {
+  background-color: #edf2f7;
+  transform: scale(1.005);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .main-nav {
+    flex-direction: column;
+    padding: 10px;
+    align-items: flex-start;
+  }
+
+  .main-nav a,
+  .dropdown .dropbtn {
+    margin: 5px 0;
+    width: calc(100% - 20px);
+    text-align: left;
+  }
+
+  .dropdown-content {
+    position: static;
+    width: 100%;
+    box-shadow: none;
+    border-top: 1px solid #eee;
+  }
+
+  .table-container {
+    padding: 15px;
+    margin-top: 15px;
+    width: 98%;
+    min-width: unset;
+    /* Remove min-width on small screens */
+    overflow-x: auto;
+    /* Ensure scrolling is available */
+  }
+
+  h2 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+  }
+
+  th,
+  td {
+    padding: 8px 4px;
+    font-size: 0.75rem;
+  }
+
+  td.actions-column {
+    flex-direction: row;
+    gap: 5px;
+  }
+}
+
+/* Further adjustments for extremely small screens if necessary */
+@media (max-width: 480px) {
+  th,
+  td {
+    font-size: 0.65rem;
+    padding: 6px 3px;
+  }
+
+  .main-nav a,
+  .dropdown .dropbtn {
+    font-size: 14px;
+  }
+}
+
+/* Styles for action buttons within the table */
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1em;
+  margin: 0 5px;
+  transition: color 0.2s ease, transform 0.2s ease;
+  padding: 5px;
+  /* Add padding for easier touch targets */
+}
+
+.edit-btn {
+  color: #2196f3;
+  /* Blue for edit */
+}
+
+.edit-btn:hover {
+  color: #1976d2;
+  transform: scale(1.15);
+}
+
+.delete-btn {
+  color: #f44336;
+  /* Red for delete */
+}
+
+.delete-btn:hover {
+  color: #d32f2f;
+  transform: scale(1.15);
+}
+
+.save-btn {
+  color: #4caf50;
+  /* Green for save */
+}
+
+.save-btn:hover {
+  color: #388e3c;
+  transform: scale(1.15);
+}
+
+.cancel-btn {
+  color: #ffc107;
+  /* Orange for cancel */
+}
+
+.cancel-btn:hover {
+  color: #ffa000;
+  transform: scale(1.15);
+}
+
+/* Custom Confirmation Modal Styles (from consignment.html) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+  animation: fadeInOverlay 0.3s forwards;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #f0f4f8, #e9ecf0);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid #dcdcdc;
+  animation: slideInModal 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-content p {
+  font-size: 1.1em;
+  margin-bottom: 25px;
+  color: #333;
+  font-weight: 500;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.modal-buttons button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.modal-buttons .yes-btn {
+  background-color: #e53935;
+  color: white;
+}
+
+.modal-buttons .yes-btn:hover {
+  background-color: #c62828;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.modal-buttons .no-btn {
+  background-color: #e0e0e0;
+  color: #555;
+}
+
+.modal-buttons .no-btn:hover {
+  background-color: #c0c0c0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+/* Success Popup Element  */
+.success-popup {
+  position: fixed;
+  top: -100px;
+  /* Start off-screen above */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4caf50;
+  /* Green background */
+  color: white;
+  padding: 15px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+  text-align: center;
+  z-index: 9999;
+  /* Ensure it's on top */
+  opacity: 0;
+  /* Start hidden */
+  transition: top 0.5s ease-out, opacity 0.5s ease-out;
+  /* Smooth transition */
+  min-width: 250px;
+}
+
+.success-popup.show {
+  top: 20px;
+  /* Slide down to 20px from top */
+  opacity: 1;
+  /* Fade in */
+}
+
+/* Confirmation modal message font style */
+#confirmationMessage {
+  font-family: "Arial", sans-serif; /* Change font family */
+  font-size: 1.1rem; /* Adjust size */
+  font-weight: 600; /* Boldness */
+  font-style: italic; /* normal, italic, or oblique */
+  color: #6a1b9a; /* Optional: purple text to match theme */
+  text-align: center; /* Center the text */
+}

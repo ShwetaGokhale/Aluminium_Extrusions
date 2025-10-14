@@ -1,0 +1,195 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Monitoring Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'Css/dashboard_new.css' %}">
+
+
+</head>
+
+<body>
+    <div class="w-full h-screen bg-black text-white overflow-hidden" id="dashboardMain">
+
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-900 to-teal-700 px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white text-blue-900 px-4 py-2 rounded font-bold text-xl">
+                    <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Logo" class="h-12 w-auto">
+                </div>
+                <h1 class="text-3xl font-bold flex items-center space-x-2">
+                    <span class="factory-animate text-5xl">🏭</span>
+                    <span>Production Monitoring Dashboard</span>
+                </h1>
+
+            </div>
+            <!-- Last Updated -->
+            <div class="flex items-center space-x-6">
+                <div class="text-right">
+                    <div class="text-sm text-gray-200">Last Updated</div>
+                    <div class="text-lg font-semibold" id="lastUpdated"></div>
+                </div>
+                <div class="flex items-center bg-yellow-500 px-4 py-2 rounded-lg shadow-md space-x-3 animate-pulse">
+                    <i class="fa fa-cogs text-white text-2xl"></i>
+                    <!-- Mini animated production design -->
+                    <div class="flex space-x-1 items-end">
+                        <div class="w-2 h-3 bg-white rounded-sm animate-bounce [animation-delay:-0.2s]"></div>
+                        <div class="w-2 h-5 bg-white rounded-sm animate-bounce [animation-delay:-0.1s]"></div>
+                        <div class="w-2 h-4 bg-white rounded-sm animate-bounce"></div>
+                        <div class="w-2 h-6 bg-white rounded-sm animate-bounce [animation-delay:-0.15s]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Press Cards Grid -->
+        <div id="pressCardsContainer" class="production-scroll overflow-y-auto px-8 py-6"
+            style="height: calc(100vh - 88px);">
+            {% if presses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for press in presses %}
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border-2 border-gray-700 hover:border-blue-500 transition-all duration-300 cursor-pointer transform hover:scale-105 shadow-xl fade-in"
+                    onclick="showPressDetail({{ press.id }}, '{{ press.name }}')">
+
+                    <!-- Press Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-4">
+                            <div
+                                class="w-16 h-16 bg-gradient-to-br from-blue-500 to-teal-500 rounded-xl flex items-center justify-center">
+                                <i class="fa fa-industry text-white text-3xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">{{ press.name }}</h2>
+                            </div>
+                        </div>
+                        <div class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold pulse">
+                            ACTIVE
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-blue-900 bg-opacity-50 rounded-lg p-4 text-center">
+                            <div class="text-blue-300 text-sm mb-1">Active Plans</div>
+                            <div class="text-white text-3xl font-bold">{{ press.production_count }}</div>
+                        </div>
+                        <div class="bg-teal-900 bg-opacity-50 rounded-lg p-4 text-center">
+                            <div class="text-teal-300 text-sm mb-1">Total Qty</div>
+                            <div class="text-white text-3xl font-bold">{{ press.total_qty }}</div>
+                        </div>
+                    </div>
+
+                    <!-- View Details Button -->
+                    <button
+                        class="w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white py-3 rounded-lg transition-all duration-200 font-semibold text-lg">
+                        <i class="fa fa-chart-line mr-2"></i>View Production Details
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="flex items-center justify-center h-full">
+                <div class="text-center fade-in">
+                    <i class="fa fa-industry text-gray-600 text-8xl mb-6"></i>
+                    <h2 class="text-3xl font-bold text-gray-400 mb-4">No Presses Available</h2>
+                    <p class="text-gray-500 text-xl mb-8">Create a press in Company Master to get started</p>
+                    <a href="/extrusions/company/"
+                        class="inline-block px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-semibold">
+                        Go to Company Master
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Press Details View -->
+        <div id="pressDetailView" class="hidden fixed inset-0 bg-black z-50">
+            <div class="bg-gradient-to-r from-blue-900 to-teal-700 px-8 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white text-blue-900 px-4 py-2 rounded font-bold text-xl">
+                        <span id="detailPressName"></span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold flex items-center space-x-2">
+                            <span class="factory-animate text-4xl">🏭</span>
+                            <span id="detailPressTitle"></span>
+                        </h1>
+
+
+                        <p class="text-gray-200 text-sm" id="detailPressInfo"></p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <div class="text-sm text-gray-200">Status</div>
+                        <div class="text-lg font-semibold text-green-400 pulse">RUNNING</div>
+                    </div>
+                    <button onclick="closePressDetail()"
+                        class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors">
+                        <i class="fa fa-arrow-left mr-2"></i>Back
+                    </button>
+                </div>
+            </div>
+
+            <!-- Production Table -->
+            <div class="px-8 py-6 pb-8 production-scroll overflow-y-auto" style="height: calc(100vh - 160px);">
+                <div class="bg-gray-900 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gradient-to-r from-gray-800 to-gray-900 sticky top-0">
+                                <tr>
+                                    <th
+                                        class="px-8 py-5 text-left text-base font-bold text-gray-300 uppercase tracking-wider">
+                                        Order No</th>
+                                    <th
+                                        class="px-8 py-5 text-left text-base font-bold text-gray-300 uppercase tracking-wider">
+                                        Die No</th>
+                                    <th
+                                        class="px-8 py-5 text-center text-base font-bold text-gray-300 uppercase tracking-wider">
+                                        Cut Length</th>
+                                    <th
+                                        class="px-8 py-5 text-center text-base font-bold text-gray-300 uppercase tracking-wider">
+                                        Planned Qty</th>
+                                    <th
+                                        class="px-8 py-5 text-center text-base font-bold text-gray-300 uppercase tracking-wider">
+                                        Current Production</th>
+                                    <th
+                                        class="px-8 py-5 text-center text-base font-bold text-gray-300 uppercase tracking-wider">
+                                        Production Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailTableBody" class="divide-y divide-gray-800"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="detailLoadingState" class="text-center py-16">
+                        <div class="inline-block">
+                            <i class="fa fa-spinner fa-spin text-blue-500 text-6xl mb-4"></i>
+                            <p class="text-gray-400 text-xl font-medium">Loading production data...</p>
+                        </div>
+                    </div>
+
+                    <!-- No Data State -->
+                    <div id="detailNoDataState" class="hidden text-center py-16">
+                        <i class="fa fa-inbox text-gray-600 text-7xl mb-6"></i>
+                        <p class="text-gray-400 text-2xl font-semibold mb-2">No production plans found</p>
+                        <p class="text-gray-500 text-lg">This press doesn't have any production plans yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- JavaScript -->
+<script src="{% static 'Js/dashboard_new.js' %}"></script>
+
+</html>

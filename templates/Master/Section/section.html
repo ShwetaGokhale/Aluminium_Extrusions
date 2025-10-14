@@ -1,0 +1,227 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'Css/section.css' %}">
+
+<!-- Popup Notification -->
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+        {% if edit_mode %}Edit Section{% else %}Section Form{% endif %}
+    </h3>
+
+    <form id="sectionForm" method="post" enctype="multipart/form-data"
+        action="{% if edit_mode %}{% url 'section_edit' section.id %}{% else %}{% url 'section_form' %}{% endif %}">
+        {% csrf_token %}
+
+        {% if edit_mode %}
+        <input type="hidden" name="section_id" value="{{ section.id }}">
+        {% endif %}
+
+        <!-- Section ID (Auto-generated, Read-only) -->
+        <div>
+            <label for="section_id_display">Section ID <span class="auto-gen-label">(Auto-generated)</span></label>
+            <input type="text" id="section_id_display" 
+                value="{% if edit_mode %}{{ section.section_id }}{% else %}{{ next_section_id }}{% endif %}" 
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
+        </div>
+
+        <!-- Date -->
+        <div>
+            <label for="date">Date <span style="color: red;">*</span></label>
+            <input type="date" name="date" id="date" required
+                value="{% if edit_mode %}{{ section.date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Section No -->
+        <div>
+            <label for="section_no">Section No <span style="color: red;">*</span></label>
+            <input type="text" name="section_no" id="section_no" required 
+                   value="{% if edit_mode %}{{ section.section_no }}{% endif %}"
+                   placeholder="Enter section number">
+        </div>
+
+        <!-- Section Name -->
+        <div>
+            <label for="section_name">Section Name <span style="color: red;">*</span></label>
+            <input type="text" name="section_name" id="section_name" required 
+                   value="{% if edit_mode %}{{ section.section_name }}{% endif %}"
+                   placeholder="Enter section name">
+        </div>
+
+        <!-- Section Image -->
+        <div>
+            <label for="section_image">Section Image</label>
+            <input type="file" name="section_image" id="section_image" accept="image/*">
+            {% if edit_mode and section.section_image %}
+            <div class="mt-2">
+                <img src="{{ section.section_image.url }}" alt="Section Image" class="preview-image">
+                <p class="text-sm text-gray-600">Current image</p>
+            </div>
+            {% endif %}
+            <div id="imagePreview" class="mt-2 hidden">
+                <img id="previewImg" src="" alt="Preview" class="preview-image">
+            </div>
+        </div>
+
+        <!-- Shape -->
+        <div>
+            <label for="shape">Shape <span style="color: red;">*</span></label>
+            <select name="shape" id="shape" required>
+                <option value="">Select Shape</option>
+                <option value="T Profile" {% if edit_mode and section.shape == 'T Profile' %}selected{% endif %}>T Profile</option>
+                <option value="U Profile" {% if edit_mode and section.shape == 'U Profile' %}selected{% endif %}>U Profile</option>
+                <option value="C Profile" {% if edit_mode and section.shape == 'C Profile' %}selected{% endif %}>C Profile</option>
+                <option value="H Profile" {% if edit_mode and section.shape == 'H Profile' %}selected{% endif %}>H Profile</option>
+                <option value="L Profile" {% if edit_mode and section.shape == 'L Profile' %}selected{% endif %}>L Profile</option>
+            </select>
+        </div>
+
+        <!-- Type -->
+        <div>
+            <label for="type">Type <span style="color: red;">*</span></label>
+            <select name="type" id="type" required>
+                <option value="">Select Type</option>
+                <option value="Section" {% if edit_mode and section.type == 'Section' %}selected{% endif %}>Section</option>
+                <option value="Channel" {% if edit_mode and section.type == 'Channel' %}selected{% endif %}>Channel</option>
+                <option value="Angle" {% if edit_mode and section.type == 'Angle' %}selected{% endif %}>Angle</option>
+                <option value="Mesh" {% if edit_mode and section.type == 'Mesh' %}selected{% endif %}>Mesh</option>
+                <option value="Rod" {% if edit_mode and section.type == 'Rod' %}selected{% endif %}>Rod</option>
+            </select>
+        </div>
+
+        <!-- Usage -->
+        <div>
+            <label for="usage">Usage <span style="color: red;">*</span></label>
+            <select name="usage" id="usage" required>
+                <option value="">Select Usage</option>
+                <option value="Industrial" {% if edit_mode and section.usage == 'Industrial' %}selected{% endif %}>Industrial</option>
+                <option value="Construction" {% if edit_mode and section.usage == 'Construction' %}selected{% endif %}>Construction</option>
+                <option value="Solar" {% if edit_mode and section.usage == 'Solar' %}selected{% endif %}>Solar</option>
+                <option value="Auto" {% if edit_mode and section.usage == 'Auto' %}selected{% endif %}>Auto</option>
+            </select>
+        </div>
+
+        <!-- Length in mm -->
+        <div>
+            <label for="length_mm">Length in mm <span style="color: red;">*</span></label>
+            <input type="number" name="length_mm" id="length_mm" step="0.01" required 
+                   value="{% if edit_mode %}{{ section.length_mm }}{% endif %}"
+                   placeholder="Enter length in mm">
+        </div>
+
+        <!-- Width in mm -->
+        <div>
+            <label for="width_mm">Width in mm <span style="color: red;">*</span></label>
+            <input type="number" name="width_mm" id="width_mm" step="0.01" required 
+                   value="{% if edit_mode %}{{ section.width_mm }}{% endif %}"
+                   placeholder="Enter width in mm">
+        </div>
+
+        <!-- Thickness in mm -->
+        <div>
+            <label for="thickness_mm">Thickness in mm <span style="color: red;">*</span></label>
+            <input type="number" name="thickness_mm" id="thickness_mm" step="0.01" required 
+                   value="{% if edit_mode %}{{ section.thickness_mm }}{% endif %}"
+                   placeholder="Enter thickness in mm">
+        </div>
+
+        <!-- Ionized -->
+        <div class="ionized-container">
+            <label class="ionized-label">Ionized <span style="color: red;">*</span></label>
+            <div class="ionized-options">
+                <label class="checkbox-label">
+                    <input type="radio" name="ionized" id="ionized_yes" value="true" 
+                        {% if edit_mode and section.ionized %}checked{% endif %} required>
+                    <span>Yes</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="radio" name="ionized" id="ionized_no" value="false" 
+                        {% if edit_mode and not section.ionized %}checked{% elif not edit_mode %}checked{% endif %}>
+                    <span>No</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">
+            {% if edit_mode %}Update Section{% else %}Save Section{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Pass data to JavaScript -->
+{% if edit_mode %}
+<script>
+    window.editMode = true;
+    window.sectionId = {{ section.id }};
+    window.currentSectionId = "{{ section.section_id }}";
+</script>
+{% else %}
+<script>
+    window.editMode = false;
+    window.nextSectionId = "{{ next_section_id }}";
+</script>
+{% endif %}
+
+<!-- JavaScript -->
+<script src="{% static 'Js/section.js' %}"></script>
+
+<style>
+    .auto-gen-label {
+        font-size: 0.75rem;
+        color: #718096;
+        font-style: italic;
+        font-weight: normal;
+    }
+    
+    .preview-image {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        margin-top: 8px;
+    }
+    
+    .ionized-container {
+        grid-column: 1 / 3;
+    }
+    
+    .ionized-label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .ionized-options {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+    }
+    
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .checkbox-label input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    .checkbox-label span {
+        font-weight: 500;
+        color: #4a5568;
+    }
+</style>
+
+{% endblock %}

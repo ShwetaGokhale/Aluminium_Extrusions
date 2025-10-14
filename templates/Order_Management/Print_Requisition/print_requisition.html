@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Print Requisition</title>
+    <link rel="stylesheet" href="{% static 'Css/print_requisition.css' %}">
+</head>
+
+<body class="{% if is_bulk %}multiple-mode{% else %}single-mode{% endif %}">
+
+    {% if is_bulk %}
+    <!-- Multiple requisitions mode -->
+    <div class="note-section">
+        <strong>📌 Note:</strong> On the print dialog, set margins to <strong>"Default"</strong> to get best results.
+    </div>
+
+    <div id="requisitionsContainer">
+        {% for req_data in requisitions %}
+        {% if forloop.counter0|divisibleby:4 %}
+        {% if not forloop.first %}</div>{% endif %}
+    <div class="page">
+        {% endif %}
+
+        <div class="outer-box">
+            <!-- Header -->
+            <div class="header">
+                <div class="address">
+                    <strong>INFIMETRICS INFO SOLUTIONS PVT LTD.</strong><br>
+                    UNIT #8, Software Technology Parks of India (STPI),<br>
+                    Parsodi, Nagpur, Maharashtra, India<br>
+                    440022<br>
+                    Mob: +91 7798282796 | Email: nitin.awade@infimetrics.com<br>
+                    www.infimetrics.com
+                </div>
+                <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Logo">
+            </div>
+
+            <!-- Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cust Requisition No</th>
+                        <th>Customer Name</th>
+                        <th>Section No</th>
+                        <th>WT Range</th>
+                        <th>Cut Length</th>
+                        <th>QTY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ req_data.requisition_no }}</td>
+                        <td>{{ req_data.customer }}</td>
+                        <td>{{ req_data.section_no }}</td>
+                        <td>{{ req_data.wt_range }}</td>
+                        <td>{{ req_data.cut_length }}</td>
+                        <td>{{ req_data.qty }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="font-size: 8px; margin: 40px 0;">
+                <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+                    <div><strong>Address:</strong> {{ req_data.address|truncatechars:20 }}</div>
+                    <div><strong>Dispatch Date:</strong> {{ req_data.dispatch_date|date:"Y-m-d"|default:"N/A" }}</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+                    <div><strong>Expiry Date:</strong> {{ req_data.expiry_date|date:"Y-m-d"|default:"N/A" }}</div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div>Receiver's Signature</div>
+                <div>Authorized Signature</div>
+            </div>
+        </div>
+
+        {% if forloop.last %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Single requisition mode (existing functionality) -->
+    <div class="outer-box">
+        <!-- Header -->
+        <div class="header">
+            <div class="address">
+                <strong>INFIMETRICS INFO SOLUTIONS PVT LTD.</strong><br>
+                UNIT #8, Software Technology Parks of India (STPI),<br>
+                Parsodi, Nagpur, Maharashtra, India<br>
+                440022<br>
+                Mob: +91 7798282796 | Email: nitin.awade@infimetrics.com<br>
+                www.infimetrics.com
+            </div>
+            <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Logo">
+        </div>
+
+        <!-- Table for Single Requisition -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Cust Requisition No</th>
+                    <th>Customer Name</th>
+                    <th>Section No</th>
+                    <th>WT Range</th>
+                    <th>Cut Length</th>
+                    <th>QTY</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ requisition.requisition_no|default:"N/A" }}</td>
+                    <td>{{ requisition.customer.name|default:requisition.customer }}</td>
+                    <td>{{ requisition.orders.all.0.section_no.section_no|default:"N/A" }}</td>
+                    <td>{{ requisition.orders.all.0.wt_range|default:"N/A" }}</td>
+                    <td>{{ requisition.orders.all.0.cut_length|default:"N/A" }}</td>
+                    <td>{{ requisition.orders.all.0.qty_in_no|default:"N/A" }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="font-size: 13px; margin: 40px 0;">
+            <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+                <div><strong>Address:</strong> {{ requisition.address|truncatechars:30|default:"N/A" }}</div>
+                <div><strong>Dispatch Date:</strong> {{ requisition.dispatch_date|date:"Y-m-d"|default:"N/A" }}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+                <div><strong>Expiry Date:</strong> {{ requisition.expiry_date|date:"Y-m-d"|default:"N/A" }}</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div>Receiver's Signature</div>
+            <div>Authorized Signature</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <button class="print-btn" onclick="window.print()">Print</button>
+</body>
+
+</html>

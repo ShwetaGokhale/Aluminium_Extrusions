@@ -1,0 +1,132 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'Css/lot.css' %}">
+
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h2 class="text-3xl font-bold italic mb-4 text-purple-800 text-center">Lot List</h2>
+            <button id="addNewLotBtn" class="add-new-btn">
+                <i class="fa-solid fa-plus"></i> Add New Lot
+            </button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Cast No</th>
+                    <th>Press No</th>
+                    <th>Date of Extrusion</th>
+                    <th>Aging No</th>
+                    <th>Lot Number</th>
+                    <th class="date-column">Date Added</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="lotTableBody">
+                {% for lot in lots %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ lot.cast_no }}</td>
+                    <td>{{ lot.press_no.press_name }}</td>
+                    <td>{{ lot.date_of_extrusion }}</td>
+                    <td>{{ lot.aging_no }}</td>
+                    <td>{{ lot.lot_number }}</td>
+                    <td class="date-column">{{ lot.date_added }}</td>
+                    <td>
+                        <button class="editLotBtn edit-btn" data-id="{{ lot.id }}" data-cast="{{ lot.cast_no }}"
+                            data-press="{{ lot.press_no.id }}" data-date="{{ lot.date_of_extrusion }}"
+                            data-aging="{{ lot.aging_no }}" data-number="{{ lot.lot_number }}"
+                            data-date-added="{{ lot.date_added }}">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button class="delete-btn" data-lot-id="{{ lot.id }}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="empty-row">No lots found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add/Edit Lot Modal -->
+    <div id="addEditLotModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeAddEditLotModalBtn">&times;</button>
+            <h3 id="addEditLotModalTitle">Add New Lot</h3>
+            <form id="lotAddEditForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="lotModalIdInput" name="id">
+
+                <div class="modal-form-group">
+                    <label>Cast No:</label>
+                    <input type="text" id="lotCastInput" name="cast_no" required>
+                </div>
+
+                <div class="modal-form-group">
+                    <label>Press No:</label>
+                    <div class="input-with-btn">
+                        <select id="lotPressInput" name="press_no" required>
+                            <option value="">-- Select Press --</option>
+                            {% for press in presses %}
+                            <option value="{{ press.id }}">{{ press.press_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label>Date of Extrusion:</label>
+                    <input type="date" id="lotDateInput" name="date_of_extrusion" value="{{ 'now'|date:'Y-m-d' }}"
+                        required>
+                </div>
+
+                <div class="modal-form-group">
+                    <label>Aging No:</label>
+                    <input type="text" id="lotAgingInput" name="aging_no" required>
+                </div>
+
+                <div class="modal-form-group">
+                    <label>Lot Number:</label>
+                    <div class="input-with-btn">
+                        <input type="text" id="lotNumberInput" name="lot_number" readonly>
+                        <button type="button" id="generateLotBtn" class="generate-btn">Generate</button>
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label>Date Added:</label>
+                    <input type="date" id="lotDateAddedInput" name="date_added" value="{{ 'now'|date:'Y-m-d' }}"
+                        required>
+                </div>
+
+                <button type="submit" class="modal-add-btn" id="saveLotModalBtn">Save Lot</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteLotModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-3xl font-bold italic mb-4 text-purple-800 text-center">
+                Are you sure you want to delete this lot?
+            </h3>
+            <div class="modal-buttons">
+                <button id="confirmDeleteLotBtn">Yes</button>
+                <button id="cancelDeleteLotBtn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="successPopup" class="success-popup">Action successful!</div>
+</body>
+<script src="{% static 'Js/lot.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'Css/press.css' %}">
+
+<body>
+    <script src="{% static 'Js/press.js' %}"></script>
+    <div class="container">
+        <div class="header-section">
+            <h2 class="text-3xl font-bold italic mb-4 text-purple-800 text-center">Press List</h2>
+            <button id="addNewPressBtn" class="add-new-btn">
+                <i class="fa-solid fa-plus"></i> Add New Press
+            </button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Press Name</th>
+                    <th class="date-column">Date Added</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="pressTableBody">
+                {% for press in presses %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ press.press_name }}</td>
+                    <td class="date-column">{{ press.date_added }}</td>
+                    <td class="actions-column">
+                        <button type="button" class="editPressBtn edit-btn" data-id="{{ press.id }}"
+                            data-name="{{ press.press_name }}" data-date="{{ press.date_added }}">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button type="button" class="delete-btn" data-press-id="{{ press.id }}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-row">No presses found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- Add/Edit Press Modal -->
+    <div id="addEditPressModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeAddEditPressModalBtn">&times;</button>
+            <h3 id="addEditPressModalTitle">Add New Press</h3>
+            <form id="pressAddEditForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="pressModalIdInput" name="id">
+                <div class="modal-form-group">
+                    <label for="pressModalNameInput">Press Name:</label>
+                    <input type="text" id="pressModalNameInput" name="press_name" placeholder="e.g., Main Press"
+                        required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="pressModalDateInput">Date Added:</label>
+                    <input type="date" id="pressModalDateInput" name="date_added" value="{{ 'now'|date:'Y-m-d' }}"
+                        required>
+                </div>
+                <button type="submit" class="modal-add-btn" id="savePressModalBtn">Add Press</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deletePressModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-3xl font-bold italic mb-4 text-purple-800 text-center">
+                Are you sure you want to delete this press?
+            </h3>
+            <div class="modal-buttons">
+                <button id="confirmDeletePressBtn">Yes</button>
+                <button id="cancelDeletePressBtn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Popup  -->
+    <div id="successPopup" class="success-popup">
+        Action successful!
+    </div>
+</body>
+{% endblock %}

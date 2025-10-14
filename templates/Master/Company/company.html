@@ -1,0 +1,124 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'Css/company.css' %}">
+
+<!-- Popup Notification -->
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+        {% if edit_mode %}Edit Company{% else %}Company Form{% endif %}
+    </h3>
+
+    <form id="companyForm" method="post"
+        action="{% if edit_mode %}{% url 'company_edit' company.id %}{% else %}{% url 'company_create' %}{% endif %}">
+        {% csrf_token %}
+        {% if edit_mode %}
+        <input type="hidden" name="company_id" value="{{ company.id }}">
+        {% endif %}
+
+        <!-- Basic Company Info -->
+        <div>
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" required value="{% if edit_mode %}{{ company.name }}{% endif %}">
+        </div>
+
+        <div>
+            <label for="contact_no">Contact No</label>
+            <input type="text" name="contact_no" id="contact_no" required
+                value="{% if edit_mode %}{{ company.contact_no }}{% endif %}">
+        </div>
+
+        <div class="full-width">
+            <label for="description">Description</label>
+            <textarea name="description" id="description"
+                rows="4">{% if edit_mode %}{{ company.description }}{% endif %}</textarea>
+        </div>
+
+        <div class="full-width">
+            <label for="address">Address</label>
+            <textarea name="address" id="address" rows="3"
+                required>{% if edit_mode %}{{ company.address }}{% endif %}</textarea>
+        </div>
+
+        <!-- Shifts Section -->
+        <div class="full-width">
+            <label>Shifts</label>
+            <div class="section-container">
+                <table class="section-table" id="shiftsTable">
+                    <thead>
+                        <tr>
+                            <th>Name of Shift</th>
+                            <th>Timing</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shiftsTableBody">
+                        {% if not edit_mode %}
+                        <tr class="example-row" style="background:#eee;">
+                            <td colspan="3" style="text-align:center;">Add Shift Items</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <div class="btn-center">
+                    <button type="button" class="add-btn" id="addShiftBtn">Add Shift</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Presses Section -->
+        <div class="full-width">
+            <label>Press</label>
+            <div class="section-container">
+                <table class="section-table" id="pressesTable">
+                    <thead>
+                        <tr>
+                            <th>Name of Press</th>
+                            <th>Capacity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pressesTableBody">
+                        {% if not edit_mode %}
+                        <tr class="example-row" style="background:#eee;">
+                            <td colspan="3" style="text-align:center;">Add Press Items</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <div class="btn-center">
+                    <button type="button" class="add-btn" id="addPressBtn">Add Press</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">
+            {% if edit_mode %}Update Company{% else %}Save Company{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Pass data to JavaScript -->
+{% if edit_mode %}
+{{ shifts|json_script:"shifts-data" }}
+{{ presses|json_script:"presses-data" }}
+<script>
+    window.editMode = true;
+    window.companyId = {{ company.id }};
+    window.shiftsData = JSON.parse(document.getElementById("shifts-data").textContent);
+    window.pressesData = JSON.parse(document.getElementById("presses-data").textContent);
+</script>
+{% else %}
+<script>
+    window.editMode = false;
+</script>
+{% endif %}
+
+<!-- JavaScript -->
+<script src="{% static 'Js/company.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'Css/die.css' %}">
+
+<!-- Popup Notification -->
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+        {% if edit_mode %}Edit Die{% else %}Die Form{% endif %}
+    </h3>
+
+    <form id="dieForm" method="post" enctype="multipart/form-data"
+        action="{% if edit_mode %}{% url 'die_edit' die.id %}{% else %}{% url 'die_create' %}{% endif %}">
+        {% csrf_token %}
+        {% if edit_mode %}
+        <input type="hidden" name="die_id" value="{{ die.id }}">
+        {% endif %}
+
+        <!-- Die ID (Auto-generated, Read-only) -->
+        <div>
+            <label for="die_id_display">Die ID <span class="auto-gen-label">(Auto-generated)</span></label>
+            <input type="text" id="die_id_display" 
+                value="{% if edit_mode %}{{ die.die_id }}{% else %}{{ next_die_id }}{% endif %}" 
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
+        </div>
+
+        <!-- Date -->
+        <div>
+            <label for="date">Date <span class="required">*</span></label>
+            <input type="date" name="date" id="date" required
+                value="{% if edit_mode %}{{ die.date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Die No -->
+        <div>
+            <label for="die_no">Die No <span class="required">*</span></label>
+            <input type="text" name="die_no" id="die_no" required 
+                value="{% if edit_mode %}{{ die.die_no }}{% endif %}"
+                placeholder="Enter die number">
+        </div>
+
+        <!-- Die Name -->
+        <div>
+            <label for="die_name">Die Name <span class="required">*</span></label>
+            <input type="text" name="die_name" id="die_name" required 
+                value="{% if edit_mode %}{{ die.die_name }}{% endif %}"
+                placeholder="Enter die name">
+        </div>
+
+        <!-- Image -->
+        <div>
+            <label for="image">Die Design Image</label>
+            <input type="file" name="image" id="image" accept="image/*">
+            {% if edit_mode and die.image %}
+            <div class="image-preview mt-2">
+                <img src="{{ die.image.url }}" alt="Die Image" style="max-width: 150px; border-radius: 8px;">
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Press -->
+        <div>
+            <label for="press">Press</label>
+            <select name="press" id="press">
+                <option value="">Select Press</option>
+                {% for press in presses %}
+                <option value="{{ press.id }}" 
+                    {% if edit_mode and die.press and die.press.id == press.id %}selected{% endif %}>
+                    {{ press.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Supplier Name -->
+        <div>
+            <label for="supplier">Supplier Name</label>
+            <select name="supplier" id="supplier">
+                <option value="">Select Supplier</option>
+                {% for supplier in suppliers %}
+                <option value="{{ supplier.id }}" 
+                    {% if edit_mode and die.supplier and die.supplier.id == supplier.id %}selected{% endif %}>
+                    {{ supplier.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Project No -->
+        <div>
+            <label for="project_no">Project No</label>
+            <input type="text" name="project_no" id="project_no" 
+                value="{% if edit_mode %}{{ die.project_no }}{% endif %}"
+                placeholder="Enter project number">
+        </div>
+
+        <!-- Date of Receipt -->
+        <div>
+            <label for="date_of_receipt">Date of Receipt</label>
+            <input type="date" name="date_of_receipt" id="date_of_receipt"
+                value="{% if edit_mode and die.date_of_receipt %}{{ die.date_of_receipt|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- No of Cavity -->
+        <div>
+            <label for="no_of_cavity">No of Cavity <span class="required">*</span></label>
+            <select name="no_of_cavity" id="no_of_cavity" required>
+                <option value="">Select Cavity</option>
+                <option value="One" {% if edit_mode and die.no_of_cavity == 'One' %}selected{% endif %}>One</option>
+                <option value="Two" {% if edit_mode and die.no_of_cavity == 'Two' %}selected{% endif %}>Two</option>
+                <option value="Three" {% if edit_mode and die.no_of_cavity == 'Three' %}selected{% endif %}>Three</option>
+                <option value="Four" {% if edit_mode and die.no_of_cavity == 'Four' %}selected{% endif %}>Four</option>
+            </select>
+        </div>
+
+        <!-- Req Weight -->
+        <div>
+            <label for="req_weight">Req Weight in KG<span class="required">*</span></label>
+            <input type="number" step="0.01" name="req_weight" id="req_weight" required
+                value="{% if edit_mode %}{{ die.req_weight }}{% endif %}"
+                placeholder="Enter required weight">
+        </div>
+
+        <!-- Size -->
+        <div>
+            <label for="size">Size <span class="required">*</span></label>
+            <input type="text" name="size" id="size" required
+                value="{% if edit_mode %}{{ die.size }}{% endif %}"
+                placeholder="Enter size">
+        </div>
+
+        <!-- Die Material -->
+        <div>
+            <label for="die_material">Die Material <span class="required">*</span></label>
+            <select name="die_material" id="die_material" required>
+                <option value="">Select Material</option>
+                <option value="SS" {% if edit_mode and die.die_material == 'SS' %}selected{% endif %}>SS</option>
+                <option value="CI" {% if edit_mode and die.die_material == 'CI' %}selected{% endif %}>CI</option>
+                <option value="GI" {% if edit_mode and die.die_material == 'GI' %}selected{% endif %}>GI</option>
+            </select>
+        </div>
+
+        <!-- Hardness -->
+        <div>
+            <label for="hardness">Hardness <span class="required">*</span></label>
+            <input type="text" name="hardness" id="hardness" required
+                value="{% if edit_mode %}{{ die.hardness }}{% endif %}"
+                placeholder="Enter hardness">
+        </div>
+
+        <!-- Type -->
+        <div>
+            <label for="type">Type <span class="required">*</span></label>
+            <select name="type" id="type" required>
+                <option value="">Select Type</option>
+                <option value="Dieplate" {% if edit_mode and die.type == 'Dieplate' %}selected{% endif %}>Dieplate</option>
+                <option value="Manderel" {% if edit_mode and die.type == 'Manderel' %}selected{% endif %}>Manderel</option>
+                <option value="Backer" {% if edit_mode and die.type == 'Backer' %}selected{% endif %}>Backer</option>
+                <option value="Feeder" {% if edit_mode and die.type == 'Feeder' %}selected{% endif %}>Feeder</option>
+            </select>
+        </div>
+
+        <!-- Description -->
+        <div class="full-width">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" rows="3"
+                placeholder="Enter description">{% if edit_mode %}{{ die.description }}{% endif %}</textarea>
+        </div>
+
+        <!-- Remark -->
+        <div class="full-width">
+            <label for="remark">Remark</label>
+            <textarea name="remark" id="remark" rows="3"
+                placeholder="Enter remarks">{% if edit_mode %}{{ die.remark }}{% endif %}</textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">
+            {% if edit_mode %}Update Die{% else %}Save Die{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Pass data to JavaScript -->
+{% if edit_mode %}
+<script>
+    window.editMode = true;
+    window.dieId = {{ die.id }};
+    window.currentDieId = "{{ die.die_id }}";
+</script>
+{% else %}
+<script>
+    window.editMode = false;
+    window.nextDieId = "{{ next_die_id }}";
+</script>
+{% endif %}
+
+<!-- JavaScript -->
+<script src="{% static 'Js/die.js' %}"></script>
+
+<style>
+    .auto-gen-label {
+        font-size: 0.75rem;
+        color: #718096;
+        font-style: italic;
+        font-weight: normal;
+    }
+</style>
+
+{% endblock %}

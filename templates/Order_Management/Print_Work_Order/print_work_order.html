@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Print Work Order</title>
+    <link rel="stylesheet" href="{% static 'Css/print_work_order.css' %}">
+</head>
+
+<body class="{% if workorders|length > 1 %}multiple-mode{% else %}single-mode{% endif %}">
+
+    {% if workorders %}
+        {% if workorders|length > 1 %}
+        <!-- Multiple work orders mode -->
+        <div class="note-section">
+            <strong>📌 Note:</strong> On the print dialog, set margins to <strong>"Default"</strong> to get best results.
+        </div>
+        {% endif %}
+
+        <div id="work_ordersContainer">
+            {% for work_order in workorders %}
+                {% if forloop.counter0|divisibleby:4 %}
+                    {% if not forloop.first %}</div>{% endif %}
+                    <div class="page">
+                {% endif %}
+
+                <div class="outer-box">
+
+                    <!-- Header -->
+                    <div class="header">
+                        <div class="address">
+                            <strong>INFIMETRICS INFO SOLUTIONS PVT LTD.</strong><br>
+                            UNIT #8, Software Technology Parks of India (STPI),<br>
+                            Parsodi, Nagpur, Maharashtra, India<br>
+                            440022<br>
+                            Mob: +91 7798282796 | Email: nitin.awade@infimetrics.com<br>
+                            www.infimetrics.com
+                        </div>
+                        <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Logo">
+                    </div>
+
+                    <!-- Table -->
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Contact No</th>
+                                <th>Address</th>
+                                <th>Sales Manager</th>
+                                <th>Payment Terms</th>
+                                <th>Delivery Date</th>
+                                <th>Dispatch Date</th>
+                                <th>Expiry Date</th>
+                                <th>Delivery Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ work_order.customer.customer_name }}</td>
+                                <td>{{ work_order.contact_no }}</td>
+                                <td>{{ work_order.address }}</td>
+                                <td>{{ work_order.sales_manager }}</td>
+                                <td>{{ work_order.payment_terms }}</td>
+                                <td>{{ work_order.delivery_date|date:"Y-m-d" }}</td>
+                                <td>{{ work_order.dispatch_date|date:"Y-m-d" }}</td>
+                                <td>{{ work_order.expiry_date|date:"Y-m-d" }}</td>
+                                <td>{{ work_order.delivery_address }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Work Order Details Section -->
+                    <div class="work-order-details">
+                        <div class="detail-row">
+                            <div><strong>Address:</strong> {{ work_order.address|truncatechars:50 }}</div>
+                            <div><strong>Dispatch Date:</strong> {{ work_order.dispatch_date|date:"Y-m-d" }}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div><strong>Expiry Date:</strong> {{ work_order.expiry_date|date:"Y-m-d" }}</div>
+                            <div><strong>Delivery Address:</strong> {{ work_order.delivery_address|truncatechars:50 }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="footer">
+                        <div>Receiver's Signature</div>
+                        <div>Authorized Signature</div>
+                    </div>
+
+                </div>
+
+                {% if forloop.last %}</div>{% endif %}
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <div class="outer-box">
+            <!-- Header -->
+            <div class="header">
+                <div class="address">
+                    <strong>INFIMETRICS INFO SOLUTIONS PVT LTD.</strong><br>
+                    UNIT #8, Software Technology Parks of India (STPI),<br>
+                    Parsodi, Nagpur, Maharashtra, India<br>
+                    440022<br>
+                    Mob: +91 7798282796 | Email: nitin.awade@infimetrics.com<br>
+                    www.infimetrics.com
+                </div>
+                <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Logo">
+            </div>
+
+            <!-- Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Contact No</th>
+                        <th>Address</th>
+                        <th>Payment Terms</th>
+                        <th>Delivery Date</th>
+                        <th>Dispatch Date</th>
+                        <th>Expiry Date</th>
+                        <th>Delivery Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ work_order.customer.customer_name }}</td>
+                        <td>{{ work_order.contact_no }}</td>
+                        <td>{{ work_order.address }}</td>
+                        <td>{{ work_order.payment_terms }}</td>
+                        <td>{{ work_order.delivery_date|date:"Y-m-d" }}</td>
+                        <td>{{ work_order.dispatch_date|date:"Y-m-d" }}</td>
+                        <td>{{ work_order.expiry_date|date:"Y-m-d" }}</td>
+                        <td>{{ work_order.delivery_address }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Work Order Details Section -->
+            <div class="work-order-details">
+                <div class="detail-row">
+                    <div><strong>Address:</strong> {{ work_order.address|truncatechars:50 }}</div>
+                    <div><strong>Dispatch Date:</strong> {{ work_order.dispatch_date|date:"Y-m-d" }}</div>
+                </div>
+                <div class="detail-row">
+                    <div><strong>Expiry Date:</strong> {{ work_order.expiry_date|date:"Y-m-d" }}</div>
+                    <div><strong>Delivery Address:</strong> {{ work_order.delivery_address|truncatechars:50 }}</div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <div>Receiver's Signature</div>
+                <div>Authorized Signature</div>
+            </div>
+        </div>
+    {% endif %}
+
+    <button class="print-btn" onclick="window.print()">Print</button>
+
+</body>
+
+</html>

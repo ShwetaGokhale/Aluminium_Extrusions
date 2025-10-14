@@ -1,0 +1,194 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'Css/work_order.css' %}">
+
+<!-- Popup Notification -->
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+        {% if edit_mode %}Edit Work Order{% else %}Work Order Form{% endif %}
+    </h3>
+
+    <form id="workOrderForm" method="post"
+          action="{% if edit_mode %}{% url 'work_order_edit' work_order.id %}{% else %}{% url 'work_order' %}{% endif %}">
+        {% csrf_token %}
+        {% if edit_mode %}
+            <input type="hidden" name="work_order_id" value="{{ work_order.id }}">
+        {% endif %}
+
+        <!-- Customer + Contact/Address -->
+        <div>
+            <label for="customerSearchInput">Customer</label>
+            <div class="custom-searchable-select-wrapper" id="customerSearchWrapper">
+                <input type="text" id="customerSearchInput" class="searchable-input"
+                       placeholder="Search Customer..."
+                       value="{% if edit_mode %}{{ work_order.customer.customer_name }}{% endif %}">
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                <input type="hidden" name="customer" id="id_customer"
+                       value="{% if edit_mode %}{{ work_order.customer.id }}{% endif %}">
+
+                <div id="customerDropdownList" class="custom-dropdown-list">
+                    {% for c in customers %}
+                        <div class="dropdown-item"
+                             data-id="{{ c.id }}"
+                             data-contact="{{ c.contact_number }}"
+                             data-address="{{ c.address }}">
+                             {{ c.customer_name }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <label>Contact No</label>
+            <input type="text" id="customerContact" name="contact_no" readonly
+                   value="{% if edit_mode %}{{ work_order.contact_no }}{% endif %}">
+        </div>
+
+        <div>
+            <label>Address</label>
+            <input type="text" id="customerAddress" name="address" readonly
+                   value="{% if edit_mode %}{{ work_order.address }}{% endif %}">
+        </div>
+
+        <!-- Other Fields -->
+        <div>
+            <label>Sales Manager</label>
+            <input type="text" name="sales_manager"
+                   value="{% if edit_mode %}{{ work_order.sales_manager }}{% endif %}">
+        </div>
+
+        <div>
+            <label>Payment Terms</label>
+            <select name="payment_terms">
+                <option value="30" {% if edit_mode and work_order.payment_terms == "30" %}selected{% endif %}>30 Days</option>
+                <option value="45" {% if edit_mode and work_order.payment_terms == "45" %}selected{% endif %}>45 Days</option>
+                <option value="60" {% if edit_mode and work_order.payment_terms == "60" %}selected{% endif %}>60 Days</option>
+                <option value="90" {% if edit_mode and work_order.payment_terms == "90" %}selected{% endif %}>90 Days</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Delivery Date</label>
+            <input type="date" name="delivery_date"
+                   value="{% if edit_mode and work_order.delivery_date %}{{ work_order.delivery_date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <div>
+            <label>Dispatch Date</label>
+            <input type="date" name="dispatch_date"
+                   value="{% if edit_mode and work_order.dispatch_date %}{{ work_order.dispatch_date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <div>
+            <label>Expiry Date</label>
+            <input type="date" name="expiry_date"
+                   value="{% if edit_mode and work_order.expiry_date %}{{ work_order.expiry_date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <div>
+            <label>Delivery Address</label>
+            <input type="text" name="delivery_address"
+                   value="{% if edit_mode %}{{ work_order.delivery_address }}{% endif %}">
+        </div>
+
+        <!-- Goods Section -->
+        <div class="full-width">
+            <label>Goods</label>
+            <div class="goods-info-container">
+                <table class="goods-info-table" id="goodsTable">
+                    <thead>
+                        <tr>
+                            <th>Section No</th>
+                            <th>WT Range</th>
+                            <th>Cut Length</th>
+                            <th>Alloy Temper</th>
+                            <th>Pack</th>
+                            <th>Qty</th>
+                            <th>Total Pack</th>
+                            <th>Total No</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="goodsTableBody">
+                        {% if not edit_mode %}
+                        <tr class="example-row" style="background:#eee;">
+                            <td colspan="10" style="text-align:center;">Add Goods Items</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <div class="btn-center">
+                    <button type="button" class="add-btn" id="addGoodsBtn">Add Goods</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financials Section -->
+        <div class="full-width">
+            <label>Financials</label>
+            <div class="goods-info-container">
+                <table class="goods-info-table" id="financeTable">
+                    <thead>
+                        <tr>
+                            <th>Amount</th>
+                            <th>Tax Type</th>
+                            <th>Tax Amount</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="financeTableBody">
+                        {% if not edit_mode %}
+                        <tr class="example-row" style="background:#eee;">
+                            <td colspan="5" style="text-align:center;">Add Financial Entries</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <div class="btn-center">
+                    <button type="button" class="add-btn" id="addFinanceBtn">Add Finance</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit">
+            {% if edit_mode %}Update Work Order{% else %}Save Work Order{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Pass data to JavaScript -->
+{{ sections|json_script:"section-data" }}
+{{ alloys|json_script:"alloy-data" }}
+
+{% if edit_mode %}
+    {{ goods|json_script:"goods-data" }}
+    {{ finance|json_script:"finance-data" }}
+    <script>
+        window.editMode = true;
+        window.workOrderId = {{ work_order.id }};
+        window.goodsData = JSON.parse(document.getElementById("goods-data").textContent);
+        window.financeData = JSON.parse(document.getElementById("finance-data").textContent);
+    </script>
+{% else %}
+    <script>
+        window.editMode = false;
+    </script>
+{% endif %}
+
+<script>
+    window.sectionOptions = JSON.parse(document.getElementById("section-data").textContent);
+    window.alloyOptions = JSON.parse(document.getElementById("alloy-data").textContent);
+</script>
+
+<!-- JavaScript -->
+<script src="{% static 'Js/work_order.js' %}"></script>
+{% endblock %}

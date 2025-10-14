@@ -1,0 +1,144 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'Css/alloy.css' %}">
+
+<!-- Popup Notification -->
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+        {% if edit_mode %}Edit Alloy{% else %}Alloy Form{% endif %}
+    </h3>
+
+    <form id="alloyForm" method="post"
+        action="{% if edit_mode %}{% url 'alloy_edit' alloy.id %}{% else %}{% url 'alloy_form' %}{% endif %}">
+        {% csrf_token %}
+
+        {% if edit_mode %}
+        <input type="hidden" name="alloy_id" value="{{ alloy.id }}">
+        {% endif %}
+
+        <!-- Alloy ID (Auto-generated, Read-only) -->
+        <div>
+            <label for="alloy_id_display">Alloy ID <span class="auto-gen-label">(Auto-generated)</span></label>
+            <input type="text" id="alloy_id_display" 
+                value="{% if edit_mode %}{{ alloy.alloy_id }}{% else %}{{ next_alloy_id }}{% endif %}" 
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
+        </div>
+
+        <!-- Date -->
+        <div>
+            <label for="date">Date <span style="color: red;">*</span></label>
+            <input type="date" name="date" id="date" required
+                value="{% if edit_mode %}{{ alloy.date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Alloy Code -->
+        <div>
+            <label for="alloy_code">Alloy Code <span style="color: red;">*</span></label>
+            <input type="text" name="alloy_code" id="alloy_code" required 
+                   value="{% if edit_mode %}{{ alloy.alloy_code }}{% endif %}"
+                   placeholder="Enter alloy code">
+        </div>
+
+        <!-- Temper Designation -->
+        <div>
+            <label for="temper_designation">Temper Designation <span style="color: red;">*</span></label>
+            <select name="temper_designation" id="temper_designation" required>
+                <option value="">Select Temper Designation</option>
+                <option value="Fabricated" {% if edit_mode and alloy.temper_designation == 'Fabricated' %}selected{% endif %}>Fabricated</option>
+                <option value="Annealed" {% if edit_mode and alloy.temper_designation == 'Annealed' %}selected{% endif %}>Annealed</option>
+                <option value="Strain Hardened" {% if edit_mode and alloy.temper_designation == 'Strain Hardened' %}selected{% endif %}>Strain Hardened</option>
+                <option value="Solution Heat Treated" {% if edit_mode and alloy.temper_designation == 'Solution Heat Treated' %}selected{% endif %}>Solution Heat Treated</option>
+                <option value="Thermally Treated" {% if edit_mode and alloy.temper_designation == 'Thermally Treated' %}selected{% endif %}>Thermally Treated</option>
+            </select>
+        </div>
+
+        <!-- Temper Code -->
+        <div>
+            <label for="temper_code">Temper Code <span style="color: red;">*</span></label>
+            <select name="temper_code" id="temper_code" required>
+                <option value="">Select Temper Code</option>
+                <option value="T1" {% if edit_mode and alloy.temper_code == 'T1' %}selected{% endif %}>T1</option>
+                <option value="T2" {% if edit_mode and alloy.temper_code == 'T2' %}selected{% endif %}>T2</option>
+                <option value="T3" {% if edit_mode and alloy.temper_code == 'T3' %}selected{% endif %}>T3</option>
+                <option value="T4" {% if edit_mode and alloy.temper_code == 'T4' %}selected{% endif %}>T4</option>
+                <option value="T5" {% if edit_mode and alloy.temper_code == 'T5' %}selected{% endif %}>T5</option>
+                <option value="T6" {% if edit_mode and alloy.temper_code == 'T6' %}selected{% endif %}>T6</option>
+                <option value="T7" {% if edit_mode and alloy.temper_code == 'T7' %}selected{% endif %}>T7</option>
+                <option value="T8" {% if edit_mode and alloy.temper_code == 'T8' %}selected{% endif %}>T8</option>
+                <option value="T9" {% if edit_mode and alloy.temper_code == 'T9' %}selected{% endif %}>T9</option>
+                <option value="T10" {% if edit_mode and alloy.temper_code == 'T10' %}selected{% endif %}>T10</option>
+            </select>
+        </div>
+
+        <!-- Tensile Strength -->
+        <div>
+            <label for="tensile_strength">Tensile Strength <span style="color: red;">*</span></label>
+            <input type="number" name="tensile_strength" id="tensile_strength" step="0.01" required 
+                   value="{% if edit_mode %}{{ alloy.tensile_strength }}{% endif %}"
+                   placeholder="Enter tensile strength">
+        </div>
+
+        <!-- Material -->
+        <div>
+            <label for="material">Material <span style="color: red;">*</span></label>
+            <input type="text" name="material" id="material" required 
+                   value="{% if edit_mode %}{{ alloy.material }}{% endif %}"
+                   placeholder="Enter material">
+        </div>
+
+        <!-- Silicon Percent -->
+        <div>
+            <label for="silicon_percent">Silicon (%) <span style="color: red;">*</span></label>
+            <input type="number" name="silicon_percent" id="silicon_percent" step="0.01" min="0" max="100" required 
+                   value="{% if edit_mode %}{{ alloy.silicon_percent }}{% endif %}"
+                   placeholder="Enter silicon percentage">
+        </div>
+
+        <!-- Copper Percent -->
+        <div>
+            <label for="copper_percent">Copper (%) <span style="color: red;">*</span></label>
+            <input type="number" name="copper_percent" id="copper_percent" step="0.01" min="0" max="100" required 
+                   value="{% if edit_mode %}{{ alloy.copper_percent }}{% endif %}"
+                   placeholder="Enter copper percentage">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">
+            {% if edit_mode %}Update Alloy{% else %}Save Alloy{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Pass data to JavaScript -->
+{% if edit_mode %}
+<script>
+    window.editMode = true;
+    window.alloyId = {{ alloy.id }};
+    window.currentAlloyId = "{{ alloy.alloy_id }}";
+</script>
+{% else %}
+<script>
+    window.editMode = false;
+    window.nextAlloyId = "{{ next_alloy_id }}";
+</script>
+{% endif %}
+
+<!-- JavaScript -->
+<script src="{% static 'Js/alloy.js' %}"></script>
+
+<style>
+    .auto-gen-label {
+        font-size: 0.75rem;
+        color: #718096;
+        font-style: italic;
+        font-weight: normal;
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'Css/customer_requisition.css' %}">
+
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+        {% if edit_mode %}Edit Customer Requisition{% else %}Customer Requisition Form{% endif %}
+    </h3>
+
+    <form id="requisitionForm" method="post"
+          action="{% if edit_mode %}{% url 'requisition_edit' requisition.id %}{% else %}{% url 'requisition_form' %}{% endif %}">
+        {% csrf_token %}
+        {% if edit_mode %}
+            <input type="hidden" name="requisition_id" value="{{ requisition.id }}">
+        {% endif %}
+
+        <!-- Requisition ID -->
+        <div>
+            <label for="requisition_id_display">Cust Requisition ID <span class="auto-gen-label">(Auto-generated)</span></label>
+            <input type="text" id="requisition_id_display" 
+                value="{% if edit_mode %}{{ requisition.requisition_id }}{% else %}{{ next_requisition_id }}{% endif %}" 
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
+        </div>
+
+        <!-- Date -->
+        <div>
+            <label for="date">Date <span style="color: red;">*</span></label>
+            <input type="date" name="date" id="date" required
+                value="{% if edit_mode %}{{ requisition.date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Requisition No -->
+        <div>
+            <label for="requisition_no">Cust Requisition No <span style="color: red;">*</span></label>
+            <input type="text" name="requisition_no" id="requisition_no" required 
+                   value="{% if edit_mode %}{{ requisition.requisition_no }}{% endif %}"
+                   placeholder="Enter requisition number">
+        </div>
+
+        <!-- Customer Dropdown -->
+        <div>
+            <label for="customerSearchInput">Customer <span style="color: red;">*</span></label>
+            <div class="custom-searchable-select-wrapper" id="customerSearchWrapper">
+                <input type="text" id="customerSearchInput" class="searchable-input"
+                       placeholder="Search Customer..."
+                       value="{% if edit_mode %}{{ requisition.customer.name }}{% endif %}">
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                <input type="hidden" name="customer" id="id_customer"
+                       value="{% if edit_mode %}{{ requisition.customer.id }}{% endif %}">
+
+                <div id="customerDropdownList" class="custom-dropdown-list">
+                    {% for c in customers %}
+                        <div class="dropdown-item"
+                             data-id="{{ c.id }}"
+                             data-contact="{{ c.contact_no }}"
+                             data-address="{{ c.address }}">
+                             {{ c.name }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <label>Contact No</label>
+            <input type="text" id="customerContact" name="contact_no" readonly
+                   value="{% if edit_mode %}{{ requisition.contact_no }}{% endif %}">
+        </div>
+
+        <div>
+            <label>Address</label>
+            <input type="text" id="customerAddress" name="address" readonly
+                   value="{% if edit_mode %}{{ requisition.address }}{% endif %}">
+        </div>
+
+        <!-- Sales Manager -->
+        <div>
+            <label for="salesManagerSearchInput">Sales Manager <span style="color: red;">*</span></label>
+            <div class="custom-searchable-select-wrapper" id="salesManagerSearchWrapper">
+                <input type="text" id="salesManagerSearchInput" class="searchable-input"
+                       placeholder="Search Sales Manager..."
+                       value="{% if edit_mode %}{{ requisition.sales_manager.first_name }} {{ requisition.sales_manager.last_name }}{% endif %}">
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                <input type="hidden" name="sales_manager" id="id_sales_manager"
+                       value="{% if edit_mode %}{{ requisition.sales_manager.id }}{% endif %}">
+
+                <div id="salesManagerDropdownList" class="custom-dropdown-list">
+                    {% for s in staff %}
+                        <div class="dropdown-item"
+                             data-id="{{ s.id }}">
+                             {{ s.first_name }} {{ s.last_name }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Expiry Date -->
+        <div>
+            <label for="expiry_date">Expiry Date</label>
+            <input type="date" name="expiry_date" id="expiry_date"
+                value="{% if edit_mode and requisition.expiry_date %}{{ requisition.expiry_date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Dispatch Date -->
+        <div>
+            <label for="dispatch_date">Dispatch Date</label>
+            <input type="date" name="dispatch_date" id="dispatch_date"
+                value="{% if edit_mode and requisition.dispatch_date %}{{ requisition.dispatch_date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Orders Table -->
+        <div class="full-width">
+            <label>Orders</label>
+            <div class="goods-info-container">
+                <table class="goods-info-table" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Section No</th>
+                            <th>Section Name</th>
+                            <th>WT Range</th>
+                            <th>Cut Length</th>
+                            <th>QTY in No</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        {% if not edit_mode %}
+                        <tr class="example-row" style="background:#eee;">
+                            <td colspan="6" style="text-align:center;">Add Order Items</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <div class="btn-center">
+                    <button type="button" class="add-btn" id="addOrderBtn">Add Order</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit">
+            {% if edit_mode %}Update Requisition{% else %}Save Requisition{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- ✅ JSON-safe data -->
+{{ sections|json_script:"section-data" }}
+
+{% if edit_mode %}
+    {{ orders|json_script:"orders-data" }}
+    <script>
+        window.editMode = true;
+        window.requisitionId = {{ requisition.id }};
+        window.ordersData = JSON.parse(document.getElementById("orders-data").textContent);
+    </script>
+{% else %}
+    <script>
+        window.editMode = false;
+        window.nextRequisitionId = "{{ next_requisition_id }}";
+    </script>
+{% endif %}
+
+<script>
+    window.sectionOptions = JSON.parse(document.getElementById("section-data").textContent);
+</script>
+
+<script src="{% static 'Js/customer_requisition.js' %}"></script>
+{% endblock %}

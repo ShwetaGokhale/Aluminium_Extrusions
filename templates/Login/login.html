@@ -1,0 +1,312 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aluminium Extrusions Login</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom right, #dceeff, #e6dbff);
+    }
+
+    .form-container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-box {
+      position: relative;
+      background-color: white;
+      padding: 40px 30px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 380px;
+      animation: slideUp 0.8s ease forwards;
+      transform: translateY(20px);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      text-align: center;
+      color: #6a1b9a;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1a73e8;
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 24px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    input[type="email"],
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    input:focus {
+      border-color: #1a73e8;
+      outline: none;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #1a73e8;
+      border: none;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      background-color: #155acb;
+    }
+
+    .login-btn:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+
+    .message-box {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .error-box {
+      color: red;
+      background-color: #ffe5e5;
+    }
+
+    .success-box {
+      color: green;
+      background-color: #e5ffe5;
+    }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 14px;
+    }
+
+    .form-footer a {
+      color: #1a73e8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+
+    #otp-field {
+      margin-top: 16px;
+    }
+
+    .otp-container {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .otp-box {
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .otp-box:focus {
+      border-color: #1a73e8;
+    }
+
+    #otp-timer {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+      text-align: center;
+    }
+
+    #verify-message {
+      margin-top: 10px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-box">
+      <h1>Aluminium Extrusions</h1>
+      <h2>Login</h2>
+
+      {% for msg in messages %}
+      <div class="message-box {% if 'success' in msg.tags %}success-box{% else %}error-box{% endif %}">
+        {{ msg }}
+      </div>
+      {% endfor %}
+
+      <form id="login-form" method="post">
+        {% csrf_token %}
+        
+        {% if show_otp %}
+          <input type="hidden" name="email" value="{{ email }}">
+          
+          <div id="verify-message" style="color: green;">OTP sent. Please check your email.</div>
+
+          <div id="otp-field">
+            <label>Enter OTP</label>
+            <div class="otp-container">
+              {% for _ in "123456" %}
+              <input type="text" maxlength="1" class="otp-box" />
+              {% endfor %}
+            </div>
+            <div id="otp-timer"></div>
+            <input type="hidden" name="otp" id="id_otp" />
+          </div>
+
+          <button type="submit" formaction="{% url 'verify_otp' %}" class="login-btn" id="verify-btn">Verify OTP</button>
+        {% else %}
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" placeholder="Enter your email" required value="{{ email|default:'' }}" autofocus>
+          <button type="submit" class="login-btn" id="login-btn">Send OTP</button>
+        {% endif %}
+      </form>
+
+      <p class="form-footer">
+        Don't have an account? <a href="{% url 'register' %}">Register here</a>
+      </p>
+
+      <p class="form-footer" style="font-size: 12px; color: #888; margin-top: 20px;">
+        Made with care by <strong>Infimetrics IT Solutions Pvt. Ltd</strong>
+      </p>
+    </div>
+  </div>
+
+  {% if show_otp %}
+  <script>
+    // OTP Logic
+    let otpTimerInterval;
+    let otpExpired = false;
+
+    function startOtpTimer(duration = 300) {
+      clearInterval(otpTimerInterval);
+      const display = document.getElementById("otp-timer");
+      const boxes = document.querySelectorAll(".otp-box");
+      boxes.forEach(b => b.disabled = false);
+      otpExpired = false;
+
+      otpTimerInterval = setInterval(() => {
+        const m = String(Math.floor(duration / 60)).padStart(2, '0');
+        const s = String(duration % 60).padStart(2, '0');
+        display.textContent = `OTP expires in ${m}:${s}`;
+        if (--duration < 0) {
+          clearInterval(otpTimerInterval);
+          otpExpired = true;
+          boxes.forEach(b => b.disabled = true);
+          display.textContent = "OTP expired. Please request a new OTP.";
+        }
+      }, 1000);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const otpInputs = document.querySelectorAll(".otp-box");
+      const hiddenOtpInput = document.getElementById("id_otp");
+      const form = document.getElementById("login-form");
+      const verifyBtn = document.getElementById("verify-btn");
+
+      // Auto-focus and navigate between OTP boxes
+      otpInputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+          if (input.value.length === 1 && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+          }
+          // Update hidden input
+          let otp = "";
+          otpInputs.forEach(box => otp += box.value);
+          hiddenOtpInput.value = otp;
+        });
+        
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !input.value && index > 0) {
+            otpInputs[index - 1].focus();
+          }
+        });
+      });
+
+      // Start timer
+      startOtpTimer(300);
+
+      // Validate OTP before submit
+      form.addEventListener("submit", (e) => {
+        if (otpExpired) {
+          e.preventDefault();
+          alert("OTP has expired. Please request a new OTP.");
+          return false;
+        }
+
+        let otp = "";
+        let valid = true;
+        otpInputs.forEach(input => {
+          if (input.value === "") valid = false;
+          otp += input.value;
+        });
+
+        if (!valid) {
+          e.preventDefault();
+          alert("Please enter the complete 6-digit OTP.");
+          return false;
+        }
+
+        hiddenOtpInput.value = otp;
+      });
+
+      // Focus first box
+      if (otpInputs.length > 0) {
+        otpInputs[0].focus();
+      }
+    });
+  </script>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,57 @@
+/* Smooth fade-in effect for dashboard */
+.dashboard-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.dashboard-animate.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Footer styles */
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #6a1b9a;
+  color: white;
+  text-align: center;
+  padding: 4px 0;
+  /* Reduced padding for thinner height */
+  font-size: 10px;
+  /* Smaller font */
+  line-height: 1.2;
+  /* Tighter line height */
+  z-index: 50;
+}
+
+footer.show {
+  bottom: 0;
+}
+
+#pageFooter {
+  position: fixed;
+  bottom: -100px;
+  /* Initially hidden */
+  left: 0;
+  width: 100%;
+  background-color: #6a1b9a;
+  color: white;
+  text-align: center;
+  padding: 6px 0;
+  /* Slim height */
+  font-size: 10px;
+  transition: bottom 0.3s ease;
+  z-index: 50;
+}
+
+#pageFooter.show {
+  bottom: 0;
+}
+
+.search-input::placeholder {
+  font-size: 13px;
+}

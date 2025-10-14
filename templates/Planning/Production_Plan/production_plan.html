@@ -1,0 +1,200 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'Css/production_plan.css' %}">
+
+<!-- Popup Notification -->
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+        {% if edit_mode %}Edit Production Plan{% else %}Production Plan Form{% endif %}
+    </h3>
+
+    <form id="productionPlanForm" method="post"
+        action="{% if edit_mode %}{% url 'production_plan_edit' plan.id %}{% else %}{% url 'production_plan' %}{% endif %}">
+        {% csrf_token %}
+
+        {% if edit_mode %}
+        <input type="hidden" name="plan_id" value="{{ plan.id }}">
+        {% endif %}
+
+        <!-- Production Plan ID (Auto-generated, Read-only) -->
+        <div>
+            <label for="production_plan_id_display">Production Plan ID <span
+                    class="auto-gen-label">(Auto-generated)</span></label>
+            <input type="text" id="production_plan_id_display"
+                value="{% if edit_mode %}{{ plan.production_plan_id }}{% else %}{{ next_production_plan_id }}{% endif %}"
+                readonly style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
+        </div>
+
+        <!-- Date -->
+        <div>
+            <label for="date">Date <span style="color: red;">*</span></label>
+            <input type="date" name="date" id="date" required
+                value="{% if edit_mode %}{{ plan.date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Press -->
+        <div>
+            <label for="press">Press <span style="color: red;">*</span></label>
+            <select name="press" id="press" required>
+                <option value="">Select Press</option>
+                {% for p in presses %}
+                <option value="{{ p.id }}" {% if edit_mode and plan.press.id == p.id %}selected{% endif %}>
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Shift -->
+        <div>
+            <label for="shift">Shift <span style="color: red;">*</span></label>
+            <select name="shift" id="shift" required>
+                <option value="">Select Shift</option>
+                {% for s in shifts %}
+                <option value="{{ s.id }}" {% if edit_mode and plan.shift.id == s.id %}selected{% endif %}>
+                    {{ s.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Customer Requisition ID - Shows Requisition Number -->
+        <div>
+            <label for="cust_requisition_id">Cust Requisition ID <span style="color: red;">*</span></label>
+            <select name="cust_requisition_id" id="cust_requisition_id" required>
+                <option value="">Select Requisition</option>
+                {% for req in requisitions %}
+                <option value="{{ req.id }}" {% if edit_mode and plan.cust_requisition_id.id == req.id %}selected{% endif %}>
+                    {{ req.requisition_id }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Customer Name (Auto-retrieve) -->
+        <div>
+            <label for="customer_name">Customer Name</label>
+            <input type="text" name="customer_name" id="customer_name" readonly
+                value="{% if edit_mode %}{{ plan.customer_name }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed;">
+        </div>
+
+        <!-- Die Requisition ID -->
+        <div>
+            <label for="die_requisition">Die Requisition ID <span style="color: red;">*</span></label>
+            <select name="die_requisition" id="die_requisition" required>
+                <option value="">Select Die Requisition</option>
+                {% for die_req in die_requisitions %}
+                <option value="{{ die_req.id }}" {% if edit_mode and plan.die_requisition.id == die_req.id %}selected{% endif %}>
+                    {{ die_req.die_requisition_id }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Die No (Auto-retrieve) -->
+        <div>
+            <label for="die_no">Die No</label>
+            <input type="text" name="die_no" id="die_no" readonly
+                value="{% if edit_mode %}{{ plan.die_no }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed;">
+        </div>
+
+        <!-- WT Range (Auto-retrieve) -->
+        <div>
+            <label for="wt_range">WT Range</label>
+            <input type="text" name="wt_range" id="wt_range" readonly
+                value="{% if edit_mode %}{{ plan.wt_range }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed;">
+        </div>
+
+        <!-- Cut Length (Auto-retrieve) -->
+        <div>
+            <label for="cut_length">Cut Length</label>
+            <input type="text" name="cut_length" id="cut_length" readonly
+                value="{% if edit_mode %}{{ plan.cut_length }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed;">
+        </div>
+
+        <!-- WT per Piece (Auto-retrieve) -->
+        <div>
+            <label for="wt_per_piece">WT per Piece</label>
+            <input type="number" step="0.01" name="wt_per_piece" id="wt_per_piece" readonly
+                value="{% if edit_mode %}{{ plan.wt_per_piece }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed;">
+        </div>
+
+        <!-- Planned Production in QTY -->
+        <div>
+            <label for="qty">Planned Production in QTY <span style="color: red;">*</span></label>
+            <input type="number" name="qty" id="qty" min="1" required
+                value="{% if edit_mode %}{{ plan.qty }}{% endif %}">
+        </div>
+
+        <!-- Billet Size -->
+        <div>
+            <label for="billet_size">Billet Size <span style="color: red;">*</span></label>
+            <input type="number" step="0.01" name="billet_size" id="billet_size" required
+                value="{% if edit_mode %}{{ plan.billet_size }}{% endif %}">
+        </div>
+
+        <!-- No Of Billet -->
+        <div>
+            <label for="no_of_billet">No Of Billet <span style="color: red;">*</span></label>
+            <input type="number" name="no_of_billet" id="no_of_billet" min="1" required
+                value="{% if edit_mode %}{{ plan.no_of_billet }}{% endif %}">
+        </div>
+
+        <!-- Plan Recovery -->
+        <div>
+            <label for="plan_recovery">Plan Recovery <span style="color: red;">*</span></label>
+            <input type="number" step="0.01" name="plan_recovery" id="plan_recovery" required 
+                value="{% if edit_mode %}{{ plan.plan_recovery }}{% endif %}">
+        </div>
+
+        <!-- Current Recovery -->
+        <div>
+            <label for="current_recovery">Current Recovery <span style="color: red;">*</span></label>
+            <input type="number" step="0.01" name="current_recovery" id="current_recovery" required 
+                value="{% if edit_mode %}{{ plan.current_recovery }}{% endif %}">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">
+            {% if edit_mode %}Update Production Plan{% else %}Save Production Plan{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Pass data to JavaScript -->
+{% if edit_mode %}
+<script>
+    window.editMode = true;
+    window.planId = {{ plan.id }};
+    window.currentProductionPlanId = "{{ plan.production_plan_id }}";
+</script>
+{% else %}
+<script>
+    window.editMode = false;
+    window.nextProductionPlanId = "{{ next_production_plan_id }}";
+</script>
+{% endif %}
+
+<!-- JavaScript -->
+<script src="{% static 'Js/production_plan.js' %}"></script>
+
+<style>
+    .auto-gen-label {
+        font-size: 0.75rem;
+        color: #718096;
+        font-style: italic;
+        font-weight: normal;
+    }
+</style>
+
+{% endblock %}

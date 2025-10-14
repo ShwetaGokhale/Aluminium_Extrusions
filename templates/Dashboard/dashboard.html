@@ -1,0 +1,154 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'Css/dashboard.css' %}">
+
+<main class="dashboard-animate flex-1 w-full max-w-7xl px-4 py-6 mx-auto">
+
+    <div>
+        <h2 class="text-xl font-bold mb-4">📈 Todays Production data</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+            <!-- Profile Length in Feets -->
+            <div
+                class="bg-white border rounded-lg shadow p-3 flex flex-col items-center justify-center hover:shadow-lg hover:scale-105 transition-transform duration-300">
+                <div class="text-blue-500 text-2xl mb-1">📏</div>
+                <p class="text-xs font-medium text-gray-500 text-center">Profile Length in Feets</p>
+                <p class="text-2xl font-extrabold text-blue-600 text-center">78.4</p>
+            </div>
+
+            <!-- Previous Profile Length in feet -->
+            <div
+                class="bg-white border rounded-lg shadow p-3 flex flex-col items-center justify-center hover:shadow-lg hover:scale-105 transition-transform duration-300">
+                <div class="text-orange-500 text-2xl mb-1">📊</div>
+                <p class="text-xs font-medium text-gray-500 text-center">Previous Profile Length in feet</p>
+                <p class="text-2xl font-extrabold text-orange-600 text-center">76.6</p>
+            </div>
+
+            <!-- Today's Profile Count -->
+            <div
+                class="bg-white border rounded-lg shadow p-3 flex flex-col items-center justify-center hover:shadow-lg hover:scale-105 transition-transform duration-300">
+                <div class="text-green-500 text-2xl mb-1">⚙️</div>
+                <p class="text-xs font-medium text-gray-500 text-center">Today's Profile Count +</p>
+                <p class="text-2xl font-extrabold text-green-600 text-center">26</p>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Daily Die Wise Summary -->
+    <div class="mt-8">
+        <h2 class="text-xl font-bold mb-4">🗂️ Daily Die Wise Summary</h2>
+
+        <!-- Die Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Die Card 1 -->
+            <div
+                class="bg-white border rounded-lg shadow p-4 hover:shadow-lg hover:scale-105 transition-transform duration-300">
+                <h3 class="text-md font-semibold mb-2">Die Name: 3T-TOP</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sr. No</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sensor Name</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Press Name</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Profile Length</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-2 py-1 text-gray-700">1</td>
+                                <td class="px-2 py-1 text-gray-700">1234</td>
+                                <td class="px-2 py-1 text-gray-700">Falcon-1</td>
+                                <td class="px-2 py-1 text-gray-700">78.6</td>
+                            </tr>
+                            <tr>
+                                <td class="px-2 py-1 text-gray-700">2</td>
+                                <td class="px-2 py-1 text-gray-700">5678</td>
+                                <td class="px-2 py-1 text-gray-700">Falcon-2</td>
+                                <td class="px-2 py-1 text-gray-700">80.2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Die Card 2 -->
+            <div
+                class="bg-white border rounded-lg shadow p-4 hover:shadow-lg hover:scale-105 transition-transform duration-300">
+                <h3 class="text-md font-semibold mb-2">Die Name: XOR-34</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sr. No</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sensor Name</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Press Name</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Profile Length</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-2 py-1 text-gray-700">1</td>
+                                <td class="px-2 py-1 text-gray-700">1234</td>
+                                <td class="px-2 py-1 text-gray-700">Falcon-1</td>
+                                <td class="px-2 py-1 text-gray-700">78.6</td>
+                            </tr>
+                            <tr>
+                                <td class="px-2 py-1 text-gray-700">2</td>
+                                <td class="px-2 py-1 text-gray-700">5678</td>
+                                <td class="px-2 py-1 text-gray-700">Falcon-2</td>
+                                <td class="px-2 py-1 text-gray-700">80.2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Die Card 3 -->
+            <div
+                class="bg-white border rounded-lg shadow p-4 hover:shadow-lg hover:scale-105 transition-transform duration-300">
+                <h3 class="text-md font-semibold mb-2">Die Name: ABC-12</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sr. No</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sensor Name</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Press Name</th>
+                                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Profile Length</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-2 py-1 text-gray-700">1</td>
+                                <td class="px-2 py-1 text-gray-700">4321</td>
+                                <td class="px-2 py-1 text-gray-700">Falcon-3</td>
+                                <td class="px-2 py-1 text-gray-700">79.5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <h2 class="text-xl font-bold mb-2">📊 Production Chart</h2>
+        <div class="bg-white border rounded-lg shadow p-3">
+            <canvas id="productionChart" class="w-full h-40"></canvas>
+        </div>
+    </div>
+
+</main>
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Custom JS -->
+<script src="{% static 'Js/dashboard.js' %}"></script>
+{% endblock %}

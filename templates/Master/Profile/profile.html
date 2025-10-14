@@ -1,0 +1,167 @@
+{% extends "Master/Base/base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'Css/profile.css' %}">
+
+<div class="container">
+    <div class="header-section">
+        <h2 class="text-3xl font-bold italic mb-4 text-purple-800 text-center">Profile List</h2>
+        <button id="addNewProfileBtn" class="add-new-btn">
+            <i class="fa-solid fa-plus"></i> Add New Profile
+        </button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Category</th>
+                <th>Profile Name</th>
+                <th>Section No</th>
+                <th>Length (mm)</th>
+                <th>Width (mm)</th>
+                <th>Thickness (mm)</th>
+                <th>Weight Range</th>
+                <th>Shape Image</th>
+                <th class="date-column">Date Added</th>
+                <th style="text-align:center;">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="profileTableBody">
+            {% for profile in profiles %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ profile.category }}</td>
+                <td>{{ profile.profile_name }}</td>
+                <td>{{ profile.section_no }}</td>
+                <td>{{ profile.length_mm|default:"-" }}</td>
+                <td>{{ profile.width_mm|default:"-" }}</td>
+                <td>{{ profile.thickness_mm|default:"-" }}</td>
+                <td>{{ profile.get_weight_type_display }} - {{ profile.weight_value }}</td>
+                <td>
+                    {% if profile.shape_image %}
+                    <img src="{{ profile.shape_image.url }}" alt="Shape" width="40">
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td class="date-column">{{ profile.date_added }}</td>
+                <td class="actions-column">
+                    <button class="editProfileBtn edit-btn" data-id="{{ profile.id }}"
+                        data-category="{{ profile.category }}" data-name="{{ profile.profile_name }}"
+                        data-section="{{ profile.section_no }}" data-length="{{ profile.length_mm|default:'' }}"
+                        data-width="{{ profile.width_mm|default:'' }}"
+                        data-thickness="{{ profile.thickness_mm|default:'' }}"
+                        data-weight-type="{{ profile.weight_type }}" data-weight-value="{{ profile.weight_value }}"
+                        data-date="{{ profile.date_added|date:'Y-m-d' }}"
+                        data-image="{% if profile.shape_image %}{{ profile.shape_image.url }}{% endif %}">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+
+                    <button class="delete-btn" data-profile-id="{{ profile.id }}">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="11" class="empty-row">No profiles found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add/Edit Profile Modal -->
+<div id="addEditProfileModalOverlay" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close-btn" id="closeAddEditProfileModalBtn">&times;</button>
+        <h3 id="addEditProfileModalTitle">Add New Profile</h3>
+        <form id="profileAddEditForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" id="profileModalIdInput" name="id">
+
+            <div class="modal-form-group">
+                <label>Category:</label>
+                <input type="text" id="categoryInput" name="category"
+                    placeholder="Enter Category (e.g., Common Profile)" required>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Profile Name:</label>
+                <input type="text" id="profileNameInput" name="profile_name"
+                    placeholder="Enter Profile Name (e.g., Main Profile)" required>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Section No:</label>
+                <input type="text" id="sectionNoInput" name="section_no" placeholder="Enter Section No (e.g., 1)"
+                    required>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Length (mm):</label>
+                <input type="text" id="lengthInput" name="length_mm" placeholder="Enter length in meters (e.g., 6)"
+                    required>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Width (mm):</label>
+                <input type="text" id="widthInput" name="width_mm" placeholder="Enter width in mm (e.g., 100)" required>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Thickness (mm):</label>
+                <input type="text" id="thicknessInput" name="thickness_mm" placeholder="Enter thickness in mm (e.g., 2)"
+                    required>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Weight Type:</label>
+                <select id="weightTypeInput" name="weight_type" required>
+                    <option value="">-- Select Type --</option>
+                    {% for value, display in weight_types %}
+                    <option value="{{ value }}">{{ display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Weight Value:</label>
+                <input type="text" id="weightValueInput" name="weight_value"
+                    placeholder="Enter weight value (e.g., 1700 or 1700-1800)" required>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Shape Image:</label>
+                <input type="file" id="shapeImageInput" name="shape_image" accept="image/*">
+            </div>
+
+            <div class="modal-form-group">
+                <label>Date Added:</label>
+                <input type="date" id="dateAddedInput" name="date_added" value="{{ 'now'|date:'Y-m-d' }}" required>
+            </div>
+
+            <button type="submit" class="modal-add-btn" id="saveProfileModalBtn">Save Profile</button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteProfileModalOverlay" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="text-3xl font-bold italic mb-4 text-purple-800 text-center">
+            Are you sure you want to delete this profile?
+        </h3>
+        <div class="modal-buttons">
+            <button id="confirmDeleteProfileBtn">Yes</button>
+            <button id="cancelDeleteProfileBtn">No</button>
+        </div>
+    </div>
+</div>
+
+<div id="successPopup" class="success-popup">Action successful!</div>
+
+<script src="{% static 'Js/profile.js' %}"></script>
+{% endblock %}
