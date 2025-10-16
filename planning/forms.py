@@ -100,7 +100,7 @@ class ProductionPlanForm(forms.ModelForm):
             'date', 'press', 'shift', 'cust_requisition_id', 
             'customer_name', 'die_requisition', 'die_no', 'wt_range',
             'cut_length', 'wt_per_piece', 'qty', 'billet_size',
-            'no_of_billet', 'plan_recovery', 'current_recovery'
+            'no_of_billet', 'plan_recovery', 'current_recovery', 'status'
         ]
         widgets = {
             'date': forms.DateInput(attrs={
@@ -174,6 +174,10 @@ class ProductionPlanForm(forms.ModelForm):
                 'id': 'current_recovery',
                 'step': '0.01'
             }),
+            'status': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'status'
+            }),
         }
     
     def __init__(self, *args, **kwargs):
@@ -184,4 +188,3 @@ class ProductionPlanForm(forms.ModelForm):
         self.fields['wt_range'].required = False
         self.fields['cut_length'].required = False
         self.fields['wt_per_piece'].required = False
-        

@@ -1,6 +1,6 @@
 /* ========== GLOBAL ========== */
 body {
-  font-family: "Segoe UI", sans-serif; /* unchanged */
+  font-family: "Segoe UI", sans-serif;
   margin: 0;
   padding: 0;
   background: linear-gradient(to right, #e0f7fa, #f3e5f5);
@@ -9,11 +9,17 @@ body {
   transition: background 0.5s ease;
 }
 
-/* Sidebar */
+/* Sidebar - Match Dashboard Header Color */
 .main-header {
   width: 260px;
   height: 100vh;
-  background-color: #6a1b9a; /* original purple */
+  background-color: #1e3a8a; /* Blue-900 to match dashboard header */
+  /* background-color: #6a1b9a; original purple */
+  background: linear-gradient(
+    135deg,
+    #1e3a8a 0%,
+    #0f766e 100%
+  ); /* Blue to Teal gradient */
   padding-top: 20px;
   position: fixed;
   top: 0;
@@ -42,25 +48,29 @@ body {
   margin: 4px 0;
   text-align: left;
   color: white;
-  font-weight: bold; /* keep original */
-  border-radius: 6px; /* slightly rounded for modern look */
+  font-weight: bold;
+  border-radius: 6px;
   transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s;
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
   justify-content: flex-start;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  font-size: inherit; /* Keep original font size */
 }
 
 .dropbtn .dropdown-icon {
-  margin-left: auto; /* arrow stays on right */
+  margin-left: auto;
   transition: transform 0.3s ease;
 }
 
-/* Hover */
+/* Hover - Darker blue similar to dashboard theme */
 .main-nav a:hover,
 .dropbtn:hover {
-  background-color: #4a148c;
+  background-color: rgba(30, 58, 138, 0.6); /* Darker blue with transparency */
   transform: translateX(2px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
@@ -74,7 +84,7 @@ body {
 .dropdown-content {
   display: flex;
   flex-direction: column;
-  background: rgba(186, 104, 200, 0.15); /* soft light purple */
+  background: rgba(15, 118, 110, 0.2); /* Teal with transparency */
   width: 100%;
   margin: 0;
   border-radius: 6px;
@@ -103,7 +113,7 @@ body {
 }
 
 .dropdown-content a:hover {
-  background-color: rgba(186, 104, 200, 0.3);
+  background-color: rgba(30, 58, 138, 0.4);
   color: white;
   border-left: 3px solid #fff;
 }
@@ -122,14 +132,20 @@ body {
   padding: 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold; /* keep original bold */
+  font-weight: bold;
   transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
 }
 
 .main-nav button:hover {
   background-color: #e53935;
   transform: translateX(2px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  border-color: #e53935;
 }
 
 /* Page Content */
@@ -138,4 +154,83 @@ body {
   padding: 25px;
   width: calc(100% - 260px);
   transition: margin 0.3s ease;
+}
+
+/* Sidebar Logo */
+.sidebar-logo {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  width: 100% !important;
+  max-height: 80px !important;
+  overflow: hidden;
+}
+
+.sidebar-logo img {
+  width: 120px !important;
+  max-width: 120px !important;
+  min-width: 120px !important;
+  height: auto !important;
+  max-height: 50px !important;
+  object-fit: contain !important;
+  border-radius: 6px;
+  box-shadow: none;
+  transition: transform 0.3s ease;
+  display: block !important;
+}
+
+.sidebar-logo img:hover {
+  transform: scale(1.04);
+}
+
+/* Scrollbar for sidebar */
+.main-header::-webkit-scrollbar {
+  width: 6px;
+}
+
+.main-header::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.main-header::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.main-header::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-header {
+    width: 220px;
+  }
+
+  .content-wrapper {
+    margin-left: 220px;
+    width: calc(100% - 220px);
+    padding: 15px;
+  }
+
+  .sidebar-logo img {
+    width: 100px !important;
+    max-width: 100px !important;
+    min-width: 100px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-header {
+    width: 200px;
+  }
+
+  .content-wrapper {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+    padding: 10px;
+  }
 }

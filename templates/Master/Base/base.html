@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    
+
     <style>
         /* Logout Modal Styles */
         #logoutModal {
@@ -28,8 +28,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         #logoutModalContent {
@@ -47,6 +52,7 @@
                 transform: translateY(-50px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -123,6 +129,11 @@
 <body>
     <!-- Sidebar Header -->
     <header class="main-header">
+        <!-- Sidebar Logo -->
+        <div class="sidebar-logo">
+            <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Company Logo">
+        </div>
+
         <nav class="main-nav">
             <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home"></i> <span>Dashboard</span></a>
             <a href="{% url 'dashboard_new' %}"><i class="fa-solid fa-home"></i> <span>Dashboard New</span></a>
@@ -242,14 +253,14 @@
         }
 
         // Close modal when clicking outside
-        document.getElementById('logoutModal').addEventListener('click', function(e) {
+        document.getElementById('logoutModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeLogoutModal();
             }
         });
 
         // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 closeLogoutModal();
             }

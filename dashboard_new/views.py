@@ -56,14 +56,14 @@ class DashboardNewView(View):
 
 
 class PressProductionDataView(View):
-    """API endpoint to get production data for a specific press - Simplified version"""
+    """API endpoint to get production data for a specific press with status"""
     
     def get(self, request, press_id):
         try:
             # Verify press exists
             press = CompanyPress.objects.select_related('company').get(id=press_id)
             
-            # Get all production plans for this press - only select needed fields
+            # Get all production plans for this press - including status field
             production_plans = ProductionPlan.objects.filter(
                 press=press
             ).select_related(
@@ -73,10 +73,11 @@ class PressProductionDataView(View):
                 'die_no',
                 'cut_length',
                 'qty',
+                'status',
                 'cust_requisition_id'
             ).order_by('-created_at')
             
-            # Format production data - only 4 fields
+            # Format production data - including status
             production_data = []
             for plan in production_plans:
                 try:
@@ -84,7 +85,9 @@ class PressProductionDataView(View):
                         'order_no': plan.cust_requisition_id.requisition_id if plan.cust_requisition_id else 'N/A',
                         'die_no': plan.die_no or 'N/A',
                         'cut_length': plan.cut_length or 'N/A',
-                        'planned_qty': plan.qty
+                        'planned_qty': plan.qty,
+                        'status': plan.status,
+                        'status_display': plan.get_status_display()  # Get the human-readable status
                     })
                 except Exception as e:
                     print(f"Error processing plan {plan.id}: {str(e)}")

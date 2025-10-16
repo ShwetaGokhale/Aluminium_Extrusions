@@ -39,6 +39,47 @@ document.addEventListener("fullscreenchange", function () {
     // When they click again, fullscreen reactivates (handled above)
 });
 
+// Helper function to get status badge styling
+function getStatusBadge(status) {
+    const statusConfig = {
+        'planned': {
+            bg: 'bg-blue-500',
+            text: 'text-white',
+            icon: 'fa-clock',
+            label: 'Planned'
+        },
+        'running': {
+            bg: 'bg-yellow-500',
+            text: 'text-white',
+            icon: 'fa-play-circle',
+            label: 'Running',
+            pulse: true
+        },
+        'completed': {
+            bg: 'bg-green-500',
+            text: 'text-white',
+            icon: 'fa-check-circle',
+            label: 'Completed'
+        },
+        'discard': {
+            bg: 'bg-red-500',
+            text: 'text-white',
+            icon: 'fa-times-circle',
+            label: 'Discard'
+        }
+    };
+
+    const config = statusConfig[status] || statusConfig['planned'];
+    const pulseClass = config.pulse ? 'animate-pulse' : '';
+
+    return `
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${config.bg} ${config.text} ${pulseClass}">
+            <i class="fa ${config.icon} mr-2"></i>
+            ${config.label}
+        </span>
+    `;
+}
+
 // Press detail logic
 function showPressDetail(pressId, pressName) {
     const cardsContainer = document.getElementById('pressCardsContainer');
@@ -74,15 +115,16 @@ function displayDetailedProduction(productionData) {
     }
 
     tableBody.innerHTML = productionData.map((plan, index) => `
-                <tr class="${index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-900'} hover:bg-gray-700 transition-colors duration-150 fade-in">
-                    <td class="px-8 py-5 text-gray-300 text-lg font-medium">${plan.order_no}</td>
-                    <td class="px-8 py-5 text-blue-400 text-lg font-semibold">${plan.die_no}</td>
-                    <td class="px-8 py-5 text-yellow-400 text-lg font-medium text-center">${plan.cut_length}</td>
-                    <td class="px-8 py-5 text-green-400 text-xl font-bold text-center">${plan.planned_qty}</td>
-                    <td class="px-8 py-5 text-teal-400 text-xl font-bold text-center">-</td>
-                    <td class="px-8 py-5 text-purple-400 text-xl font-bold text-center">-</td>
-                </tr>
-            `).join('');
+        <tr class="${index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-900'} hover:bg-gray-700 transition-colors duration-150 fade-in">
+            <td class="px-8 py-5 text-gray-300 text-lg font-medium">${plan.order_no}</td>
+            <td class="px-8 py-5 text-blue-400 text-lg font-semibold">${plan.die_no}</td>
+            <td class="px-8 py-5 text-yellow-400 text-lg font-medium text-center">${plan.cut_length}</td>
+            <td class="px-8 py-5 text-green-400 text-xl font-bold text-center">${plan.planned_qty}</td>
+            <td class="px-8 py-5 text-teal-400 text-xl font-bold text-center">-</td>
+            <td class="px-8 py-5 text-purple-400 text-xl font-bold text-center">-</td>
+            <td class="px-8 py-5 text-center">${getStatusBadge(plan.status)}</td>
+        </tr>
+    `).join('');
 }
 
 function closePressDetail() {

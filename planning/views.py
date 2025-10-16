@@ -437,6 +437,7 @@ class ProductionPlanListView(View):
                     'cut_length': plan.cut_length,
                     'wt_per_piece': str(plan.wt_per_piece),
                     'qty': plan.qty,
+                    'status': plan.status,
                 })
             
             return JsonResponse(
@@ -598,6 +599,7 @@ class ProductionPlanAPI(View):
                 "no_of_billet": plan.no_of_billet,
                 "plan_recovery": str(plan.plan_recovery),
                 "current_recovery": str(plan.current_recovery),
+                "status": plan.status,
                 "created_at": plan.created_at.strftime("%Y-%m-%d"),
             })
         return JsonResponse({"success": True, "plans": formatted})
@@ -637,7 +639,8 @@ class ProductionPlanAPI(View):
                 billet_size=data['billet_size'],
                 no_of_billet=data['no_of_billet'],
                 plan_recovery=data['plan_recovery'],
-                current_recovery=data['current_recovery']
+                current_recovery=data['current_recovery'],
+                status=data.get('status', 'planned')
             )
             
             return JsonResponse(
@@ -681,6 +684,7 @@ class ProductionPlanDetailAPI(View):
             plan.no_of_billet = data.get('no_of_billet', plan.no_of_billet)
             plan.plan_recovery = data.get('plan_recovery', plan.plan_recovery)
             plan.current_recovery = data.get('current_recovery', plan.current_recovery)
+            plan.status = data.get('status', plan.status)
             plan.save()
             
             return JsonResponse({

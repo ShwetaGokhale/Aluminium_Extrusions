@@ -113,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const noOfBillet = document.getElementById("no_of_billet").value;
         const planRecovery = document.getElementById("plan_recovery").value;
         const currentRecovery = document.getElementById("current_recovery").value;
+        const status = document.getElementById("status").value;
 
         if (!date) {
             showMessage("error", "Date is required");
@@ -164,6 +165,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
+        if (!status) {
+            showMessage("error", "Status is required");
+            return false;
+        }
+
         return true;
     }
 
@@ -191,7 +197,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 billet_size: formData.get("billet_size"),
                 no_of_billet: formData.get("no_of_billet"),
                 plan_recovery: formData.get("plan_recovery"),
-                current_recovery: formData.get("current_recovery")
+                current_recovery: formData.get("current_recovery"),
+                status: formData.get("status")
             };
 
             console.log("Payload being sent:", payload);

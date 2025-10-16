@@ -130,6 +130,13 @@ class DieRequisition(models.Model):
 class ProductionPlan(models.Model):
     """Model for Production Planning management"""
     
+    STATUS_CHOICES = [
+        ('planned', 'Planned'),
+        ('running', 'Running'),
+        ('completed', 'Completed'),
+        ('discard', 'Discard'),
+    ]
+    
     production_plan_id = models.CharField(
         max_length=20,
         unique=True,
@@ -208,6 +215,12 @@ class ProductionPlan(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0)],
         verbose_name="Current Recovery"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='planned',
+        verbose_name="Status"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
