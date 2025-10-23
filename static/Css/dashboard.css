@@ -20,11 +20,8 @@ footer {
   color: white;
   text-align: center;
   padding: 4px 0;
-  /* Reduced padding for thinner height */
   font-size: 10px;
-  /* Smaller font */
   line-height: 1.2;
-  /* Tighter line height */
   z-index: 50;
 }
 
@@ -35,14 +32,12 @@ footer.show {
 #pageFooter {
   position: fixed;
   bottom: -100px;
-  /* Initially hidden */
   left: 0;
   width: 100%;
   background-color: #6a1b9a;
   color: white;
   text-align: center;
   padding: 6px 0;
-  /* Slim height */
   font-size: 10px;
   transition: bottom 0.3s ease;
   z-index: 50;
@@ -54,4 +49,207 @@ footer.show {
 
 .search-input::placeholder {
   font-size: 13px;
+}
+
+/* Die card hover effects */
+.die-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.die-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Modal overlay animation */
+#dieDetailsModal {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#dieDetailsModal > div {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Status badges with animations */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Table row hover effect */
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Smooth scroll for modal content */
+#dieDetailsModal .overflow-y-auto {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for modal */
+#dieDetailsModal .overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+#dieDetailsModal .overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+#dieDetailsModal .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+#dieDetailsModal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Die icon animation */
+@keyframes dieRotate {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+.die-card:hover .die-icon {
+  animation: dieRotate 0.5s ease-in-out;
+}
+
+/* Gradient text effect for die numbers */
+.die-number {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button hover effect */
+button {
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Card pulse effect on load */
+@keyframes cardPulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.die-card {
+  animation: cardPulse 0.5s ease-out;
+}
+
+/* Stagger animation for cards */
+.die-card:nth-child(1) {
+  animation-delay: 0s;
+}
+.die-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.die-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.die-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.die-card:nth-child(5) {
+  animation-delay: 0.4s;
+}
+.die-card:nth-child(6) {
+  animation-delay: 0.5s;
+}
+
+/* Table header sticky effect with shadow */
+thead.sticky {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .die-card {
+    animation: none;
+  }
+
+  #dieDetailsModal > div {
+    margin: 1rem;
+  }
+}
+
+/* Production chart container enhancement */
+#productionChart {
+  transition: all 0.3s ease;
+}
+
+#productionChart:hover {
+  transform: scale(1.02);
 }
