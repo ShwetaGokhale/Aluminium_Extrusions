@@ -44,7 +44,8 @@ table {
 }
 
 th {
-  background-color: #7b1fa2;
+  /* background-color: #7b1fa2; */
+  background-color: #1e3a8a; /* Blue-900 to match dashboard header */;
   color: #fff;
   text-transform: uppercase;
   font-weight: bold;
@@ -115,7 +116,8 @@ tbody tr:hover {
 /* Row selection styling */
 tbody tr.selected-row {
   background-color: #e0f7fa !important;
-  border-left: 3px solid #6a1b9a;
+  /* border-left: 3px solid #6a1b9a; */
+  border-left: 3px solid #1e3a8a; /* Blue-900 to match dashboard header */
 }
 
 .row-checkbox {
@@ -327,7 +329,8 @@ tbody tr.selected-row {
   font-size: 1.1rem;
   font-weight: 600;
   font-style: italic;
-  color: #6a1b9a;
+  /* color: #6a1b9a; */
+  color: #1e3a8a; /* Blue-900 to match dashboard header */
   text-align: center;
 }
 

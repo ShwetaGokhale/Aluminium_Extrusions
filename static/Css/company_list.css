@@ -41,14 +41,16 @@ table {
 }
 
 th {
-  background-color: #6a1b9a;
+  /* background-color: #6a1b9a; */
+  background-color: #1e3a8a; /* Blue-900 to match dashboard header */;
   color: white;
   padding: 12px 8px;
   text-align: left;
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
-  border: 1px solid #7b1fa2;
+  /* border: 1px solid #7b1fa2; */
+  border: 1px solid #1e3a8a; /* Blue-900 to match dashboard header */
   position: sticky;
   top: 0;
   z-index: 10;
@@ -81,8 +83,9 @@ table {
 
 /* Header style */
 th {
-  background-color: #7b1fa2;
+  /* background-color: #7b1fa2; */
   /* Purple */
+  background-color: #1e3a8a; /* Blue-900 to match dashboard header */;
   color: #fff;
   text-transform: uppercase;
   font-weight: bold;
@@ -397,6 +400,7 @@ tbody tr:hover {
   font-size: 1.1rem; /* Adjust size */
   font-weight: 600; /* Boldness */
   font-style: italic; /* normal, italic, or oblique */
-  color: #6a1b9a; /* Optional: purple text to match theme */
+  /* color: #6a1b9a; Optional: purple text to match theme */
+  color: #1e3a8a; /* Blue-900 to match dashboard header */
   text-align: center; /* Center the text */
 }

@@ -3,13 +3,13 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/alloy.css' %}">
+<link rel="stylesheet" href="{% static 'css/alloy.css' %}">
 
 <!-- Popup Notification -->
 <div id="popupMessage" class="popup-message hidden"></div>
 
 <div class="form-container">
-    <h3 class="text-2xl font-bold italic mb-4 text-purple-800 text-center">
+    <h3 class="text-2xl font-bold italic mb-4 text-center" style="color: #1e3a8a;">
         {% if edit_mode %}Edit Alloy{% else %}Alloy Form{% endif %}
     </h3>
 
@@ -130,7 +130,7 @@
 {% endif %}
 
 <!-- JavaScript -->
-<script src="{% static 'Js/alloy.js' %}"></script>
+<script src="{% static 'js/alloy.js' %}"></script>
 
 <style>
     .auto-gen-label {

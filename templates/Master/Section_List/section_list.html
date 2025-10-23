@@ -9,7 +9,7 @@
 
 <main class="table-container">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl lg:text-3xl font-bold italic text-purple-800 text-center flex-grow">
+        <h2 class="text-2xl lg:text-3xl font-bold italic text-center flex-grow" style="color: #1e3a8a;">
             Section List
         </h2>
 
@@ -20,7 +20,7 @@
                           focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
             <button type="submit"
                 class="text-white font-bold py-2 px-4 rounded-lg shadow flex items-center transition duration-200"
-                style="background-color: #6a1b9a;">
+                style="background-color: #1e3a8a;">
                 <i class="fas fa-search mr-1"></i>
                 Search
             </button>
@@ -103,7 +103,7 @@
             {% for num in page_range %}
             {% if num == current_page %}
             <span
-                class="relative inline-flex items-center px-4 py-2 border border-purple-500 bg-purple-600 text-sm font-medium text-white">
+                class="relative inline-flex items-center px-4 py-2 border border-[#1e3a8a] bg-[#1e3a8a] text-sm font-medium text-white">
                 {{ num }}
             </span>
             {% else %}

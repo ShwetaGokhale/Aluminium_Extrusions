@@ -23,7 +23,8 @@
 .form-header h3 {
   flex: 1;
   text-align: center;
-  color: #4a148c;
+  /* color: #4a148c; */
+  color: #1e3a8a; /* Blue-900 to match dashboard header */;
   margin: 0;
 }
 
@@ -43,7 +44,8 @@
 .status-field-container select {
   width: 100%;
   padding: 10px;
-  border: 2px solid #6a1b9a;
+  /* border: 2px solid #6a1b9a; */
+  border: 2px solid #1e3a8a; /* Blue-900 to match dashboard header */
   border-radius: 6px;
   font-size: 14px;
   background-color: #f9f9f9;
@@ -53,8 +55,10 @@
 
 .status-field-container select:focus {
   outline: none;
-  border-color: #4a148c;
-  box-shadow: 0 0 8px rgba(106, 27, 154, 0.5);
+  /* border-color: #4a148c; */
+  border-color: #153e75; /* Darker Blue-900 */
+  /* box-shadow: 0 0 8px rgba(106, 27, 154, 0.5); */
+  box-shadow: 0 0 8px rgba(30, 58, 138, 0.5);
   background-color: #fff;
 }
 
@@ -77,7 +81,8 @@
 
 h3 {
   text-align: center;
-  color: #4a148c;
+  /* color: #4a148c; */
+  color: #1e3a8a; /* Blue-900 to match dashboard header */;
 }
 
 form {
@@ -122,8 +127,10 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #6a1b9a;
-  box-shadow: 0 0 5px rgba(106, 27, 154, 0.5);
+  /* border-color: #6a1b9a; */
+  border-color: #1e3a8a; /* Blue-900 to match dashboard header */
+  /* box-shadow: 0 0 5px rgba(106, 27, 154, 0.5); */
+  box-shadow: 0 0 5px rgba(30, 58, 138, 0.5);
   background-color: #fff;
 }
 
@@ -145,7 +152,8 @@ textarea {
 button[type="submit"] {
   grid-column: 1 / 3;
   padding: 12px;
-  background-color: #6a1b9a;
+  /* background-color: #6a1b9a; */
+  background-color: #1e3a8a; /* Blue-900 to match dashboard header */
   color: white;
   border: none;
   border-radius: 6px;
@@ -156,7 +164,8 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-  background-color: #4a148c;
+  /* background-color: #4a148c; */
+  background-color: #153e75; /* Darker Blue-900 */
 }
 
 /* ==== Popup Notification ==== */
