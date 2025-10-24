@@ -62,7 +62,7 @@ footer.show {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Modal overlay animation */
+/* Modal overlay animation. */
 #dieDetailsModal {
   animation: fadeIn 0.3s ease-in-out;
 }
