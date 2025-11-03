@@ -42,12 +42,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
-    'master', # Custom app for die master management
     'dashboard',  # Custom app for dashboard views
+    'dashboard_new',  # Custom app for dashboard views  
+    'master', # Custom app for die master management
     'order_management',  # Custom app for order management
     'planning',  # Custom app for planning
-    'dashboard_new',  # Custom app for dashboard views  
     'login', # Custom app for login functionality
+    'production',  # Custom app for production management
 ]
 
 MIDDLEWARE = [

@@ -10,16 +10,13 @@ class DieForm(forms.ModelForm):
     class Meta:
         model = Die
         fields = [
-            'date', 'die_no', 'die_name', 'image',
+            'die_no', 'die_name', 'image',  # Removed 'date' from here
             'press', 'supplier', 'project_no', 'date_of_receipt', 
             'no_of_cavity', 'req_weight', 'size', 'die_material', 
             'hardness', 'type', 'description', 'remark'
         ]
         widgets = {
-            'date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
+            # Removed 'date' widget
             'die_no': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter Die Number'
@@ -94,7 +91,6 @@ class DieForm(forms.ModelForm):
         self.fields['press'].required = False
         self.fields['supplier'].required = False
         self.fields['date_of_receipt'].required = False
-
 # ──────────────────────────────────────────────────────────────────────────────
 # Forms for Press functionality
 # ──────────────────────────────────────────────────────────────────────────────
@@ -123,7 +119,9 @@ class AlloyForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'date',
+                'readonly': 'readonly',  # Make date field read-only
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
             }),
             'alloy_code': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -159,7 +157,15 @@ class AlloyForm(forms.ModelForm):
                 'max': '100'
             }),
         }
-
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove required attribute from all fields
+        for field_name, field in self.fields.items():
+            field.required = False
+            # Make date field non-editable
+            if field_name == 'date':
+                field.disabled = True
 # ──────────────────────────────────────────────────────────────────────────────
 # Forms for LOT functionality
 # ──────────────────────────────────────────────────────────────────────────────
@@ -239,7 +245,9 @@ class CustomerForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'date',
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
             }),
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -265,8 +273,13 @@ class CustomerForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['contact_person'].required = False
-
+        # Make all fields optional
+        for field in self.fields.values():
+            field.required = False
+        
+        # Set today's date as initial value if creating new customer
+        if not self.instance.pk:
+            self.fields['date'].initial = timezone.now().date()
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Forms for Company functionality

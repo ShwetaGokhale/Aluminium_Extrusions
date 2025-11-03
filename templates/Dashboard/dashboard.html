@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,11 +15,11 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f0f0;
+            background: linear-gradient(135deg, #e0d5f0 0%, #f0e5ff 50%, #d5e0f5 100%);
         }
 
         .header {
-            background: linear-gradient(135deg, #0d5f4e 0%, #1a8b6f 100%);
+            background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);
             color: white;
             padding: 10px 25px;
             display: flex;
@@ -34,7 +33,7 @@
         }
 
         .logo span {
-            color: #4dd4ac;
+            color: #ce93d8;
         }
 
         .header-right {
@@ -53,7 +52,7 @@
         .status-dot {
             width: 8px;
             height: 8px;
-            background: #4dd4ac;
+            background: #ce93d8;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -96,7 +95,7 @@
 
         .nav-item.active {
             background: white;
-            color: #333;
+            color: #6a1b9a;
             font-weight: 600;
         }
 
@@ -104,7 +103,7 @@
             display: grid;
             grid-template-columns: 340px 1fr 280px;
             gap: 0;
-            background: #e8e8e8;
+            background: transparent;
             padding: 15px;
         }
 
@@ -114,6 +113,8 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .machine-image {
@@ -126,7 +127,8 @@
         .chart-card {
             background: white;
             padding: 15px;
-            border-radius: 4px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .chart-header {
@@ -207,8 +209,8 @@
         }
 
         .center-section {
-            background: white;
-            padding: 15px;
+            background: transparent;
+            padding: 0px;
             margin-left: 15px;
             display: flex;
             flex-direction: column;
@@ -224,8 +226,8 @@
         .time-card {
             background: white;
             padding: 15px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -243,17 +245,17 @@
         }
 
         .time-icon.run {
-            background: #4caf50;
+            background: #3b82f6;
             color: white;
         }
 
         .time-icon.idle {
-            background: #ff9800;
+            background: #f59e0b;
             color: white;
         }
 
         .time-icon.off {
-            background: #f44336;
+            background: #ef4444;
             color: white;
         }
 
@@ -270,15 +272,15 @@
         }
 
         .time-content .time-value.run {
-            color: #4caf50;
+            color: #3b82f6;
         }
 
         .time-content .time-value.idle {
-            color: #ff9800;
+            color: #f59e0b;
         }
 
         .time-content .time-value.off {
-            color: #f44336;
+            color: #ef4444;
         }
 
         .time-content .minutes {
@@ -286,51 +288,87 @@
             color: #999;
         }
 
-        .metrics-row {
+        .die-cards-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            gap: 15px;
         }
 
-        .metric-card {
-            padding: 25px 15px;
-            border-radius: 4px;
-            text-align: center;
+        .die-card {
+            padding: 15px 18px;
+            border-radius: 8px;
+            background: white;
+            position: relative;
+            min-height: 190px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .metric-card.oee {
-            background: #4caf50;
-            color: white;
+        .die-card.green .die-number {
+            color: #10b981;
         }
 
-        .metric-card.availability {
-            background: #ff7043;
-            color: white;
+        .die-card.orange .die-number {
+            color: #f59e0b;
         }
 
-        .metric-card.performance {
-            background: #ffc107;
-            color: white;
+        .die-card.yellow .die-number {
+            color: #eab308;
         }
 
-        .metric-card.quality {
-            background: #2196f3;
-            color: white;
+        .die-card.blue .die-number {
+            color: #3b82f6;
         }
 
-        .metric-label {
-            font-size: 12px;
-            margin-bottom: 12px;
-            opacity: 0.95;
+        .die-number {
+            font-size: 20px;
+            margin-bottom: 15px;
+            opacity: 1;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
+            gap: 5px;
+            font-weight: bold;
         }
 
-        .metric-value {
-            font-size: 48px;
+        .die-info {
+            font-size: 17px;
+            margin-bottom: 25px;
+            line-height: 1.8;
             font-weight: bold;
+            flex-grow: 1;
+            color: #555;
+        }
+
+        .die-label {
+            font-size: 15px;
+            margin-bottom: 8px;
+            opacity: 1;
+            font-weight: bold;
+            color: #777;
+        }
+
+        .die-value {
+            font-size: 45px;
+            font-weight: bold;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .die-card.green .die-value {
+            color: #10b981;
+        }
+
+        .die-card.orange .die-value {
+            color: #f59e0b;
+        }
+
+        .die-card.yellow .die-value {
+            color: #eab308;
+        }
+
+        .die-card.blue .die-value {
+            color: #3b82f6;
         }
 
         .charts-bottom {
@@ -459,15 +497,15 @@
         }
 
         .stacked-bar.run {
-            background: #4caf50;
+            background: #3b82f6;
         }
 
         .stacked-bar.idle {
-            background: #ff9800;
+            background: #f59e0b;
         }
 
         .stacked-bar.off {
-            background: #f44336;
+            background: #ef4444;
         }
 
         .x-label {
@@ -499,27 +537,38 @@
             background: white;
             padding: 20px;
             margin-left: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .shift-info {
             font-size: 12px;
             margin-bottom: 20px;
             text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
         }
 
         .shift-info h4 {
             font-size: 15px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
         }
 
         .shift-time {
             color: #666;
             font-size: 11px;
+            line-height: 1.6;
         }
 
         .machine-state {
             text-align: center;
             margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
         }
 
         .state-label {
@@ -530,10 +579,10 @@
         }
 
         .state-badge {
-            background: #4caf50;
+            background: #6a1b9a;
             color: white;
             padding: 8px 25px;
-            border-radius: 3px;
+            border-radius: 20px;
             display: inline-block;
             font-weight: bold;
             font-size: 13px;
@@ -543,7 +592,17 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .production-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .prod-icon {
@@ -552,23 +611,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 3px;
+            border-radius: 6px;
             font-size: 20px;
             flex-shrink: 0;
         }
 
         .prod-icon.on {
-            background: #4caf50;
+            background: #10b981;
             color: white;
         }
 
         .prod-icon.off {
-            background: #ff9800;
+            background: #f59e0b;
             color: white;
         }
 
         .prod-icon.bad {
-            background: #f44336;
+            background: #ef4444;
             color: white;
         }
 
@@ -585,15 +644,15 @@
         }
 
         .prod-value.on {
-            color: #4caf50;
+            color: #10b981;
         }
 
         .prod-value.off {
-            color: #ff9800;
+            color: #f59e0b;
         }
 
         .prod-value.bad {
-            color: #f44336;
+            color: #ef4444;
         }
     </style>
 </head>
@@ -602,13 +661,11 @@
     <!-- Header -->
     <!-- <div class="header">
         <div class="logo">
-            <span>IO</span>Tdashboard <span style="font-size: 13px; margin-left: 12px; font-weight: normal;">OEE
-                Monitoring</span>
+            <span>IO</span>Tdashboard <span style="font-size: 13px; margin-left: 12px; font-weight: normal;">OEE Monitoring</span>
         </div>
         <div class="header-right">
             <div class="status-indicator">
-                IoT: <div class="status-dot"></div> <span style="color: #4dd4ac;">Online</span> | Last Updated On: 7 Jun
-                2024 15:33
+                IoT: <div class="status-dot"></div> <span style="color: #ce93d8;">Online</span> | Last Updated On: 7 Jun 2024 15:33
             </div>
             <i class="fas fa-th" style="cursor: pointer;"></i>
         </div>
@@ -641,7 +698,6 @@
         <div class="left-section">
             <img src="https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=400&h=250&fit=crop"
                 alt="Manufacturing" class="machine-image">
-                <!-- <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Logo"> -->
 
             <div class="chart-card">
                 <div class="chart-header">
@@ -652,11 +708,11 @@
                 </div>
                 <div class="donut-chart">
                     <svg width="180" height="180">
-                        <circle cx="90" cy="90" r="70" fill="none" stroke="#4caf50" stroke-width="28"
+                        <circle cx="90" cy="90" r="70" fill="none" stroke="#3b82f6" stroke-width="28"
                             stroke-dasharray="320 145" stroke-linecap="round" />
-                        <circle cx="90" cy="90" r="70" fill="none" stroke="#ffc107" stroke-width="28"
+                        <circle cx="90" cy="90" r="70" fill="none" stroke="#eab308" stroke-width="28"
                             stroke-dasharray="30 435" stroke-dashoffset="-320" stroke-linecap="round" />
-                        <circle cx="90" cy="90" r="70" fill="none" stroke="#f44336" stroke-width="28"
+                        <circle cx="90" cy="90" r="70" fill="none" stroke="#ef4444" stroke-width="28"
                             stroke-dasharray="55 410" stroke-dashoffset="-350" stroke-linecap="round" />
                     </svg>
                     <div class="donut-center">
@@ -666,15 +722,15 @@
                 </div>
                 <div class="legend">
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #4caf50;"></div>
+                        <div class="legend-color" style="background: #3b82f6;"></div>
                         Run Time <span class="legend-value">366</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #ffc107;"></div>
+                        <div class="legend-color" style="background: #eab308;"></div>
                         Idle Time <span class="legend-value">35</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #f44336;"></div>
+                        <div class="legend-color" style="background: #ef4444;"></div>
                         Off Time <span class="legend-value">64</span>
                     </div>
                 </div>
@@ -684,80 +740,92 @@
         <!-- Center Section -->
         <div class="center-section">
             <div class="top-row">
-                <!-- Run Time (Stopwatch Icon) -->
+                <!-- Ordered -->
                 <div class="time-card">
                     <div class="time-icon run">
-                        <i class="fas fa-stopwatch" style="font-size: 24px;"></i>
+                        <i class="fas fa-clipboard-list" style="font-size: 24px;"></i>
                     </div>
                     <div class="time-content">
-                        <h4>Run<br>Time</h4>
-                        <div class="time-value run">366 <span class="minutes">minutes</span></div>
+                        <h4>Ordered</h4>
+                        <div class="time-value run">500</div>
                     </div>
                 </div>
 
-                <!-- Idle Time (Stopwatch with slightly bigger Pause badge) -->
+                <!-- Completed -->
                 <div class="time-card">
-                    <div class="time-icon idle" style="position: relative;">
-                        <!-- Stopwatch icon -->
-                        <i class="fas fa-stopwatch" style="font-size: 24px;"></i>
-
-                        <!-- Small white circle with Pause inside (slightly bigger) -->
-                        <div style="position: absolute; bottom: -3px; right: -3px; width: 18px; height: 18px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
-                            <i class="fas fa-pause" style="font-size: 10px; color: #ff9800;"></i>
-                        </div>
+                    <div class="time-icon idle">
+                        <i class="fas fa-check-circle" style="font-size: 24px;"></i>
                     </div>
                     <div class="time-content">
-                        <h4>Idle<br>Time</h4>
-                        <div class="time-value idle">35 <span class="minutes">minutes</span></div>
+                        <h4>Completed</h4>
+                        <div class="time-value idle">320</div>
                     </div>
                 </div>
 
-                <!-- Off Time (Stopwatch Icon) -->
+                <!-- In Progress -->
                 <div class="time-card">
-                   <div class="time-icon off" style="position: relative;">
-                        <i class="fas fa-stopwatch" style="font-size: 24px;"></i>
-
-                        <!-- Diagonal line (/) centered -->
-                        <div style="position: absolute; top: 50%; left: 50%; width: 70%; height: 2px; background: white; transform: translate(-50%, -50%) rotate(45deg); transform-origin: center;">
-                        </div>
+                   <div class="time-icon off">
+                        <i class="fas fa-spinner" style="font-size: 24px;"></i>
                     </div>
                     <div class="time-content">
-                        <h4>Off<br>Time</h4>
-                        <div class="time-value off">64 <span class="minutes">minutes</span></div>
+                        <h4>In Progress</h4>
+                        <div class="time-value off">180</div>
                     </div>
                 </div>
             </div>
 
-            <div class="metrics-row">
-                <div class="metric-card oee">
-                    <div class="metric-label">
-                        <i class="fas fa-cog"></i> OEE
+            <!-- DIE Cards Row -->
+            <div class="die-cards-row">
+                <div class="die-card green">
+                    <div class="die-number">
+                        <i class="fas fa-circle" style="font-size: 7px;"></i> Die-12098-09
                     </div>
-                    <div class="metric-value">64%</div>
+                    <div class="die-info">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span>Order Qty</span>
+                            <span>C/L</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 27px; font-weight: bold;">
+                            <span>500</span>
+                            <span>16ft</span>
+                        </div>
+                    </div>
+                    <div class="die-label">Current Prod</div>
+                    <div class="die-value">320</div>
                 </div>
 
-                <div class="metric-card availability">
-                    <div class="metric-label">
-                        <i class="fas fa-clock"></i> Availability
+                <div class="die-card orange">
+                    <div class="die-number">DIE-8976-09</div>
+                    <div class="die-info">
+                        <div style="margin-bottom: 4px;">Order Qty : <span style="font-weight: 600;">500</span></div>
+                        <div>Cut Length: <span style="font-weight: 600;">16ft</span></div>
                     </div>
-                    <div class="metric-value">78%</div>
+                    <div class="die-label">Efficiency</div>
+                    <div class="die-value">68%</div>
                 </div>
 
-                <div class="metric-card performance">
-                    <div class="metric-label">
-                        <i class="fas fa-tachometer-alt"></i> Performance
+                <div class="die-card yellow">
+                    <div class="die-number">DIE-6765-43</div>
+                    <div class="die-info">
+                        <div style="margin-bottom: 4px;">Order Qty : <span style="font-weight: 600;">670</span></div>
+                        <div>Cut Length: <span style="font-weight: 600;">14ft</span></div>
                     </div>
-                    <div class="metric-value">84%</div>
+                    <div class="die-label">Efficiency</div>
+                    <div class="die-value">89%</div>
                 </div>
 
-                <div class="metric-card quality">
-                    <div class="metric-label">
-                        <i class="fas fa-check-circle"></i> Quality
+                <div class="die-card blue">
+                    <div class="die-number">DIE-9873-33</div>
+                    <div class="die-info">
+                        <div style="margin-bottom: 4px;">Order Qty : <span style="font-weight: 600;">9000</span></div>
+                        <div>Cut Length: <span style="font-weight: 600;">12ft</span></div>
                     </div>
-                    <div class="metric-value">98%</div>
+                    <div class="die-label">Efficiency</div>
+                    <div class="die-value">100%</div>
                 </div>
             </div>
 
+            <!-- Charts Row -->
             <div class="charts-bottom">
                 <div class="chart-card">
                     <div class="chart-header">
@@ -769,10 +837,10 @@
                     <div class="bar-chart-container">
                         <div class="y-axis">100 %</div>
                         <div class="bar-chart">
-                            <div class="bar" style="height: 64%; width: 50px; background: #4caf50;"></div>
-                            <div class="bar" style="height: 78%; width: 50px; background: #ff7043;"></div>
-                            <div class="bar" style="height: 84%; width: 50px; background: #ffc107;"></div>
-                            <div class="bar" style="height: 98%; width: 50px; background: #2196f3;"></div>
+                            <div class="bar" style="height: 64%; width: 50px; background: #10b981;"></div>
+                            <div class="bar" style="height: 75%; width: 50px; background: #f59e0b;"></div>
+                            <div class="bar" style="height: 78%; width: 50px; background: #eab308;"></div>
+                            <div class="bar" style="height: 100%; width: 50px; background: #3b82f6;"></div>
                         </div>
                         <div class="bar-labels">
                             <div>OEE</div>
@@ -784,6 +852,7 @@
                     </div>
                 </div>
 
+                <!-- Line Chart -->
                 <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
@@ -843,9 +912,9 @@
                         </div>
                         <div class="chart-legend">
                             <div class="legend-left">
-                                <div><span style="color: #4caf50;">●</span> Run Time</div>
-                                <div><span style="color: #ff9800;">●</span> Idle Time</div>
-                                <div><span style="color: #f44336;">●</span> Off time</div>
+                                <div><span style="color: #3b82f6;">●</span> Run Time</div>
+                                <div><span style="color: #f59e0b;">●</span> Idle Time</div>
+                                <div><span style="color: #ef4444;">●</span> Off time</div>
                             </div>
                             <div class="legend-right">
                                 <div>Avg: 1000 min 5149 min</div>

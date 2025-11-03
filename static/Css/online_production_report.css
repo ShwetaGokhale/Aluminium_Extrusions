@@ -1,0 +1,477 @@
+/* ==== Form Container ==== */
+.form-container {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 30px auto;
+}
+
+/* ==== Form Header with Status Field ==== */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+  gap: 20px;
+  animation: slideUp 0.8s ease forwards;
+  transform: translateY(20px);
+}
+
+.form-header h3 {
+  flex: 1;
+  text-align: center;
+  color: #1e3a8a;
+  margin: 0;
+}
+
+.status-field-container {
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.status-field-container label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+  font-size: 14px;
+}
+
+.status-field-container select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #1e3a8a;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #f9f9f9;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  font-weight: 500;
+}
+
+.status-field-container select:focus {
+  outline: none;
+  border-color: #153e75;
+  box-shadow: 0 0 8px rgba(30, 58, 138, 0.5);
+  background-color: #fff;
+}
+
+/* Status color indicators */
+.status-field-container select option[value="in_progress"] {
+  background-color: #fff3e0;
+}
+
+.status-field-container select option[value="completed"] {
+  background-color: #e8f5e9;
+}
+
+.status-field-container select option[value="on_hold"] {
+  background-color: #e3f2fd;
+}
+
+.status-field-container select option[value="cancelled"] {
+  background-color: #ffebee;
+}
+
+h3 {
+  text-align: center;
+  color: #1e3a8a;
+}
+
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 30px;
+  animation: slideUp 0.8s ease forwards;
+  transform: translateY(20px);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #f9f9f9;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #1e3a8a;
+  box-shadow: 0 0 5px rgba(30, 58, 138, 0.5);
+  background-color: #fff;
+}
+
+input[readonly],
+select[disabled] {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.full-width {
+  grid-column: 1 / 3;
+}
+
+/* ==== Custom Time Picker Wrapper ==== */
+.time-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.time-input-wrapper input[type="text"] {
+  padding-right: 40px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #1e3a8a;
+}
+
+.time-input-wrapper .clock-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  cursor: pointer;
+  color: #1e3a8a;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.time-input-wrapper input[type="text"]:hover + .clock-icon,
+.time-input-wrapper input[type="text"]:focus + .clock-icon {
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Hide default time input */
+input[type="time"] {
+  display: none;
+}
+
+/* ==== Custom Clock Picker Modal ==== */
+.clock-picker-modal {
+  display: none;
+  position: absolute;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+
+.clock-picker-modal.active {
+  display: block;
+}
+
+.clock-picker-container {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 280px;
+  border: 1px solid #ddd;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.clock-picker-header {
+  text-align: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.clock-picker-header h4 {
+  margin: 0 0 8px 0;
+  color: #1e3a8a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.clock-display {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1e3a8a;
+  margin: 5px 0;
+}
+
+.period-selector {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.period-btn {
+  padding: 4px 14px;
+  border: 1px solid #1e3a8a;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: #1e3a8a;
+  transition: all 0.2s ease;
+}
+
+.period-btn.active {
+  background: #1e3a8a;
+  color: white;
+}
+
+.period-btn:hover {
+  background: #153e75;
+  color: white;
+}
+
+/* Clock Face */
+.clock-face {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 2px solid #1e3a8a;
+  border-radius: 50%;
+  margin: 10px auto;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+  box-shadow: inset 0 0 10px rgba(30, 58, 138, 0.1);
+}
+
+.clock-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #1e3a8a;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.clock-number {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: #1e3a8a;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.clock-number:hover {
+  background: rgba(30, 58, 138, 0.1);
+  transform: scale(1.1);
+}
+
+.clock-number.selected {
+  background: #1e3a8a;
+  color: white;
+}
+
+/* Minute Input */
+.minute-input-container {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.minute-input-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 12px;
+  color: #333;
+}
+
+.minute-input-container input {
+  width: 70px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px;
+  border: 1px solid #1e3a8a;
+  border-radius: 4px;
+}
+
+/* Action Buttons */
+.clock-picker-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.clock-picker-actions button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clock-cancel-btn {
+  background: #e5e7eb;
+  color: #333;
+}
+
+.clock-cancel-btn:hover {
+  background: #d1d5db;
+}
+
+.clock-ok-btn {
+  background: #1e3a8a;
+  color: white;
+}
+
+.clock-ok-btn:hover {
+  background: #153e75;
+}
+
+/* ==== Buttons ==== */
+button[type="submit"] {
+  grid-column: 1 / 3;
+  padding: 12px;
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.2s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #153e75;
+}
+
+/* ==== Popup Notification ==== */
+.popup-message {
+  position: fixed;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4caf50;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transition: top 0.5s, opacity 0.5s;
+  min-width: 220px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.popup-message.error {
+  background: #e53935;
+}
+
+.popup-message.show {
+  top: 24px;
+  opacity: 1;
+}
+
+.popup-message.hidden {
+  display: none;
+}
+
+/* ==== Responsive Design ==== */
+@media (max-width: 768px) {
+  .form-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-header h3 {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
+  .status-field-container {
+    min-width: 100%;
+  }
+
+  form {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .full-width {
+    grid-column: 1;
+  }
+
+  button[type="submit"] {
+    grid-column: 1;
+  }
+
+  .form-container {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  .clock-face {
+    width: 180px;
+    height: 180px;
+  }
+
+  .clock-picker-container {
+    width: 260px;
+    padding: 12px;
+  }
+
+  .clock-number {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+}

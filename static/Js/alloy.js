@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("alloyForm");
     const alloyIdDisplay = document.getElementById("alloy_id_display");
+    const dateField = document.getElementById("date");
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -38,78 +39,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ---------------- Validate Form ----------------
-    function validateForm() {
-        const date = document.getElementById("date").value;
-        const alloyCode = document.getElementById("alloy_code").value.trim();
-        const temperDesignation = document.getElementById("temper_designation").value.trim();
-        const temperCode = document.getElementById("temper_code").value.trim();
-        const tensileStrength = document.getElementById("tensile_strength").value.trim();
-        const material = document.getElementById("material").value.trim();
-        const siliconPercent = document.getElementById("silicon_percent").value.trim();
-        const copperPercent = document.getElementById("copper_percent").value.trim();
-
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
-
-        if (!alloyCode) {
-            showMessage("error", "Alloy Code is required");
-            return false;
-        }
-
-        if (!temperDesignation) {
-            showMessage("error", "Temper Designation is required");
-            return false;
-        }
-
-        if (!temperCode) {
-            showMessage("error", "Temper Code is required");
-            return false;
-        }
-
-        if (!tensileStrength || parseFloat(tensileStrength) <= 0) {
-            showMessage("error", "Valid Tensile Strength is required (must be greater than 0)");
-            return false;
-        }
-
-        if (!material) {
-            showMessage("error", "Material is required");
-            return false;
-        }
-
-        if (!siliconPercent || parseFloat(siliconPercent) < 0 || parseFloat(siliconPercent) > 100) {
-            showMessage("error", "Silicon percentage must be between 0 and 100");
-            return false;
-        }
-
-        if (!copperPercent || parseFloat(copperPercent) < 0 || parseFloat(copperPercent) > 100) {
-            showMessage("error", "Copper percentage must be between 0 and 100");
-            return false;
-        }
-
-        return true;
+    // ---------------- Set Today's Date (Create Mode Only) ----------------
+    if (!window.editMode && dateField) {
+        // Ensure today's date is set
+        const today = new Date().toISOString().split('T')[0];
+        dateField.value = window.todayDate || today;
     }
 
     if (form) {
         form.addEventListener("submit", async function (e) {
             e.preventDefault();
 
-            if (!validateForm()) return;
-
             const formData = new FormData(form);
 
             // Convert FormData to JSON for API
             let payload = {
                 date: formData.get("date"),
-                alloy_code: formData.get("alloy_code"),
-                temper_designation: formData.get("temper_designation"),
-                temper_code: formData.get("temper_code"),
-                tensile_strength: formData.get("tensile_strength"),
-                material: formData.get("material"),
-                silicon_percent: formData.get("silicon_percent"),
-                copper_percent: formData.get("copper_percent")
+                alloy_code: formData.get("alloy_code") || "",
+                temper_designation: formData.get("temper_designation") || "",
+                temper_code: formData.get("temper_code") || "",
+                tensile_strength: formData.get("tensile_strength") || "",
+                material: formData.get("material") || "",
+                silicon_percent: formData.get("silicon_percent") || "",
+                copper_percent: formData.get("copper_percent") || ""
             };
 
             // Debug: Log payload

@@ -40,20 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- Validate Form ----------------
     function validateForm() {
-        const date = document.getElementById("date").value;
         const dieNo = document.getElementById("die_no").value.trim();
-        const dieName = document.getElementById("die_name").value.trim();
-        const noOfCavity = document.getElementById("no_of_cavity").value;
-        const reqWeight = document.getElementById("req_weight").value;
-        const size = document.getElementById("size").value.trim();
-        const dieMaterial = document.getElementById("die_material").value;
-        const hardness = document.getElementById("hardness").value.trim();
-        const type = document.getElementById("type").value;
-
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
 
         if (!dieNo) {
             showMessage("error", "Die No is required");
@@ -63,41 +50,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // Check for placeholder or invalid values
         if (dieNo.toLowerCase().includes('die -') || dieNo.trim() === '' || dieNo.length < 2) {
             showMessage("error", "Please enter a valid Die No (minimum 2 characters)");
-            return false;
-        }
-
-        if (!dieName) {
-            showMessage("error", "Die Name is required");
-            return false;
-        }
-
-        if (!noOfCavity) {
-            showMessage("error", "No of Cavity is required");
-            return false;
-        }
-
-        if (!reqWeight || parseFloat(reqWeight) <= 0) {
-            showMessage("error", "Valid Req Weight is required (must be greater than 0)");
-            return false;
-        }
-
-        if (!size) {
-            showMessage("error", "Size is required");
-            return false;
-        }
-
-        if (!dieMaterial) {
-            showMessage("error", "Die Material is required");
-            return false;
-        }
-
-        if (!hardness) {
-            showMessage("error", "Hardness is required");
-            return false;
-        }
-
-        if (!type) {
-            showMessage("error", "Type is required");
             return false;
         }
 

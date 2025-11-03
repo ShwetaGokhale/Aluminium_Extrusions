@@ -95,7 +95,7 @@ class DieAPI(View):
             {
                 "id": d.id,
                 "die_id": d.die_id,
-                "date": d.date.strftime("%Y-%m-%d"),
+                "date": d.date.strftime("%Y-%m-%d") if d.date else None,
                 "die_no": d.die_no,
                 "die_name": d.die_name,
                 "description": d.description,
@@ -106,7 +106,7 @@ class DieAPI(View):
                 "project_no": d.project_no,
                 "date_of_receipt": d.date_of_receipt.strftime("%Y-%m-%d") if d.date_of_receipt else None,
                 "no_of_cavity": d.no_of_cavity,
-                "req_weight": str(d.req_weight),
+                "req_weight": str(d.req_weight) if d.req_weight else None,
                 "size": d.size,
                 "die_material": d.die_material,
                 "hardness": d.hardness,
@@ -124,7 +124,6 @@ class DieAPI(View):
         """Create a new die"""
         try:
             # Handle multipart form data for image upload
-            date = request.POST.get('date')
             die_no = request.POST.get('die_no', '').strip()
             die_name = request.POST.get('die_name', '').strip()
             press_id = request.POST.get('press')
@@ -141,29 +140,27 @@ class DieAPI(View):
             remark = request.POST.get('remark', '').strip()
             image = request.FILES.get('image')
             
-            # Validate required fields
-            if not all([date, die_no, die_name, no_of_cavity, 
-                       req_weight, size, die_material, hardness, die_type]):
+            # Validate only required field: die_no
+            if not die_no:
                 return JsonResponse({
                     'success': False, 
-                    'message': 'Please fill all required fields.'
+                    'message': 'Die No is required.'
                 })
             
-            # Create die (die_id will be auto-generated in save method)
+            # Create die (die_id and date will be auto-generated)
             die = Die.objects.create(
-                date=date,
                 die_no=die_no,
                 die_name=die_name,
                 press_id=press_id if press_id else None,
                 supplier_id=supplier_id if supplier_id else None,
                 project_no=project_no,
                 date_of_receipt=date_of_receipt if date_of_receipt else None,
-                no_of_cavity=no_of_cavity,
-                req_weight=req_weight,
+                no_of_cavity=no_of_cavity if no_of_cavity else '',
+                req_weight=req_weight if req_weight else None,
                 size=size,
-                die_material=die_material,
+                die_material=die_material if die_material else '',
                 hardness=hardness,
-                type=die_type,
+                type=die_type if die_type else '',
                 description=description,
                 remark=remark,
                 image=image
@@ -201,7 +198,7 @@ class DieDetailAPI(View):
                 'die': {
                     'id': die.id,
                     'die_id': die.die_id,
-                    'date': die.date.strftime("%Y-%m-%d"),
+                    'date': die.date.strftime("%Y-%m-%d") if die.date else None,
                     'die_no': die.die_no,
                     'die_name': die.die_name,
                     'description': die.description,
@@ -212,7 +209,7 @@ class DieDetailAPI(View):
                     'project_no': die.project_no,
                     'date_of_receipt': die.date_of_receipt.strftime("%Y-%m-%d") if die.date_of_receipt else None,
                     'no_of_cavity': die.no_of_cavity,
-                    'req_weight': str(die.req_weight),
+                    'req_weight': str(die.req_weight) if die.req_weight else None,
                     'size': die.size,
                     'die_material': die.die_material,
                     'hardness': die.hardness,
@@ -231,7 +228,6 @@ class DieDetailAPI(View):
             die = get_object_or_404(Die, id=die_id)
             
             # Handle multipart form data for image upload
-            date = request.POST.get('date')
             die_no = request.POST.get('die_no', '').strip()
             die_name = request.POST.get('die_name', '').strip()
             press_id = request.POST.get('press')
@@ -248,28 +244,26 @@ class DieDetailAPI(View):
             remark = request.POST.get('remark', '').strip()
             image = request.FILES.get('image')
             
-            # Validate required fields
-            if not all([date, die_no, die_name, no_of_cavity, 
-                       req_weight, size, die_material, hardness, die_type]):
+            # Validate only required field: die_no
+            if not die_no:
                 return JsonResponse({
                     'success': False, 
-                    'message': 'Please fill all required fields.'
+                    'message': 'Die No is required.'
                 })
             
-            # Update die (die_id remains unchanged)
-            die.date = date
+            # Update die (die_id and date remain unchanged)
             die.die_no = die_no
             die.die_name = die_name
             die.press_id = press_id if press_id else None
             die.supplier_id = supplier_id if supplier_id else None
             die.project_no = project_no
             die.date_of_receipt = date_of_receipt if date_of_receipt else None
-            die.no_of_cavity = no_of_cavity
-            die.req_weight = req_weight
+            die.no_of_cavity = no_of_cavity if no_of_cavity else ''
+            die.req_weight = req_weight if req_weight else None
             die.size = size
-            die.die_material = die_material
+            die.die_material = die_material if die_material else ''
             die.hardness = hardness
-            die.type = die_type
+            die.type = die_type if die_type else ''
             die.description = description
             die.remark = remark
             
@@ -311,7 +305,6 @@ class DieDetailAPI(View):
                 'success': False, 
                 'message': str(e)
             })
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Views for Press functionality
@@ -494,6 +487,8 @@ class AlloyFormView(View):
     def get(self, request):
         # Generate preview of next Alloy ID
         next_alloy_id = Alloy.generate_alloy_id()
+        # Get today's date
+        today = date.today().strftime('%Y-%m-%d')
         
         return render(
             request,
@@ -501,6 +496,7 @@ class AlloyFormView(View):
             {
                 "edit_mode": False,
                 "next_alloy_id": next_alloy_id,
+                "today_date": today,
             },
         )
 
@@ -565,39 +561,37 @@ class AlloyAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip() if isinstance(data.get("date"), str) else data.get("date")
-            alloy_code = data.get("alloy_code", "").strip()
-            temper_designation = data.get("temper_designation", "").strip()
-            temper_code = data.get("temper_code", "").strip()
-            tensile_strength = data.get("tensile_strength", "").strip() if isinstance(data.get("tensile_strength"), str) else data.get("tensile_strength")
-            material = data.get("material", "").strip()
-            silicon_percent = data.get("silicon_percent", "").strip() if isinstance(data.get("silicon_percent"), str) else data.get("silicon_percent")
-            copper_percent = data.get("copper_percent", "").strip() if isinstance(data.get("copper_percent"), str) else data.get("copper_percent")
+            # Get date - use today's date if not provided
+            date_value = data.get("date")
+            if not date_value:
+                date_value = date.today()
             
-            if not all([date, alloy_code, temper_designation, temper_code, tensile_strength, material, silicon_percent, copper_percent]):
-                return JsonResponse({
-                    "success": False,
-                    "message": "All fields are required."
-                })
+            # Get other fields (all optional now)
+            alloy_code = data.get("alloy_code", "").strip() if data.get("alloy_code") else ""
+            temper_designation = data.get("temper_designation", "").strip() if data.get("temper_designation") else ""
+            temper_code = data.get("temper_code", "").strip() if data.get("temper_code") else ""
+            tensile_strength = data.get("tensile_strength", "").strip() if isinstance(data.get("tensile_strength"), str) else data.get("tensile_strength", "")
+            material = data.get("material", "").strip() if data.get("material") else ""
+            silicon_percent = data.get("silicon_percent", "").strip() if isinstance(data.get("silicon_percent"), str) else data.get("silicon_percent", "")
+            copper_percent = data.get("copper_percent", "").strip() if isinstance(data.get("copper_percent"), str) else data.get("copper_percent", "")
             
-            # Check if alloy_code already exists
-            if Alloy.objects.filter(alloy_code=alloy_code).exists():
+            # Check if alloy_code already exists (only if provided)
+            if alloy_code and Alloy.objects.filter(alloy_code=alloy_code).exists():
                 return JsonResponse({
                     "success": False,
                     "message": "Alloy Code already exists."
                 })
             
-            # Create alloy (alloy_id will be auto-generated)
+            # Create alloy with provided values or empty strings/None
             alloy = Alloy.objects.create(
-                date=date,
-                alloy_code=alloy_code,
-                temper_designation=temper_designation,
-                temper_code=temper_code,
-                tensile_strength=tensile_strength,
-                material=material,
-                silicon_percent=silicon_percent,
-                copper_percent=copper_percent
+                date=date_value,
+                alloy_code=alloy_code or "",
+                temper_designation=temper_designation or "",
+                temper_code=temper_code or "",
+                tensile_strength=tensile_strength if tensile_strength else None,
+                material=material or "",
+                silicon_percent=silicon_percent if silicon_percent else None,
+                copper_percent=copper_percent if copper_percent else None
             )
             
             return JsonResponse(
@@ -653,38 +647,32 @@ class AlloyDetailAPI(View):
             alloy = get_object_or_404(Alloy, id=pk)
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip() if isinstance(data.get("date"), str) else data.get("date")
-            alloy_code = data.get("alloy_code", "").strip()
-            temper_designation = data.get("temper_designation", "").strip()
-            temper_code = data.get("temper_code", "").strip()
-            tensile_strength = data.get("tensile_strength", "").strip() if isinstance(data.get("tensile_strength"), str) else data.get("tensile_strength")
-            material = data.get("material", "").strip()
-            silicon_percent = data.get("silicon_percent", "").strip() if isinstance(data.get("silicon_percent"), str) else data.get("silicon_percent")
-            copper_percent = data.get("copper_percent", "").strip() if isinstance(data.get("copper_percent"), str) else data.get("copper_percent")
+            # Get fields (all optional)
+            date_value = data.get("date", alloy.date)
+            alloy_code = data.get("alloy_code", "").strip() if data.get("alloy_code") else alloy.alloy_code
+            temper_designation = data.get("temper_designation", "").strip() if data.get("temper_designation") else alloy.temper_designation
+            temper_code = data.get("temper_code", "").strip() if data.get("temper_code") else alloy.temper_code
+            tensile_strength = data.get("tensile_strength", "").strip() if isinstance(data.get("tensile_strength"), str) else data.get("tensile_strength", alloy.tensile_strength)
+            material = data.get("material", "").strip() if data.get("material") else alloy.material
+            silicon_percent = data.get("silicon_percent", "").strip() if isinstance(data.get("silicon_percent"), str) else data.get("silicon_percent", alloy.silicon_percent)
+            copper_percent = data.get("copper_percent", "").strip() if isinstance(data.get("copper_percent"), str) else data.get("copper_percent", alloy.copper_percent)
             
-            if not all([date, alloy_code, temper_designation, temper_code, tensile_strength, material, silicon_percent, copper_percent]):
-                return JsonResponse({
-                    "success": False,
-                    "message": "All fields are required."
-                })
-            
-            # Check if alloy_code already exists (excluding current alloy)
-            if Alloy.objects.filter(alloy_code=alloy_code).exclude(id=pk).exists():
+            # Check if alloy_code already exists (excluding current alloy, only if changed)
+            if alloy_code != alloy.alloy_code and Alloy.objects.filter(alloy_code=alloy_code).exclude(id=pk).exists():
                 return JsonResponse({
                     "success": False,
                     "message": "Alloy Code already exists."
                 })
             
-            # Update alloy (alloy_id remains unchanged)
-            alloy.date = date
+            # Update alloy
+            alloy.date = date_value
             alloy.alloy_code = alloy_code
             alloy.temper_designation = temper_designation
             alloy.temper_code = temper_code
-            alloy.tensile_strength = tensile_strength
+            alloy.tensile_strength = tensile_strength if tensile_strength else None
             alloy.material = material
-            alloy.silicon_percent = silicon_percent
-            alloy.copper_percent = copper_percent
+            alloy.silicon_percent = silicon_percent if silicon_percent else None
+            alloy.copper_percent = copper_percent if copper_percent else None
             alloy.save()
             
             return JsonResponse({
@@ -718,7 +706,6 @@ class AlloyDeleteView(View):
             return JsonResponse({"success": True, "message": "Alloy deleted successfully!"})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Views for LOT functionality
@@ -1088,13 +1075,20 @@ class CustomerEditView(View):
         try:
             data = json.loads(request.body)
             
-            # Update customer fields
-            customer.date = data.get("date")
-            customer.name = data.get("name")
-            customer.customer_type = data.get("customer_type")
-            customer.contact_no = data.get("contact_no")
-            customer.contact_person = data.get("contact_person", "")
-            customer.address = data.get("address")
+            # Update customer fields (no validation required)
+            date_str = data.get("date")
+            if date_str:
+                # Convert string to date object if needed
+                if isinstance(date_str, str):
+                    customer.date = parse_date(date_str) or customer.date
+                else:
+                    customer.date = date_str
+            
+            customer.name = data.get("name", "").strip()
+            customer.customer_type = data.get("customer_type", "").strip()
+            customer.contact_no = data.get("contact_no", "").strip()
+            customer.contact_person = data.get("contact_person", "").strip()
+            customer.address = data.get("address", "").strip()
             customer.save()
             
             return JsonResponse(
@@ -1129,13 +1123,13 @@ class CustomerAPI(View):
             {
                 "id": s.id,
                 "customer_id": s.customer_id,
-                "date": s.date.strftime("%Y-%m-%d"),
+                "date": s.date.strftime("%Y-%m-%d") if s.date else "",
                 "name": s.name,
                 "customer_type": s.customer_type,
                 "contact_no": s.contact_no,
                 "contact_person": s.contact_person,
                 "address": s.address,
-                "created_at": s.created_at.strftime("%Y-%m-%d"),
+                "created_at": s.created_at.strftime("%Y-%m-%d") if s.created_at else "",
             }
             for s in customers
         ]
@@ -1146,23 +1140,23 @@ class CustomerAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip()
+            # Get date value and convert if necessary
+            date_value = data.get("date")
+            if not date_value:
+                date_value = timezone.now().date()
+            elif isinstance(date_value, str):
+                # Convert string to date object using Django's parser
+                date_value = parse_date(date_value) or timezone.now().date()
+            
             name = data.get("name", "").strip()
             customer_type = data.get("customer_type", "").strip()
             contact_no = data.get("contact_no", "").strip()
             contact_person = data.get("contact_person", "").strip()
             address = data.get("address", "").strip()
             
-            if not all([date, name, customer_type, contact_no, address]):
-                return JsonResponse({
-                    "success": False,
-                    "message": "Date, Name, Customer Type, Contact No, and Address are required."
-                })
-            
             # Create customer (customer_id will be auto-generated)
             customer = Customer.objects.create(
-                date=date,
+                date=date_value,
                 name=name,
                 customer_type=customer_type,
                 contact_no=contact_no,
@@ -1183,7 +1177,8 @@ class CustomerAPI(View):
                         "contact_no": customer.contact_no,
                         "contact_person": customer.contact_person,
                         "address": customer.address,
-                        "created_at": customer.created_at.strftime("%Y-%m-%d"),
+                        "date": customer.date.strftime("%Y-%m-%d") if customer.date else "",
+                        "created_at": customer.created_at.strftime("%Y-%m-%d") if customer.created_at else "",
                     },
                 }
             )
@@ -1202,16 +1197,16 @@ class CustomerDetailAPI(View):
             return JsonResponse(
                 {
                     "success": True,
-                    "supplier": {
+                    "customer": {
                         "id": customer.id,
                         "customer_id": customer.customer_id,
-                        "date": customer.date.strftime("%Y-%m-%d"),
+                        "date": customer.date.strftime("%Y-%m-%d") if customer.date else "",
                         "name": customer.name,
                         "customer_type": customer.customer_type,
                         "contact_no": customer.contact_no,
                         "contact_person": customer.contact_person,
                         "address": customer.address,
-                        "created_at": customer.created_at.strftime("%Y-%m-%d"),
+                        "created_at": customer.created_at.strftime("%Y-%m-%d") if customer.created_at else "",
                     },
                 }
             )
@@ -1224,27 +1219,20 @@ class CustomerDetailAPI(View):
             customer = get_object_or_404(Customer, id=pk)
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip()
-            name = data.get("name", "").strip()
-            customer_type = data.get("customer_type", "").strip()
-            contact_no = data.get("contact_no", "").strip()
-            contact_person = data.get("contact_person", "").strip()
-            address = data.get("address", "").strip()
+            # Update date field
+            date_str = data.get("date")
+            if date_str:
+                # Convert string to date object if needed
+                if isinstance(date_str, str):
+                    customer.date = parse_date(date_str) or customer.date
+                else:
+                    customer.date = date_str
             
-            if not all([date, name, customer_type, contact_no, address]):
-                return JsonResponse({
-                    "success": False,
-                    "message": "Date, Name, Customer Type, Contact No, and Address are required."
-                })
-            
-            # Update customer (customer_id remains unchanged)
-            customer.date = date
-            customer.name = name
-            customer.customer_type = customer_type
-            customer.contact_no = contact_no
-            customer.contact_person = contact_person
-            customer.address = address
+            customer.name = data.get("name", "").strip()
+            customer.customer_type = data.get("customer_type", "").strip()
+            customer.contact_no = data.get("contact_no", "").strip()
+            customer.contact_person = data.get("contact_person", "").strip()
+            customer.address = data.get("address", "").strip()
             customer.save()
             
             return JsonResponse({
@@ -1278,7 +1266,6 @@ class CustomerDeleteView(View):
             return JsonResponse({"success": True, "message": "Customer deleted successfully!"})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
-
 # ──────────────────────────────────────────────────────────────────────────────
 # Views for Company functionality
 # ──────────────────────────────────────────────────────────────────────────────

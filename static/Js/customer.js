@@ -1,6 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("customerForm");
     const customerIdDisplay = document.getElementById("customer_id_display");
+    const dateField = document.getElementById("date");
+
+    // ---------------- Set Today's Date ----------------
+    if (!window.editMode && dateField) {
+        const today = new Date().toISOString().split('T')[0];
+        dateField.value = today;
+    }
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -38,63 +45,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ---------------- Validate Form ----------------
-    function validateForm() {
-        const date = document.getElementById("date").value;
-        const name = document.getElementById("name").value.trim();
-        const customerType = document.getElementById("customer_type").value.trim();
-        const contactNo = document.getElementById("contact_no").value.trim();
-        const address = document.getElementById("address").value.trim();
-
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
-
-        if (!name) {
-            showMessage("error", "Customer name is required");
-            return false;
-        }
-
-        if (!customerType) {
-            showMessage("error", "Customer type is required");
-            return false;
-        }
-
-        if (!contactNo) {
-            showMessage("error", "Contact number is required");
-            return false;
-        }
-
-        // Validate contact number format (basic validation)
-        if (contactNo.length < 10) {
-            showMessage("error", "Contact number must be at least 10 digits");
-            return false;
-        }
-
-        if (!address) {
-            showMessage("error", "Address is required");
-            return false;
-        }
-
-        return true;
-    }
-
+    // ---------------- Form Submission (No Validation) ----------------
     if (form) {
         form.addEventListener("submit", async function (e) {
             e.preventDefault();
-
-            if (!validateForm()) return;
 
             const formData = new FormData(form);
 
             let payload = {
                 date: formData.get("date"),
-                name: formData.get("name"),
-                customer_type: formData.get("customer_type"),
-                contact_no: formData.get("contact_no"),
+                name: formData.get("name") || "",
+                customer_type: formData.get("customer_type") || "",
+                contact_no: formData.get("contact_no") || "",
                 contact_person: formData.get("contact_person") || "",
-                address: formData.get("address")
+                address: formData.get("address") || ""
             };
 
             // Debug: Log payload

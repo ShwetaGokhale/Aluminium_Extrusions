@@ -3,7 +3,7 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/die.css' %}">
+<link rel="stylesheet" href="{% static 'css/die.css' %}">
 
 <!-- Popup Notification -->
 <div id="popupMessage" class="popup-message hidden"></div>
@@ -29,14 +29,16 @@
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date -->
+        <!-- Date (Auto-filled with today's date, Read-only) -->
         <div>
-            <label for="date">Date <span class="required">*</span></label>
-            <input type="date" name="date" id="date" required
-                value="{% if edit_mode %}{{ die.date|date:'Y-m-d' }}{% endif %}">
+            <label for="date">Date <span class="auto-gen-label">(Auto-generated)</span></label>
+            <input type="text" name="date" id="date" 
+                value="{% if edit_mode and die.date %}{{ die.date|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}"
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Die No -->
+        <!-- Die No (ONLY REQUIRED FIELD) -->
         <div>
             <label for="die_no">Die No <span class="required">*</span></label>
             <input type="text" name="die_no" id="die_no" required 
@@ -46,8 +48,8 @@
 
         <!-- Die Name -->
         <div>
-            <label for="die_name">Die Name <span class="required">*</span></label>
-            <input type="text" name="die_name" id="die_name" required 
+            <label for="die_name">Die Name</label>
+            <input type="text" name="die_name" id="die_name"
                 value="{% if edit_mode %}{{ die.die_name }}{% endif %}"
                 placeholder="Enter die name">
         </div>
@@ -108,8 +110,8 @@
 
         <!-- No of Cavity -->
         <div>
-            <label for="no_of_cavity">No of Cavity <span class="required">*</span></label>
-            <select name="no_of_cavity" id="no_of_cavity" required>
+            <label for="no_of_cavity">No of Cavity</label>
+            <select name="no_of_cavity" id="no_of_cavity">
                 <option value="">Select Cavity</option>
                 <option value="One" {% if edit_mode and die.no_of_cavity == 'One' %}selected{% endif %}>One</option>
                 <option value="Two" {% if edit_mode and die.no_of_cavity == 'Two' %}selected{% endif %}>Two</option>
@@ -120,24 +122,24 @@
 
         <!-- Req Weight -->
         <div>
-            <label for="req_weight">Req Weight in KG<span class="required">*</span></label>
-            <input type="number" step="0.01" name="req_weight" id="req_weight" required
+            <label for="req_weight">Req Weight in KG</label>
+            <input type="number" step="0.01" name="req_weight" id="req_weight"
                 value="{% if edit_mode %}{{ die.req_weight }}{% endif %}"
                 placeholder="Enter required weight">
         </div>
 
         <!-- Size -->
         <div>
-            <label for="size">Size <span class="required">*</span></label>
-            <input type="text" name="size" id="size" required
+            <label for="size">Size</label>
+            <input type="text" name="size" id="size"
                 value="{% if edit_mode %}{{ die.size }}{% endif %}"
                 placeholder="Enter size">
         </div>
 
         <!-- Die Material -->
         <div>
-            <label for="die_material">Die Material <span class="required">*</span></label>
-            <select name="die_material" id="die_material" required>
+            <label for="die_material">Die Material</label>
+            <select name="die_material" id="die_material">
                 <option value="">Select Material</option>
                 <option value="SS" {% if edit_mode and die.die_material == 'SS' %}selected{% endif %}>SS</option>
                 <option value="CI" {% if edit_mode and die.die_material == 'CI' %}selected{% endif %}>CI</option>
@@ -147,16 +149,16 @@
 
         <!-- Hardness -->
         <div>
-            <label for="hardness">Hardness <span class="required">*</span></label>
-            <input type="text" name="hardness" id="hardness" required
+            <label for="hardness">Hardness</label>
+            <input type="text" name="hardness" id="hardness"
                 value="{% if edit_mode %}{{ die.hardness }}{% endif %}"
                 placeholder="Enter hardness">
         </div>
 
         <!-- Type -->
         <div>
-            <label for="type">Type <span class="required">*</span></label>
-            <select name="type" id="type" required>
+            <label for="type">Type</label>
+            <select name="type" id="type">
                 <option value="">Select Type</option>
                 <option value="Dieplate" {% if edit_mode and die.type == 'Dieplate' %}selected{% endif %}>Dieplate</option>
                 <option value="Manderel" {% if edit_mode and die.type == 'Manderel' %}selected{% endif %}>Manderel</option>
@@ -201,7 +203,7 @@
 {% endif %}
 
 <!-- JavaScript -->
-<script src="{% static 'Js/die.js' %}"></script>
+<script src="{% static 'js/die.js' %}"></script>
 
 <style>
     .auto-gen-label {

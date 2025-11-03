@@ -2,6 +2,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("companyForm");
     const shiftsBody = document.getElementById("shiftsTableBody");
     const pressesBody = document.getElementById("pressesTableBody");
+    const dateField = document.getElementById("date");
+
+    // ---------------- Set today's date as default (non-editable) ----------------
+    if (dateField && !dateField.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateField.value = today;
+    }
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -59,8 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.id) row.dataset.id = data.id;
 
         row.innerHTML = `
-            <td><input type="text" name="shift_name[]" placeholder="Enter shift name" value="${data.name || ''}" required></td>
-            <td><input type="text" name="shift_timing[]" placeholder="e.g., 9:00 AM - 5:00 PM" value="${data.timing || ''}" required></td>
+            <td><input type="text" name="shift_name[]" placeholder="Enter shift name" value="${data.name || ''}"></td>
+            <td><input type="text" name="shift_timing[]" placeholder="e.g., 9:00 AM - 5:00 PM" value="${data.timing || ''}"></td>
             <td>
                 <button type="button" class="delete-row">
                     <i class="fa-solid fa-trash"></i>
@@ -80,8 +87,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.id) row.dataset.id = data.id;
 
         row.innerHTML = `
-            <td><input type="text" name="press_name[]" placeholder="Enter press name" value="${data.name || ''}" required></td>
-            <td><input type="text" name="press_capacity[]" placeholder="e.g., 500 tons, 1000 kg/hr" value="${data.capacity || ''}" required></td>
+            <td><input type="text" name="press_name[]" placeholder="Enter press name" value="${data.name || ''}"></td>
+            <td><input type="text" name="press_capacity[]" placeholder="e.g., 500 tons, 1000 kg/hr" value="${data.capacity || ''}"></td>
             <td>
                 <button type="button" class="delete-row">
                     <i class="fa-solid fa-trash"></i>
@@ -138,27 +145,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---------------- Validate Form ----------------
     function validateForm() {
         const name = document.getElementById("name").value.trim();
-        const contactNo = document.getElementById("contact_no").value.trim();
-        const address = document.getElementById("address").value.trim();
 
         if (!name) {
             showMessage("error", "Company name is required");
-            return false;
-        }
-
-        if (!contactNo) {
-            showMessage("error", "Contact number is required");
-            return false;
-        }
-
-        // Validate contact number format (basic validation)
-        if (contactNo.length < 10) {
-            showMessage("error", "Contact number must be at least 10 digits");
-            return false;
-        }
-
-        if (!address) {
-            showMessage("error", "Address is required");
             return false;
         }
 
@@ -175,9 +164,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let payload = {
                 name: formData.get("name"),
-                description: formData.get("description"),
-                address: formData.get("address"),
-                contact_no: formData.get("contact_no"),
+                date: formData.get("date"),
+                description: formData.get("description") || "",
+                address: formData.get("address") || "",
+                contact_no: formData.get("contact_no") || "",
                 shifts: [],
                 presses: []
             };

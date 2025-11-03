@@ -3,7 +3,7 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/customer.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer.css' %}">
 
 <!-- Popup Notification -->
 <div id="popupMessage" class="popup-message hidden"></div>
@@ -30,25 +30,27 @@
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date -->
+        <!-- Date (Auto-set to today, Read-only) -->
         <div>
-            <label for="date">Date <span style="color: red;">*</span></label>
-            <input type="date" name="date" id="date" required
-                value="{% if edit_mode %}{{ customer.date|date:'Y-m-d' }}{% endif %}">
+            <label for="date">Date <span class="auto-gen-label">(Auto-set to today)</span></label>
+            <input type="date" name="date" id="date" 
+                value="{% if edit_mode %}{{ customer.date|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}"
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
         <!-- Name -->
         <div>
-            <label for="name">Name <span style="color: red;">*</span></label>
-            <input type="text" name="name" id="name" required 
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" 
                    value="{% if edit_mode %}{{ customer.name }}{% endif %}"
                    placeholder="Enter customer name">
         </div>
 
         <!-- Customer Type -->
         <div>
-            <label for="customer_type">Customer Type <span style="color: red;">*</span></label>
-            <select name="customer_type" id="customer_type" required>
+            <label for="customer_type">Customer Type</label>
+            <select name="customer_type" id="customer_type">
                 <option value="">Select Type</option>
                 <option value="Manufacturer" {% if edit_mode and customer.customer_type == 'Manufacturer' %}selected{% endif %}>Manufacturer</option>
                 <option value="Stockist" {% if edit_mode and customer.customer_type == 'Stockist' %}selected{% endif %}>Stockist</option>
@@ -60,8 +62,8 @@
 
         <!-- Contact No -->
         <div>
-            <label for="contact_no">Contact No <span style="color: red;">*</span></label>
-            <input type="text" name="contact_no" id="contact_no" required 
+            <label for="contact_no">Contact No</label>
+            <input type="text" name="contact_no" id="contact_no" 
                    value="{% if edit_mode %}{{ customer.contact_no }}{% endif %}"
                    placeholder="Enter contact number">
         </div>
@@ -76,8 +78,8 @@
 
         <!-- Address -->
         <div class="full-width">
-            <label for="address">Address <span style="color: red;">*</span></label>
-            <textarea name="address" id="address" rows="3" required 
+            <label for="address">Address</label>
+            <textarea name="address" id="address" rows="3" 
                       placeholder="Enter address">{% if edit_mode %}{{ customer.address }}{% endif %}</textarea>
         </div>
 
@@ -103,7 +105,7 @@
 {% endif %}
 
 <!-- JavaScript -->
-<script src="{% static 'Js/customer.js' %}"></script>
+<script src="{% static 'js/customer.js' %}"></script>
 
 <style>
     .auto-gen-label {

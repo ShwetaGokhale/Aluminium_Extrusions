@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.validators import RegexValidator
 from django.db import models, transaction
+from datetime import date
 # ------------------------------------------------------------------
 # Create your models here.
 
@@ -38,9 +39,15 @@ class Die(models.Model):
         editable=False,
         verbose_name="Die ID"
     )
-    date = models.DateField(verbose_name="Date")
+    date = models.DateField(
+        verbose_name="Date", 
+        default=timezone.now,
+        editable=False,
+        null=True, 
+        blank=True
+    )
     die_no = models.CharField(max_length=100, unique=True, verbose_name="Die No")
-    die_name = models.CharField(max_length=200, verbose_name="Die Name")
+    die_name = models.CharField(max_length=200, verbose_name="Die Name", blank=True)
     image = models.ImageField(
         upload_to='die_images/', 
         blank=True, 
@@ -69,25 +76,30 @@ class Die(models.Model):
     no_of_cavity = models.CharField(
         max_length=10, 
         choices=CAVITY_CHOICES,
-        verbose_name="No of Cavity"
+        verbose_name="No of Cavity",
+        blank=True
     )
     req_weight = models.DecimalField(
         max_digits=10, 
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        verbose_name="Req Weight"
+        verbose_name="Req Weight",
+        null=True,
+        blank=True
     )
-    size = models.CharField(max_length=100, verbose_name="Size")
+    size = models.CharField(max_length=100, verbose_name="Size", blank=True)
     die_material = models.CharField(
         max_length=10, 
         choices=MATERIAL_CHOICES,
-        verbose_name="Die Material"
+        verbose_name="Die Material",
+        blank=True
     )
-    hardness = models.CharField(max_length=100, verbose_name="Hardness")
+    hardness = models.CharField(max_length=100, verbose_name="Hardness", blank=True)
     type = models.CharField(
         max_length=20, 
         choices=TYPE_CHOICES,
-        verbose_name="Type"
+        verbose_name="Type",
+        blank=True
     )
     description = models.TextField(blank=True, verbose_name="Description")
     remark = models.TextField(blank=True, verbose_name="Remark")
@@ -121,7 +133,6 @@ class Die(models.Model):
     
     def __str__(self):
         return f"{self.die_id} - {self.die_no}"
-
 
 #─────────────────────────────────────────────────────────────────────────────
 # Model for Press functionality
@@ -166,42 +177,63 @@ class Alloy(models.Model):
         editable=False,
         verbose_name="Alloy ID"
     )
-    date = models.DateField(verbose_name="Date")
+    date = models.DateField(
+        verbose_name="Date",
+        default=date.today  # Default to today's date
+    )
     alloy_code = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name="Alloy Code"
+        verbose_name="Alloy Code",
+        blank=True,  # Not required
+        null=False,
+        default=""
     )
     temper_designation = models.CharField(
         max_length=50,
         choices=TEMPER_DESIGNATION_CHOICES,
-        verbose_name="Temper Designation"
+        verbose_name="Temper Designation",
+        blank=True,  # Not required
+        null=False,
+        default=""
     )
     temper_code = models.CharField(
         max_length=10,
         choices=TEMPER_CODE_CHOICES,
-        verbose_name="Temper Code"
+        verbose_name="Temper Code",
+        blank=True,  # Not required
+        null=False,
+        default=""
     )
     tensile_strength = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        verbose_name="Tensile Strength"
+        verbose_name="Tensile Strength",
+        blank=True,  # Not required
+        null=True  # Allow NULL for decimal fields
     )
     material = models.CharField(
         max_length=255,
-        verbose_name="Material"
+        verbose_name="Material",
+        blank=True,  # Not required
+        null=False,
+        default=""
     )
     silicon_percent = models.DecimalField(
         max_digits=5,
         decimal_places=2,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
-        verbose_name="Silicon (%)"
+        verbose_name="Silicon (%)",
+        blank=True,  # Not required
+        null=True  # Allow NULL for decimal fields
     )
     copper_percent = models.DecimalField(
         max_digits=5,
         decimal_places=2,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
-        verbose_name="Copper (%)"
+        verbose_name="Copper (%)",
+        blank=True,  # Not required
+        null=True  # Allow NULL for decimal fields
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -223,6 +255,9 @@ class Alloy(models.Model):
     def save(self, *args, **kwargs):
         if not self.alloy_id:
             self.alloy_id = Alloy.generate_alloy_id()
+        # Ensure date is set to today if not provided
+        if not self.date:
+            self.date = date.today()
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -232,8 +267,7 @@ class Alloy(models.Model):
         db_table = 'alloy'
         ordering = ['-created_at']
         verbose_name = "Alloy"
-        verbose_name_plural = "Alloys"
-    
+        verbose_name_plural = "Alloys"    
 
 #─────────────────────────────────────────────────────────────────────────────
 # Model for LOT functionality
@@ -315,20 +349,24 @@ class Customer(models.Model):
         editable=False,
         verbose_name="Customer ID"
     )
-    date = models.DateField(verbose_name="Date")
-    name = models.CharField(max_length=255, verbose_name="Name")
+    date = models.DateField(
+        default=timezone.now,
+        verbose_name="Date"
+    )
+    name = models.CharField(max_length=255, blank=True, verbose_name="Name")
     customer_type = models.CharField(
         max_length=50,
         choices=CUSTOMER_TYPE_CHOICES,
+        blank=True,
         verbose_name="Customer Type"
     )
-    contact_no = models.CharField(max_length=20, verbose_name="Contact No")
+    contact_no = models.CharField(max_length=20, blank=True, verbose_name="Contact No")
     contact_person = models.CharField(
         max_length=255,
         blank=True,
         verbose_name="Customer Contact Person"
     )
-    address = models.TextField(verbose_name="Address")
+    address = models.TextField(blank=True, verbose_name="Address")
     created_at = models.DateTimeField(auto_now_add=True)
     
     @staticmethod
@@ -357,7 +395,6 @@ class Customer(models.Model):
     class Meta:
         db_table = 'customer'
         ordering = ['-created_at']
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Model for Company functionality

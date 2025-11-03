@@ -1,0 +1,230 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+
+<style>
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #6a1b9a;
+    color: white;
+    text-align: center;
+    padding: 4px 0;
+    /* Reduced padding for thinner height */
+    font-size: 10px;
+    /* Smaller font */
+    line-height: 1.2;
+    /* Tighter line height */
+    z-index: 50;
+  }
+
+  footer.show {
+    bottom: 0;
+  }
+
+  #pageFooter {
+    position: fixed;
+    bottom: -100px;
+    /* Initially hidden */
+    left: 0;
+    width: 100%;
+    background-color: #6a1b9a;
+    color: white;
+    text-align: center;
+    padding: 6px 0;
+    /* Slim height */
+    font-size: 10px;
+    transition: bottom 0.3s ease;
+    z-index: 50;
+  }
+
+  #pageFooter.show {
+    bottom: 0;
+  }
+
+  .search-input::placeholder {
+    font-size: 13px;
+  }
+</style>
+
+<main class="flex-1 w-full max-w-7xl px-4 py-6 mx-auto">
+
+<div>
+  <h2 class="text-xl font-bold mb-4">📈 Todays Production data</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+    <!-- Profile Length in Feets -->
+    <div class="bg-white border rounded-lg shadow p-3 flex flex-col items-center justify-center">
+      <div class="text-blue-500 text-2xl mb-1">📏</div>
+      <p class="text-xs font-medium text-gray-500 text-center">Profile Length in Feets</p>
+      <p class="text-2xl font-extrabold text-blue-600 text-center">78.4</p>
+    </div>
+
+    <!-- Previous Profile Length in feet -->
+    <div class="bg-white border rounded-lg shadow p-3 flex flex-col items-center justify-center">
+      <div class="text-orange-500 text-2xl mb-1">📊</div>
+      <p class="text-xs font-medium text-gray-500 text-center">Previous Profile Length in feet</p>
+      <p class="text-2xl font-extrabold text-orange-600 text-center">76.6</p>
+    </div>
+
+    <!-- Today's Profile Count -->
+    <div class="bg-white border rounded-lg shadow p-3 flex flex-col items-center justify-center">
+      <div class="text-green-500 text-2xl mb-1">⚙️</div>
+      <p class="text-xs font-medium text-gray-500 text-center">Today's Profile Count +</p>
+      <p class="text-2xl font-extrabold text-green-600 text-center">26</p>
+    </div>
+
+  </div>
+</div>
+
+
+    <!-- Daily Die Wise Summary -->
+  <div class="mt-8">
+    <h2 class="text-xl font-bold mb-4">🗂️ Daily Die Wise Summary</h2>
+
+    <!-- Die Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <!-- Die Card 1 -->
+      <div class="bg-white border rounded-lg shadow p-4">
+        <h3 class="text-md font-semibold mb-2">Die Name: 3T-TOP</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sr. No</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sensor Name</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Press Name</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Profile Length</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td class="px-2 py-1 text-gray-700">1</td>
+                <td class="px-2 py-1 text-gray-700">1234</td>
+                <td class="px-2 py-1 text-gray-700">Falcon-1</td>
+                <td class="px-2 py-1 text-gray-700">78.6</td>
+              </tr>
+              <tr>
+                <td class="px-2 py-1 text-gray-700">2</td>
+                <td class="px-2 py-1 text-gray-700">5678</td>
+                <td class="px-2 py-1 text-gray-700">Falcon-2</td>
+                <td class="px-2 py-1 text-gray-700">80.2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Die Card 2 -->
+      <div class="bg-white border rounded-lg shadow p-4">
+        <h3 class="text-md font-semibold mb-2">Die Name: XOR-34</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sr. No</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sensor Name</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Press Name</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Profile Length</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td class="px-2 py-1 text-gray-700">1</td>
+                <td class="px-2 py-1 text-gray-700">1234</td>
+                <td class="px-2 py-1 text-gray-700">Falcon-1</td>
+                <td class="px-2 py-1 text-gray-700">78.6</td>
+              </tr>
+              <tr>
+                <td class="px-2 py-1 text-gray-700">2</td>
+                <td class="px-2 py-1 text-gray-700">5678</td>
+                <td class="px-2 py-1 text-gray-700">Falcon-2</td>
+                <td class="px-2 py-1 text-gray-700">80.2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Die Card 3 -->
+      <div class="bg-white border rounded-lg shadow p-4">
+        <h3 class="text-md font-semibold mb-2">Die Name: ABC-12</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sr. No</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Sensor Name</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Press Name</th>
+                <th class="px-2 py-1 text-left font-medium text-gray-500 uppercase">Profile Length</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td class="px-2 py-1 text-gray-700">1</td>
+                <td class="px-2 py-1 text-gray-700">4321</td>
+                <td class="px-2 py-1 text-gray-700">Falcon-3</td>
+                <td class="px-2 py-1 text-gray-700">79.5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+
+<div class="mt-6">
+  <h2 class="text-xl font-bold mb-2">📊 Production Chart</h2>
+  <div class="bg-white border rounded-lg shadow p-3">
+    <canvas id="productionChart" class="w-full h-40"></canvas>
+  </div>
+</div>
+
+</main>
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('productionChart').getContext('2d');
+  const productionChart = new Chart(ctx, {
+    type: 'line', // you can change to 'bar' if you want
+    data: {
+      labels: ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM'],
+      datasets: [{
+        label: "Profile Length (ft)",
+        data: [70, 75, 78, 76, 79, 80, 78],
+        borderColor: 'rgba(59, 130, 246, 1)',
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        tension: 0.3,
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            stepSize: 10
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

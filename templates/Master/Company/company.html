@@ -3,7 +3,7 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/company.css' %}">
+<link rel="stylesheet" href="{% static 'css/company.css' %}">
 
 <!-- Popup Notification -->
 <div id="popupMessage" class="popup-message hidden"></div>
@@ -22,13 +22,20 @@
 
         <!-- Basic Company Info -->
         <div>
-            <label for="name">Name</label>
+            <label for="name">Name <span style="color: red;">*</span></label>
             <input type="text" name="name" id="name" required value="{% if edit_mode %}{{ company.name }}{% endif %}">
         </div>
 
         <div>
+            <label for="date">Date <span class="auto-gen-label">(Auto-generated)</span></label>
+            <input type="date" name="date" id="date" readonly 
+                value="{% if edit_mode %}{{ company.date|date:'Y-m-d' }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
+        </div>
+
+        <div>
             <label for="contact_no">Contact No</label>
-            <input type="text" name="contact_no" id="contact_no" required
+            <input type="text" name="contact_no" id="contact_no"
                 value="{% if edit_mode %}{{ company.contact_no }}{% endif %}">
         </div>
 
@@ -40,8 +47,7 @@
 
         <div class="full-width">
             <label for="address">Address</label>
-            <textarea name="address" id="address" rows="3"
-                required>{% if edit_mode %}{{ company.address }}{% endif %}</textarea>
+            <textarea name="address" id="address" rows="3">{% if edit_mode %}{{ company.address }}{% endif %}</textarea>
         </div>
 
         <!-- Shifts Section -->
@@ -120,5 +126,15 @@
 {% endif %}
 
 <!-- JavaScript -->
-<script src="{% static 'Js/company.js' %}"></script>
+<script src="{% static 'js/company.js' %}"></script>
+
+<style>
+    .auto-gen-label {
+        font-size: 0.75rem;
+        color: #718096;
+        font-style: italic;
+        font-weight: normal;
+    }
+</style>
+
 {% endblock %}

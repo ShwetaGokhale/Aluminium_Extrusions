@@ -30,25 +30,26 @@
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date -->
+        <!-- Date (Non-editable, defaults to today) -->
         <div>
-            <label for="date">Date <span style="color: red;">*</span></label>
-            <input type="date" name="date" id="date" required
-                value="{% if edit_mode %}{{ alloy.date|date:'Y-m-d' }}{% endif %}">
+            <label for="date">Date <span class="auto-gen-label">(Auto-set to today)</span></label>
+            <input type="date" name="date" id="date" readonly
+                value="{% if edit_mode %}{{ alloy.date|date:'Y-m-d' }}{% else %}{{ today_date }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
         <!-- Alloy Code -->
         <div>
-            <label for="alloy_code">Alloy Code <span style="color: red;">*</span></label>
-            <input type="text" name="alloy_code" id="alloy_code" required 
+            <label for="alloy_code">Alloy Code</label>
+            <input type="text" name="alloy_code" id="alloy_code"
                    value="{% if edit_mode %}{{ alloy.alloy_code }}{% endif %}"
                    placeholder="Enter alloy code">
         </div>
 
         <!-- Temper Designation -->
         <div>
-            <label for="temper_designation">Temper Designation <span style="color: red;">*</span></label>
-            <select name="temper_designation" id="temper_designation" required>
+            <label for="temper_designation">Temper Designation</label>
+            <select name="temper_designation" id="temper_designation">
                 <option value="">Select Temper Designation</option>
                 <option value="Fabricated" {% if edit_mode and alloy.temper_designation == 'Fabricated' %}selected{% endif %}>Fabricated</option>
                 <option value="Annealed" {% if edit_mode and alloy.temper_designation == 'Annealed' %}selected{% endif %}>Annealed</option>
@@ -60,8 +61,8 @@
 
         <!-- Temper Code -->
         <div>
-            <label for="temper_code">Temper Code <span style="color: red;">*</span></label>
-            <select name="temper_code" id="temper_code" required>
+            <label for="temper_code">Temper Code</label>
+            <select name="temper_code" id="temper_code">
                 <option value="">Select Temper Code</option>
                 <option value="T1" {% if edit_mode and alloy.temper_code == 'T1' %}selected{% endif %}>T1</option>
                 <option value="T2" {% if edit_mode and alloy.temper_code == 'T2' %}selected{% endif %}>T2</option>
@@ -78,32 +79,32 @@
 
         <!-- Tensile Strength -->
         <div>
-            <label for="tensile_strength">Tensile Strength <span style="color: red;">*</span></label>
-            <input type="number" name="tensile_strength" id="tensile_strength" step="0.01" required 
+            <label for="tensile_strength">Tensile Strength</label>
+            <input type="number" name="tensile_strength" id="tensile_strength" step="0.01"
                    value="{% if edit_mode %}{{ alloy.tensile_strength }}{% endif %}"
                    placeholder="Enter tensile strength">
         </div>
 
         <!-- Material -->
         <div>
-            <label for="material">Material <span style="color: red;">*</span></label>
-            <input type="text" name="material" id="material" required 
+            <label for="material">Material</label>
+            <input type="text" name="material" id="material"
                    value="{% if edit_mode %}{{ alloy.material }}{% endif %}"
                    placeholder="Enter material">
         </div>
 
         <!-- Silicon Percent -->
         <div>
-            <label for="silicon_percent">Silicon (%) <span style="color: red;">*</span></label>
-            <input type="number" name="silicon_percent" id="silicon_percent" step="0.01" min="0" max="100" required 
+            <label for="silicon_percent">Silicon (%)</label>
+            <input type="number" name="silicon_percent" id="silicon_percent" step="0.01" min="0" max="100"
                    value="{% if edit_mode %}{{ alloy.silicon_percent }}{% endif %}"
                    placeholder="Enter silicon percentage">
         </div>
 
         <!-- Copper Percent -->
         <div>
-            <label for="copper_percent">Copper (%) <span style="color: red;">*</span></label>
-            <input type="number" name="copper_percent" id="copper_percent" step="0.01" min="0" max="100" required 
+            <label for="copper_percent">Copper (%)</label>
+            <input type="number" name="copper_percent" id="copper_percent" step="0.01" min="0" max="100"
                    value="{% if edit_mode %}{{ alloy.copper_percent }}{% endif %}"
                    placeholder="Enter copper percentage">
         </div>
@@ -121,11 +122,13 @@
     window.editMode = true;
     window.alloyId = {{ alloy.id }};
     window.currentAlloyId = "{{ alloy.alloy_id }}";
+    window.currentDate = "{{ alloy.date|date:'Y-m-d' }}";
 </script>
 {% else %}
 <script>
     window.editMode = false;
     window.nextAlloyId = "{{ next_alloy_id }}";
+    window.todayDate = "{{ today_date }}";
 </script>
 {% endif %}
 
