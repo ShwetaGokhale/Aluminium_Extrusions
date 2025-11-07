@@ -5,7 +5,8 @@ from .views import (
     OnlineProductionReportEditView,
     OnlineProductionReportAPI,
     OnlineProductionReportDetailAPI,
-    OnlineProductionReportDeleteView
+    OnlineProductionReportDeleteView,
+    TotalProductionReportView
 )
 
 urlpatterns = [
@@ -23,4 +24,8 @@ urlpatterns = [
     
     # Delete
     path('online-production-report/delete/<int:pk>/', OnlineProductionReportDeleteView.as_view(), name='online_production_report_delete'),
+
+    #_______________Total Production Report________________
+    path("total-production-report/", TotalProductionReportView.as_view(), name="total_production_report"),
+
 ]

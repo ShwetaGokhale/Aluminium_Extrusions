@@ -10,7 +10,7 @@
 <main class="table-container">
     <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
         <h2 class="text-2xl lg:text-3xl font-bold italic text-center flex-grow" style="color: #1e3a8a;">
-            Online Production Report List
+            Production Status List
         </h2>
 
         <!-- Search -->
@@ -60,10 +60,11 @@
                     <th>Die No</th>
                     <th>Start Time</th>
                     <th>End Time</th>
-                    <th>Billet Size</th>
-                    <th>No Of Billet</th>
+                    <!-- <th>Billet Size</th> -->
+                    <!-- <th>No Of Billet</th> -->
                     <th>Cut Length</th>
-                    <th>WT Per Piece</th>
+                    <th>Status</th>
+                    <!-- <th>WT Per Piece</th> -->
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -77,11 +78,12 @@
                     <td>{{ report.press_no.name }}</td>
                     <td>{{ report.die_no|default:"-" }}</td>
                     <td>{{ report.start_time|time:"H:i"|default:"-" }}</td>
-                    <td>{{ report.end_time|time:"H:i"|default:"-" }}</td>
-                    <td>{{ report.billet_size|default:"-" }}</td>
+                    <!-- <td>{{ report.end_time|time:"H:i"|default:"-" }}</td> -->
+                    <!-- <td>{{ report.billet_size|default:"-" }}</td> -->
                     <td>{{ report.no_of_billet|default:"-" }}</td>
                     <td>{{ report.cut_length|default:"-" }}</td>
-                    <td>{{ report.wt_per_piece|default:"-" }}</td>
+                    <td>{{ report.status|default:"-" }}</td>
+                    <!-- <td>{{ report.wt_per_piece|default:"-" }}</td> -->
                     <td style="white-space: nowrap;">
                         <a href="{% url 'online_production_report_edit' report.id %}" class="action-btn edit-btn" title="Edit">
                             <i class="fa-solid fa-pencil"></i>

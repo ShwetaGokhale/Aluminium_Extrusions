@@ -3,7 +3,7 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/die_requisition.css' %}">
+<link rel="stylesheet" href="{% static 'css/die_requisition.css' %}">
 
 <!-- Popup Notification -->
 <div id="popupMessage" class="popup-message hidden"></div>
@@ -30,11 +30,12 @@
                 readonly style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date -->
+        <!-- Date (Non-editable) -->
         <div>
-            <label for="date">Date <span style="color: red;">*</span></label>
-            <input type="date" name="date" id="date" required
-                value="{% if edit_mode %}{{ requisition.date|date:'Y-m-d' }}{% endif %}">
+            <label for="date">Date</label>
+            <input type="date" name="date" id="date" readonly
+                value="{% if edit_mode %}{{ requisition.date|date:'Y-m-d' }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
         <!-- Press -->
@@ -105,10 +106,10 @@
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
-        <!-- WT Range (Auto-retrieve) -->
+        <!-- WT Range (Auto-retrieve, REQUIRED) -->
         <div>
-            <label for="wt_range">WT Range</label>
-            <input type="text" name="wt_range" id="wt_range" readonly
+            <label for="wt_range">WT Range <span style="color: red;">*</span></label>
+            <input type="text" name="wt_range" id="wt_range" readonly required
                 value="{% if edit_mode %}{{ requisition.wt_range }}{% endif %}"
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
@@ -150,10 +151,10 @@
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
-        <!-- Cut Length -->
+        <!-- Cut Length (OPTIONAL - no red asterisk) -->
         <div>
-            <label for="cut_length">Cut Length <span style="color: red;">*</span></label>
-            <select name="cut_length" id="cut_length" required>
+            <label for="cut_length">Cut Length</label>
+            <select name="cut_length" id="cut_length">
                 <option value="">Select Cut Length</option>
                 {% for value, display in cut_lengths %}
                     {% if edit_mode and requisition.cut_length == value %}
@@ -194,7 +195,7 @@
 {% endif %}
 
 <!-- JavaScript -->
-<script src="{% static 'Js/die_requisition.js' %}"></script>
+<script src="{% static 'js/die_requisition.js' %}"></script>
 
 <style>
     .auto-gen-label {

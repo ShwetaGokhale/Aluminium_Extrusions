@@ -15,7 +15,9 @@ class RequisitionForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'date',
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;'
             }),
             'requisition_no': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -54,13 +56,11 @@ class RequisitionForm(forms.ModelForm):
         
         self.fields['sales_manager'].queryset = Staff.objects.all()
         self.fields['sales_manager'].empty_label = "Select Sales Manager"
-        self.fields['sales_manager'].required = True
+        self.fields['sales_manager'].required = False  # Make sales manager optional
         
         # Set default date to today
         if not self.instance.pk:
             self.fields['date'].initial = date.today()
-            self.fields['expiry_date'].initial = date.today()
-            self.fields['dispatch_date'].initial = date.today()
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Forms for Requisition's Goods functionality

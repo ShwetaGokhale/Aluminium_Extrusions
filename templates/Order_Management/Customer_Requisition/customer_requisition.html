@@ -2,7 +2,7 @@
 {% block content %}
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'Css/customer_requisition.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_requisition.css' %}">
 
 <div id="popupMessage" class="popup-message hidden"></div>
 
@@ -27,11 +27,12 @@
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date -->
+        <!-- Date (Non-editable) -->
         <div>
-            <label for="date">Date <span style="color: red;">*</span></label>
-            <input type="date" name="date" id="date" required
-                value="{% if edit_mode %}{{ requisition.date|date:'Y-m-d' }}{% endif %}">
+            <label for="date">Date</label>
+            <input type="date" name="date" id="date" readonly
+                value="{% if edit_mode %}{{ requisition.date|date:'Y-m-d' }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
         <!-- Requisition No -->
@@ -46,11 +47,11 @@
         <div>
             <label for="customerSearchInput">Customer <span style="color: red;">*</span></label>
             <div class="custom-searchable-select-wrapper" id="customerSearchWrapper">
-                <input type="text" id="customerSearchInput" class="searchable-input"
+                <input type="text" id="customerSearchInput" class="searchable-input" required
                        placeholder="Search Customer..."
                        value="{% if edit_mode %}{{ requisition.customer.name }}{% endif %}">
                 <i class="fa-solid fa-chevron-down dropdown-icon"></i>
-                <input type="hidden" name="customer" id="id_customer"
+                <input type="hidden" name="customer" id="id_customer" required
                        value="{% if edit_mode %}{{ requisition.customer.id }}{% endif %}">
 
                 <div id="customerDropdownList" class="custom-dropdown-list">
@@ -78,16 +79,16 @@
                    value="{% if edit_mode %}{{ requisition.address }}{% endif %}">
         </div>
 
-        <!-- Sales Manager -->
+        <!-- Sales Manager (Optional) -->
         <div>
-            <label for="salesManagerSearchInput">Sales Manager <span style="color: red;">*</span></label>
+            <label for="salesManagerSearchInput">Sales Manager</label>
             <div class="custom-searchable-select-wrapper" id="salesManagerSearchWrapper">
                 <input type="text" id="salesManagerSearchInput" class="searchable-input"
                        placeholder="Search Sales Manager..."
-                       value="{% if edit_mode %}{{ requisition.sales_manager.first_name }} {{ requisition.sales_manager.last_name }}{% endif %}">
+                       value="{% if edit_mode and requisition.sales_manager %}{{ requisition.sales_manager.first_name }} {{ requisition.sales_manager.last_name }}{% endif %}">
                 <i class="fa-solid fa-chevron-down dropdown-icon"></i>
                 <input type="hidden" name="sales_manager" id="id_sales_manager"
-                       value="{% if edit_mode %}{{ requisition.sales_manager.id }}{% endif %}">
+                       value="{% if edit_mode and requisition.sales_manager %}{{ requisition.sales_manager.id }}{% endif %}">
 
                 <div id="salesManagerDropdownList" class="custom-dropdown-list">
                     {% for s in staff %}
@@ -171,5 +172,5 @@
     window.sectionOptions = JSON.parse(document.getElementById("section-data").textContent);
 </script>
 
-<script src="{% static 'Js/customer_requisition.js' %}"></script>
+<script src="{% static 'js/customer_requisition.js' %}"></script>
 {% endblock %}

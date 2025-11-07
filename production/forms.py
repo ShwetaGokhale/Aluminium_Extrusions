@@ -2,8 +2,11 @@ from django import forms
 from .models import OnlineProductionReport
 from master.models import CompanyPress, CompanyShift, Staff
 from planning.models import ProductionPlan
+from .models import ProductionReport
 
-
+# ─────────────────────────────────────────────────────────────────────────────
+# Form for Online Production Report functionality
+# ─────────────────────────────────────────────────────────────────────────────
 class OnlineProductionReportForm(forms.ModelForm):
     """Form for Online Production Report"""
     
@@ -206,3 +209,20 @@ class OnlineProductionReportForm(forms.ModelForm):
                 )
         
         return cleaned_data
+    
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Forms for Total Production Report functionality
+# ─────────────────────────────────────────────────────────────────────────────
+class ProductionFilterForm(forms.Form):
+    order_no = forms.ChoiceField(choices=[], required=True)
+    press = forms.ChoiceField(choices=[], required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['order_no'].choices = [('', 'Select Order No')] + list(
+            ProductionReport.objects.values_list('order_no', 'order_no').distinct()
+        )
+        self.fields['press'].choices = [('', 'Select Press')] + list(
+            ProductionReport.objects.values_list('press', 'press').distinct()
+        )

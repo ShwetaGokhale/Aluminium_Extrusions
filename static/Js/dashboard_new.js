@@ -42,17 +42,11 @@ document.addEventListener("fullscreenchange", function () {
 // Helper function to get status badge styling
 function getStatusBadge(status) {
     const statusConfig = {
-        'planned': {
-            bg: 'bg-blue-500',
-            text: 'text-white',
-            icon: 'fa-clock',
-            label: 'Planned'
-        },
-        'running': {
+        'in_progress': {
             bg: 'bg-yellow-500',
             text: 'text-white',
             icon: 'fa-play-circle',
-            label: 'Running',
+            label: 'In Progress',
             pulse: true
         },
         'completed': {
@@ -61,24 +55,30 @@ function getStatusBadge(status) {
             icon: 'fa-check-circle',
             label: 'Completed'
         },
-        'discard': {
+        'on_hold': {
+            bg: 'bg-blue-500',
+            text: 'text-white',
+            icon: 'fa-pause-circle',
+            label: 'On Hold'
+        },
+        'cancelled': {
             bg: 'bg-red-500',
             text: 'text-white',
             icon: 'fa-times-circle',
-            label: 'Discard'
+            label: 'Cancelled'
         }
     };
 
-    const config = statusConfig[status] || statusConfig['planned'];
+    const config = statusConfig[status] || statusConfig['in_progress'];
     const pulseClass = config.pulse ? 'animate-pulse' : '';
 
     return `
         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${config.bg} ${config.text} ${pulseClass}">
-            <i class="fa ${config.icon} mr-2"></i>
-            ${config.label}
+            <i class="fa ${config.icon} mr-2"></i>${config.label}
         </span>
     `;
 }
+
 
 // Press detail logic
 function showPressDetail(pressId, pressName) {

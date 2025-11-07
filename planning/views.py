@@ -62,7 +62,8 @@ class DieRequisitionListView(View):
                     'customer_requisition_no': req.customer_requisition_no.requisition_no,
                     'section_no': req.section_no.section_no if req.section_no else '',
                     'die_no': req.die_no.die_no if req.die_no else '',
-                    'cut_length': req.cut_length,  # ✅ added
+                    'wt_range': req.wt_range,
+                    'cut_length': req.cut_length or '',
                 })
             
             return JsonResponse(
@@ -105,7 +106,7 @@ class DieRequisitionFormView(View):
         staff = Staff.objects.all()
         requisitions = Requisition.objects.all()
         dies = Die.objects.all()
-        cut_lengths = DieRequisition.CUT_LENGTH_CHOICES  # ✅ pass this
+        cut_lengths = DieRequisition.CUT_LENGTH_CHOICES
 
         return render(
             request,
@@ -118,7 +119,7 @@ class DieRequisitionFormView(View):
                 "staff": staff,
                 "requisitions": requisitions,
                 "dies": dies,
-                "cut_lengths": cut_lengths,  # ✅ pass this
+                "cut_lengths": cut_lengths,
             },
         )
 
@@ -141,7 +142,7 @@ class DieRequisitionEditView(View):
         staff = Staff.objects.all()
         requisitions = Requisition.objects.all()
         dies = Die.objects.all()
-        cut_lengths = DieRequisition.CUT_LENGTH_CHOICES  # ✅ Added this
+        cut_lengths = DieRequisition.CUT_LENGTH_CHOICES
         
         return render(
             request,
@@ -154,7 +155,7 @@ class DieRequisitionEditView(View):
                 "staff": staff,
                 "requisitions": requisitions,
                 "dies": dies,
-                "cut_lengths": cut_lengths,  # ✅ Added this
+                "cut_lengths": cut_lengths,
             },
         )
 
@@ -241,6 +242,7 @@ class DieRequisitionAPI(View):
                 "die_name": req.die_name,
                 "present_wt": str(req.present_wt),
                 "no_of_cavity": req.no_of_cavity,
+                "cut_length": req.cut_length or '',
                 "remark": req.remark,
                 "created_at": req.created_at.strftime("%Y-%m-%d"),
             })
@@ -251,10 +253,10 @@ class DieRequisitionAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate required fields
+            # Validate required fields (cut_length removed, wt_range added)
             required_fields = [
-                'date', 'press', 'shift', 'staff_name',
-                'customer_requisition_no', 'section_no', 'die_no'
+                'press', 'shift', 'staff_name',
+                'customer_requisition_no', 'section_no', 'die_no', 'wt_range'
             ]
             
             for field in required_fields:
@@ -264,9 +266,12 @@ class DieRequisitionAPI(View):
                         "message": f"{field.replace('_', ' ').title()} is required."
                     })
             
+            # Use today's date if not provided
+            requisition_date = data.get("date") or date.today().strftime("%Y-%m-%d")
+            
             # Create die requisition
             requisition = DieRequisition.objects.create(
-                date=data['date'],
+                date=requisition_date,
                 press_id=data['press'],
                 shift_id=data['shift'],
                 staff_name_id=data['staff_name'],
@@ -278,7 +283,7 @@ class DieRequisitionAPI(View):
                 die_name=data.get('die_name', ''),
                 present_wt=data.get('present_wt', 0),
                 no_of_cavity=data.get('no_of_cavity', ''),
-                cut_length=data.get('cut_length', ''),  # ✅ added
+                cut_length=data.get('cut_length') or None,  # Optional, can be null
                 remark=data.get('remark', '')
             )
             
@@ -301,34 +306,34 @@ class DieRequisitionAPI(View):
 class DieRequisitionDetailAPI(View):
     """API for get, edit & delete Die Requisition"""
     
-    def post(self, request, pk):
-        """Update die requisition"""
+    def get(self, request, pk):
+        """Get die requisition details"""
         try:
             requisition = get_object_or_404(DieRequisition, id=pk)
-            data = json.loads(request.body)
             
-            # Update fields
-            requisition.date = data.get('date', requisition.date)
-            requisition.press_id = data.get('press', requisition.press_id)
-            requisition.shift_id = data.get('shift', requisition.shift_id)
-            requisition.staff_name_id = data.get('staff_name', requisition.staff_name_id)
-            requisition.customer_requisition_no_id = data.get('customer_requisition_no', requisition.customer_requisition_no_id)
-            requisition.section_no_id = data.get('section_no', requisition.section_no_id)
-            requisition.section_name = data.get('section_name', requisition.section_name)
-            requisition.wt_range = data.get('wt_range', requisition.wt_range)
-            requisition.die_no_id = data.get('die_no', requisition.die_no_id)
-            requisition.die_name = data.get('die_name', requisition.die_name)
-            requisition.present_wt = data.get('present_wt', requisition.present_wt)
-            requisition.no_of_cavity = data.get('no_of_cavity', requisition.no_of_cavity)
-            requisition.cut_length = data.get('cut_length', requisition.cut_length)  # ✅ Added this
-            requisition.remark = data.get('remark', requisition.remark)
-            requisition.save()
-            
-            return JsonResponse({
-                "success": True,
-                "updated": True,
-                "message": "Die Requisition updated successfully!"
-            })
+            return JsonResponse(
+                {
+                    "success": True,
+                    "requisition": {
+                        "id": requisition.id,
+                        "die_requisition_id": requisition.die_requisition_id,
+                        "date": requisition.date.strftime("%Y-%m-%d"),
+                        "press": requisition.press.id if requisition.press else None,
+                        "shift": requisition.shift.id if requisition.shift else None,
+                        "staff_name": requisition.staff_name.id if requisition.staff_name else None,
+                        "customer_requisition_no": requisition.customer_requisition_no.id,
+                        "section_no": requisition.section_no.id if requisition.section_no else None,
+                        "section_name": requisition.section_name,
+                        "wt_range": requisition.wt_range,
+                        "die_no": requisition.die_no.id if requisition.die_no else None,
+                        "die_name": requisition.die_name,
+                        "present_wt": str(requisition.present_wt),
+                        "no_of_cavity": requisition.no_of_cavity,
+                        "cut_length": requisition.cut_length or '',
+                        "remark": requisition.remark,
+                    },
+                }
+            )
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
     
@@ -338,8 +343,24 @@ class DieRequisitionDetailAPI(View):
             requisition = get_object_or_404(DieRequisition, id=pk)
             data = json.loads(request.body)
             
+            # Validate required fields (cut_length removed, wt_range added)
+            required_fields = [
+                'press', 'shift', 'staff_name',
+                'customer_requisition_no', 'section_no', 'die_no', 'wt_range'
+            ]
+            
+            for field in required_fields:
+                if not data.get(field):
+                    return JsonResponse({
+                        "success": False,
+                        "message": f"{field.replace('_', ' ').title()} is required."
+                    })
+            
+            # Use existing date if not provided
+            requisition_date = data.get("date") or requisition.date
+            
             # Update fields
-            requisition.date = data.get('date', requisition.date)
+            requisition.date = requisition_date
             requisition.press_id = data.get('press', requisition.press_id)
             requisition.shift_id = data.get('shift', requisition.shift_id)
             requisition.staff_name_id = data.get('staff_name', requisition.staff_name_id)
@@ -351,6 +372,7 @@ class DieRequisitionDetailAPI(View):
             requisition.die_name = data.get('die_name', requisition.die_name)
             requisition.present_wt = data.get('present_wt', requisition.present_wt)
             requisition.no_of_cavity = data.get('no_of_cavity', requisition.no_of_cavity)
+            requisition.cut_length = data.get('cut_length') or None  # Optional, can be null
             requisition.remark = data.get('remark', requisition.remark)
             requisition.save()
             
@@ -431,7 +453,7 @@ class ProductionPlanListView(View):
                     'production_plan_id': plan.production_plan_id,
                     'date': plan.date.strftime("%Y-%m-%d"),
                     'shift': plan.shift.name if plan.shift else '',
-                    'cust_requisition_id': plan.cust_requisition_id.requisition_no,
+                    'cust_requisition_id': plan.cust_requisition_id.requisition_no if plan.cust_requisition_id else '',
                     'die_no': plan.die_no,
                     'wt_range': plan.wt_range,
                     'cut_length': plan.cut_length,
@@ -587,18 +609,18 @@ class ProductionPlanAPI(View):
                 "date": plan.date.strftime("%Y-%m-%d"),
                 "press": plan.press.name if plan.press else '',
                 "shift": plan.shift.name if plan.shift else '',
-                "cust_requisition_id": plan.cust_requisition_id.requisition_no,
+                "cust_requisition_id": plan.cust_requisition_id.requisition_no if plan.cust_requisition_id else '',
                 "customer_name": plan.customer_name,
-                "die_requisition": plan.die_requisition.die_requisition_id,
+                "die_requisition": plan.die_requisition.die_requisition_id if plan.die_requisition else '',
                 "die_no": plan.die_no,
                 "wt_range": plan.wt_range,
                 "cut_length": plan.cut_length,
                 "wt_per_piece": str(plan.wt_per_piece),
                 "qty": plan.qty,
-                "billet_size": str(plan.billet_size),
+                "billet_size": str(plan.billet_size) if plan.billet_size else '',
                 "no_of_billet": plan.no_of_billet,
-                "plan_recovery": str(plan.plan_recovery),
-                "current_recovery": str(plan.current_recovery),
+                "plan_recovery": str(plan.plan_recovery) if plan.plan_recovery else '',
+                "current_recovery": str(plan.current_recovery) if plan.current_recovery else '',
                 "status": plan.status,
                 "created_at": plan.created_at.strftime("%Y-%m-%d"),
             })
@@ -609,37 +631,34 @@ class ProductionPlanAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate required fields
-            required_fields = [
-                'date', 'press', 'shift', 'cust_requisition_id',
-                'die_requisition', 'qty', 'billet_size', 'no_of_billet',
-                'plan_recovery', 'current_recovery'
-            ]
+            # Validate only Press is required
+            if not data.get('press'):
+                return JsonResponse({
+                    "success": False,
+                    "message": "Press is required."
+                })
             
-            for field in required_fields:
-                if not data.get(field):
-                    return JsonResponse({
-                        "success": False,
-                        "message": f"{field.replace('_', ' ').title()} is required."
-                    })
+            # Set default date if not provided
+            if not data.get('date'):
+                data['date'] = timezone.now().date().isoformat()
             
-            # Create production plan
+            # Create production plan with nullable/optional fields
             plan = ProductionPlan.objects.create(
                 date=data['date'],
                 press_id=data['press'],
-                shift_id=data['shift'],
-                cust_requisition_id_id=data['cust_requisition_id'],
+                shift_id=data.get('shift') or None,
+                cust_requisition_id_id=data.get('cust_requisition_id') or None,
                 customer_name=data.get('customer_name', ''),
-                die_requisition_id=data['die_requisition'],
+                die_requisition_id=data.get('die_requisition') or None,
                 die_no=data.get('die_no', ''),
                 wt_range=data.get('wt_range', ''),
                 cut_length=data.get('cut_length', ''),
                 wt_per_piece=data.get('wt_per_piece', 0),
-                qty=data['qty'],
-                billet_size=data['billet_size'],
-                no_of_billet=data['no_of_billet'],
-                plan_recovery=data['plan_recovery'],
-                current_recovery=data['current_recovery'],
+                qty=data.get('qty') or None,
+                billet_size=data.get('billet_size') or None,
+                no_of_billet=data.get('no_of_billet') or None,
+                plan_recovery=data.get('plan_recovery') or None,
+                current_recovery=data.get('current_recovery') or None,
                 status=data.get('status', 'planned')
             )
             
@@ -668,22 +687,29 @@ class ProductionPlanDetailAPI(View):
             plan = get_object_or_404(ProductionPlan, id=pk)
             data = json.loads(request.body)
             
+            # Validate only Press is required
+            if not data.get('press'):
+                return JsonResponse({
+                    "success": False,
+                    "message": "Press is required."
+                })
+            
             # Update fields
             plan.date = data.get('date', plan.date)
             plan.press_id = data.get('press', plan.press_id)
-            plan.shift_id = data.get('shift', plan.shift_id)
-            plan.cust_requisition_id_id = data.get('cust_requisition_id', plan.cust_requisition_id_id)
+            plan.shift_id = data.get('shift') or None
+            plan.cust_requisition_id_id = data.get('cust_requisition_id') or None
             plan.customer_name = data.get('customer_name', plan.customer_name)
-            plan.die_requisition_id = data.get('die_requisition', plan.die_requisition_id)
+            plan.die_requisition_id = data.get('die_requisition') or None
             plan.die_no = data.get('die_no', plan.die_no)
             plan.wt_range = data.get('wt_range', plan.wt_range)
             plan.cut_length = data.get('cut_length', plan.cut_length)
             plan.wt_per_piece = data.get('wt_per_piece', plan.wt_per_piece)
-            plan.qty = data.get('qty', plan.qty)
-            plan.billet_size = data.get('billet_size', plan.billet_size)
-            plan.no_of_billet = data.get('no_of_billet', plan.no_of_billet)
-            plan.plan_recovery = data.get('plan_recovery', plan.plan_recovery)
-            plan.current_recovery = data.get('current_recovery', plan.current_recovery)
+            plan.qty = data.get('qty') or None
+            plan.billet_size = data.get('billet_size') or None
+            plan.no_of_billet = data.get('no_of_billet') or None
+            plan.plan_recovery = data.get('plan_recovery') or None
+            plan.current_recovery = data.get('current_recovery') or None
             plan.status = data.get('status', plan.status)
             plan.save()
             

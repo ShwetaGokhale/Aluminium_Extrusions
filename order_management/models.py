@@ -34,6 +34,7 @@ class Requisition(models.Model):
         "master.Staff",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,  # Make sales_manager optional
         verbose_name="Sales Manager"
     )
     expiry_date = models.DateField(
@@ -121,7 +122,7 @@ class RequisitionOrder(models.Model):
         db_table = 'requisition_order'
         ordering = ['id']
         verbose_name = "Requisition Order"
-        verbose_name_plural = "Requisition Orders"    
+        verbose_name_plural = "Requisition Orders"  
 
 #─────────────────────────────────────────────────────────────────────────────
 # Model for Work Order functionality

@@ -3,7 +3,9 @@ from django.core.validators import MinValueValidator
 from master.models import CompanyPress, CompanyShift
 from planning.models import ProductionPlan
 
-
+# ─────────────────────────────────────────────────────────────────────────────
+# Model for Online Production Report functionality
+# ─────────────────────────────────────────────────────────────────────────────
 class OnlineProductionReport(models.Model):
     """Model for Online Production Report management"""
     
@@ -150,3 +152,19 @@ class OnlineProductionReport(models.Model):
     
     def __str__(self):
         return f"{self.production_id} - {self.press_no.name if self.press_no else 'N/A'}"
+    
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Model for Total Production Report functionality
+# ─────────────────────────────────────────────────────────────────────────────
+class ProductionReport(models.Model):
+    date = models.DateField()
+    time = models.TimeField()
+    press = models.CharField(max_length=50)
+    die_no = models.CharField(max_length=50)
+    order_no = models.CharField(max_length=50)
+    length = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.order_no} - {self.press} - {self.die_no}"

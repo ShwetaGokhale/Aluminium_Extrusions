@@ -1,6 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("supplierForm");
     const supplierIdDisplay = document.getElementById("supplier_id_display");
+    const dateInput = document.getElementById("date");
+
+    // ---------------- Set Today's Date (if not in edit mode) ----------------
+    if (!window.editMode && dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -38,42 +45,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ---------------- Validate Form ----------------
+    // ---------------- Validate Form (Only Name Required) ----------------
     function validateForm() {
-        const date = document.getElementById("date").value;
         const name = document.getElementById("name").value.trim();
-        const supplierType = document.getElementById("supplier_type").value.trim();
-        const contactNo = document.getElementById("contact_no").value.trim();
-        const address = document.getElementById("address").value.trim();
-
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
 
         if (!name) {
             showMessage("error", "Supplier name is required");
-            return false;
-        }
-
-        if (!supplierType) {
-            showMessage("error", "Supplier type is required");
-            return false;
-        }
-
-        if (!contactNo) {
-            showMessage("error", "Contact number is required");
-            return false;
-        }
-
-        // Validate contact number format (basic validation)
-        if (contactNo.length < 10) {
-            showMessage("error", "Contact number must be at least 10 digits");
-            return false;
-        }
-
-        if (!address) {
-            showMessage("error", "Address is required");
             return false;
         }
 
@@ -89,12 +66,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const formData = new FormData(form);
 
             let payload = {
-                date: formData.get("date"),
+                date: dateInput.value,  // Always send the date value
                 name: formData.get("name"),
-                supplier_type: formData.get("supplier_type"),
-                contact_no: formData.get("contact_no"),
+                supplier_type: formData.get("supplier_type") || "",
+                contact_no: formData.get("contact_no") || "",
                 contact_person: formData.get("contact_person") || "",
-                address: formData.get("address")
+                address: formData.get("address") || ""
             };
 
             // Debug: Log payload

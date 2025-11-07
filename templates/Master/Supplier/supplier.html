@@ -3,7 +3,7 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/supplier.css' %}">
+<link rel="stylesheet" href="{% static 'css/supplier.css' %}">
 
 <!-- Popup Notification -->
 <div id="popupMessage" class="popup-message hidden"></div>
@@ -30,14 +30,16 @@
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date -->
+        <!-- Date (Auto-filled, Non-editable) -->
         <div>
-            <label for="date">Date <span style="color: red;">*</span></label>
-            <input type="date" name="date" id="date" required
-                value="{% if edit_mode %}{{ supplier.date|date:'Y-m-d' }}{% endif %}">
+            <label for="date">Date <span class="auto-gen-label">(Auto-filled)</span></label>
+            <input type="date" name="date" id="date"
+                value="{% if edit_mode %}{{ supplier.date|date:'Y-m-d' }}{% endif %}"
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Name -->
+        <!-- Name - ONLY REQUIRED FIELD -->
         <div>
             <label for="name">Name <span style="color: red;">*</span></label>
             <input type="text" name="name" id="name" required 
@@ -47,8 +49,8 @@
 
         <!-- Supplier Type -->
         <div>
-            <label for="supplier_type">Supplier Type <span style="color: red;">*</span></label>
-            <select name="supplier_type" id="supplier_type" required>
+            <label for="supplier_type">Supplier Type</label>
+            <select name="supplier_type" id="supplier_type">
                 <option value="">Select Type</option>
                 <option value="Die Supplier" {% if edit_mode and supplier.supplier_type == 'Die Supplier' %}selected{% endif %}>Die Supplier</option>
                 <option value="Raw Material" {% if edit_mode and supplier.supplier_type == 'Raw Material' %}selected{% endif %}>Raw Material</option>
@@ -61,8 +63,8 @@
 
         <!-- Contact No -->
         <div>
-            <label for="contact_no">Contact No <span style="color: red;">*</span></label>
-            <input type="text" name="contact_no" id="contact_no" required 
+            <label for="contact_no">Contact No</label>
+            <input type="text" name="contact_no" id="contact_no"
                    value="{% if edit_mode %}{{ supplier.contact_no }}{% endif %}"
                    placeholder="Enter contact number">
         </div>
@@ -77,8 +79,8 @@
 
         <!-- Address -->
         <div class="full-width">
-            <label for="address">Address <span style="color: red;">*</span></label>
-            <textarea name="address" id="address" rows="3" required 
+            <label for="address">Address</label>
+            <textarea name="address" id="address" rows="3"
                       placeholder="Enter address">{% if edit_mode %}{{ supplier.address }}{% endif %}</textarea>
         </div>
 
@@ -104,7 +106,7 @@
 {% endif %}
 
 <!-- JavaScript -->
-<script src="{% static 'Js/supplier.js' %}"></script>
+<script src="{% static 'js/supplier.js' %}"></script>
 
 <style>
     .auto-gen-label {

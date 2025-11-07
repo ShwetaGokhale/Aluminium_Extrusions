@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("sectionForm");
     const sectionIdDisplay = document.getElementById("section_id_display");
+    const dateField = document.getElementById("date");
     const imageInput = document.getElementById("section_image");
     const imagePreview = document.getElementById("imagePreview");
     const previewImg = document.getElementById("previewImg");
@@ -58,66 +59,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // ---------------- Set Today's Date ----------------
+    function setTodayDate() {
+        if (!window.editMode && dateField) {
+            const today = new Date().toISOString().split('T')[0];
+            dateField.value = today;
+        }
+    }
+
     // ---------------- Validate Form ----------------
     function validateForm() {
-        const date = document.getElementById("date").value;
         const sectionNo = document.getElementById("section_no").value.trim();
-        const sectionName = document.getElementById("section_name").value.trim();
-        const shape = document.getElementById("shape").value.trim();
-        const type = document.getElementById("type").value.trim();
-        const usage = document.getElementById("usage").value.trim();
-        const lengthMm = document.getElementById("length_mm").value.trim();
-        const widthMm = document.getElementById("width_mm").value.trim();
-        const thicknessMm = document.getElementById("thickness_mm").value.trim();
-        const ionized = document.querySelector('input[name="ionized"]:checked');
 
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
-
+        // Only Section No is required
         if (!sectionNo) {
             showMessage("error", "Section No is required");
-            return false;
-        }
-
-        if (!sectionName) {
-            showMessage("error", "Section Name is required");
-            return false;
-        }
-
-        if (!shape) {
-            showMessage("error", "Shape is required");
-            return false;
-        }
-
-        if (!type) {
-            showMessage("error", "Type is required");
-            return false;
-        }
-
-        if (!usage) {
-            showMessage("error", "Usage is required");
-            return false;
-        }
-
-        if (!lengthMm || parseFloat(lengthMm) <= 0) {
-            showMessage("error", "Valid Length in mm is required (must be greater than 0)");
-            return false;
-        }
-
-        if (!widthMm || parseFloat(widthMm) <= 0) {
-            showMessage("error", "Valid Width in mm is required (must be greater than 0)");
-            return false;
-        }
-
-        if (!thicknessMm || parseFloat(thicknessMm) <= 0) {
-            showMessage("error", "Valid Thickness in mm is required (must be greater than 0)");
-            return false;
-        }
-
-        if (!ionized) {
-            showMessage("error", "Please select Ionized option (Yes/No)");
             return false;
         }
 
@@ -134,17 +90,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Convert FormData to JSON for API
             let payload = {
-                date: formData.get("date"),
                 section_no: formData.get("section_no"),
-                section_name: formData.get("section_name"),
-                shape: formData.get("shape"),
-                type: formData.get("type"),
-                usage: formData.get("usage"),
-                length_mm: formData.get("length_mm"),
-                width_mm: formData.get("width_mm"),
-                thickness_mm: formData.get("thickness_mm"),
-                ionized: formData.get("ionized")
+                section_name: formData.get("section_name") || "",
+                shape: formData.get("shape") || "",
+                type: formData.get("type") || "",
+                usage: formData.get("usage") || "",
+                length_mm: formData.get("length_mm") || "0",
+                width_mm: formData.get("width_mm") || "0",
+                thickness_mm: formData.get("thickness_mm") || "0",
+                ionized: formData.get("ionized") || "false"
             };
+
+            // Note: Date is not included as it's auto-set on the server side
 
             // Debug: Log payload (without image)
             console.log("Payload being sent (without image):", payload);
@@ -242,8 +199,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Initial load: Fetch next Section ID if in create mode
+    // Initial load: Fetch next Section ID and set today's date if in create mode
     if (!window.editMode) {
         fetchNextSectionId();
+        setTodayDate();
     }
 });

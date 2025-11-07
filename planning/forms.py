@@ -16,7 +16,9 @@ class DieRequisitionForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'date',
+                'readonly': 'readonly',  # Make date non-editable
+                'style': 'background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;'
             }),
             'press': forms.Select(attrs={
                 'class': 'form-control',
@@ -81,13 +83,21 @@ class DieRequisitionForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Set default date to today
+        if not self.instance.pk:
+            self.fields['date'].initial = date.today()
+        
+        # Make fields optional/required as needed
         self.fields['remark'].required = False
-        # Make auto-populated fields not required initially
         self.fields['section_name'].required = False
-        self.fields['wt_range'].required = False
         self.fields['die_name'].required = False
         self.fields['present_wt'].required = False
         self.fields['no_of_cavity'].required = False
+        self.fields['cut_length'].required = False  # Make cut_length optional
+        
+        # Make wt_range required
+        self.fields['wt_range'].required = True
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -105,7 +115,9 @@ class ProductionPlanForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'date',
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
             }),
             'press': forms.Select(attrs={
                 'class': 'form-control',
@@ -182,9 +194,27 @@ class ProductionPlanForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Make auto-populated fields not required initially
+        
+        # Set today's date as default for new records
+        if not self.instance.pk:
+            self.initial['date'] = timezone.now().date()
+        
+        # Only Press is required
+        self.fields['press'].required = True
+        
+        # Make all other fields optional
+        self.fields['date'].required = False
+        self.fields['shift'].required = False
+        self.fields['cust_requisition_id'].required = False
         self.fields['customer_name'].required = False
+        self.fields['die_requisition'].required = False
         self.fields['die_no'].required = False
         self.fields['wt_range'].required = False
         self.fields['cut_length'].required = False
         self.fields['wt_per_piece'].required = False
+        self.fields['qty'].required = False
+        self.fields['billet_size'].required = False
+        self.fields['no_of_billet'].required = False
+        self.fields['plan_recovery'].required = False
+        self.fields['current_recovery'].required = False
+        self.fields['status'].required = False

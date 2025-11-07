@@ -1,0 +1,238 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'css/total_production_report.css' %}">
+
+<div class="container">
+    <h2 class="report-title">📊 Total Production Report</h2>
+    <p class="subtitle">Select Order No and Press to view production details</p>
+
+    <form id="filterForm" method="post">
+        {% csrf_token %}
+        <div class="filter-section">
+            <div class="form-group">
+                <label>Order No *</label>
+                {{ form.order_no }}
+            </div>
+            <div class="form-group">
+                <label>Press *</label>
+                {{ form.press }}
+            </div>
+            <button type="submit" id="showDataBtn">
+                <i class="fas fa-search"></i> Show Data
+            </button>
+        </div>
+    </form>
+
+    <!-- Welcome Message (shows initially) -->
+    <div id="welcomeMessage" class="welcome-card">
+        <div class="welcome-icon">📋</div>
+        <h3 style="color: #1e3a8a; font-style: italic;">Welcome to Production Report Dashboard</h3>
+        <p>To view production records, please follow these steps:</p>
+        <ol class="instructions">
+            <li><strong>Select Order No</strong> - Choose the production order you want to view</li>
+            <li><strong>Select Press</strong> - Choose the press machine</li>
+            <li><strong>Click Show Data</strong> - View detailed production records</li>
+        </ol>
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-icon">📈</div>
+                <h4>Track Production</h4>
+                <p>Monitor real-time production data</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">⚙️</div>
+                <h4>Press Performance</h4>
+                <p>View press-wise production metrics</p>
+            </div>
+            <div class="info-card">
+                <div class="info-icon">📊</div>
+                <h4>Order Analysis</h4>
+                <p>Analyze order completion status</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div id="summary" class="summary hidden">
+        <div class="summary-card">
+            <div class="summary-icon">📝</div>
+            <div class="summary-content">
+                <span class="summary-label">Total Records</span>
+                <span class="summary-value" id="totalRecords">0</span>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon">📏</div>
+            <div class="summary-content">
+                <span class="summary-label">Total Length</span>
+                <span class="summary-value" id="totalLength">0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div id="tableContainer" class="hidden">
+        <div class="table-header">
+            <h3>📋 Production Records</h3>
+        </div>
+        <div class="table-wrapper">
+            <table id="reportTable">
+                <thead>
+                    <tr>
+                        <th>S No</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Press</th>
+                        <th>Die Name</th>
+                        <th>Order No</th>
+                        <th>Length (in ft)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6" class="text-right"><strong>Grand Total:</strong></td>
+                        <td id="totalFooter">0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- No Data Message -->
+    <div id="noDataMessage" class="no-data-card hidden">
+        <div class="no-data-icon">🔍</div>
+        <h3>No Records Found</h3>
+        <p>There are no production records for the selected Order No and Press combination.</p>
+        <p class="suggestion">Please try selecting different filters or check if the data has been synced.</p>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+document.getElementById("filterForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const orderNo = document.querySelector('select[name="order_no"]').value;
+    const press = document.querySelector('select[name="press"]').value;
+
+    // Validate selections
+    if (!orderNo || !press) {
+        showNotification('Please select both Order No and Press', 'warning');
+        return;
+    }
+
+    // Show loading state
+    const btn = document.getElementById('showDataBtn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    const formData = new FormData(this);
+
+    fetch("{% url 'total_production_report' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": formData.get("csrfmiddlewaretoken") },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Remove loading state
+        btn.classList.remove('loading');
+        btn.disabled = false;
+
+        const tableContainer = document.getElementById("tableContainer");
+        const tbody = document.querySelector("#reportTable tbody");
+        const summary = document.getElementById("summary");
+        const welcomeMessage = document.getElementById("welcomeMessage");
+        const noDataMessage = document.getElementById("noDataMessage");
+
+        // Hide welcome message
+        welcomeMessage.classList.add("hidden");
+
+        if (data.success && data.records.length > 0) {
+            // Show data
+            tbody.innerHTML = "";
+            data.records.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.style.animationDelay = `${index * 0.05}s`;
+                tr.innerHTML = `
+                    <td>${row.s_no}</td>
+                    <td>${row.date}</td>
+                    <td>${row.time}</td>
+                    <td><span class="badge badge-press">${row.press}</span></td>
+                    <td>${row.die_name}</td>
+                    <td><span class="badge badge-order">${row.order_no}</span></td>
+                    <td class="length-cell">${row.length.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // Animate summary values
+            animateValue('totalRecords', 0, data.total_records, 800);
+            animateValue('totalLength', 0, data.total_length, 800, true);
+            document.getElementById("totalFooter").innerText = data.total_length.toFixed(2);
+
+            tableContainer.classList.remove("hidden");
+            summary.classList.remove("hidden");
+            noDataMessage.classList.add("hidden");
+            
+            showNotification('Data loaded successfully!', 'success');
+        } else {
+            // Show no data message
+            tableContainer.classList.add("hidden");
+            summary.classList.add("hidden");
+            noDataMessage.classList.remove("hidden");
+            
+            showNotification('No records found for selected filters', 'info');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        showNotification('An error occurred while fetching data', 'error');
+    });
+});
+
+// Animate number values
+function animateValue(id, start, end, duration, isDecimal = false) {
+    const element = document.getElementById(id);
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= end) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.innerText = isDecimal ? current.toFixed(2) : Math.floor(current);
+    }, 16);
+}
+
+// Notification function
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">×</button>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+</script>
+
+{% endblock %}

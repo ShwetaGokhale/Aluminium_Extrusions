@@ -1693,13 +1693,20 @@ class SupplierEditView(View):
         try:
             data = json.loads(request.body)
             
-            # Update supplier fields
-            supplier.date = data.get("date")
-            supplier.name = data.get("name")
-            supplier.supplier_type = data.get("supplier_type")
-            supplier.contact_no = data.get("contact_no")
+            # Validate only required field (name)
+            name = data.get("name", "").strip()
+            if not name:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Supplier name is required."
+                })
+            
+            # Update supplier fields (date is not editable, so we don't update it)
+            supplier.name = name
+            supplier.supplier_type = data.get("supplier_type", "")
+            supplier.contact_no = data.get("contact_no", "")
             supplier.contact_person = data.get("contact_person", "")
-            supplier.address = data.get("address")
+            supplier.address = data.get("address", "")
             supplier.save()
             
             return JsonResponse(
@@ -1734,7 +1741,7 @@ class SupplierAPI(View):
             {
                 "id": s.id,
                 "supplier_id": s.supplier_id,
-                "date": s.date.strftime("%Y-%m-%d"),
+                "date": s.date.strftime("%Y-%m-%d") if s.date else None,
                 "name": s.name,
                 "supplier_type": s.supplier_type,
                 "contact_no": s.contact_no,
@@ -1751,28 +1758,27 @@ class SupplierAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip()
+            # Validate only required field (name)
             name = data.get("name", "").strip()
-            supplier_type = data.get("supplier_type", "").strip()
-            contact_no = data.get("contact_no", "").strip()
-            contact_person = data.get("contact_person", "").strip()
-            address = data.get("address", "").strip()
             
-            if not all([date, name, supplier_type, contact_no, address]):
+            if not name:
                 return JsonResponse({
                     "success": False,
-                    "message": "Date, Name, Supplier Type, Contact No, and Address are required."
+                    "message": "Supplier name is required."
                 })
             
+            # Get date from request, it should always be sent from frontend
+            date = data.get("date")
+            
             # Create supplier (supplier_id will be auto-generated)
+            # Other fields are optional
             supplier = Supplier.objects.create(
                 date=date,
                 name=name,
-                supplier_type=supplier_type,
-                contact_no=contact_no,
-                contact_person=contact_person,
-                address=address
+                supplier_type=data.get("supplier_type", ""),
+                contact_no=data.get("contact_no", ""),
+                contact_person=data.get("contact_person", ""),
+                address=data.get("address", "")
             )
             
             return JsonResponse(
@@ -1810,7 +1816,7 @@ class SupplierDetailAPI(View):
                     "supplier": {
                         "id": supplier.id,
                         "supplier_id": supplier.supplier_id,
-                        "date": supplier.date.strftime("%Y-%m-%d"),
+                        "date": supplier.date.strftime("%Y-%m-%d") if supplier.date else None,
                         "name": supplier.name,
                         "supplier_type": supplier.supplier_type,
                         "contact_no": supplier.contact_no,
@@ -1829,27 +1835,21 @@ class SupplierDetailAPI(View):
             supplier = get_object_or_404(Supplier, id=pk)
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip()
+            # Validate only required field (name)
             name = data.get("name", "").strip()
-            supplier_type = data.get("supplier_type", "").strip()
-            contact_no = data.get("contact_no", "").strip()
-            contact_person = data.get("contact_person", "").strip()
-            address = data.get("address", "").strip()
             
-            if not all([date, name, supplier_type, contact_no, address]):
+            if not name:
                 return JsonResponse({
                     "success": False,
-                    "message": "Date, Name, Supplier Type, Contact No, and Address are required."
+                    "message": "Supplier name is required."
                 })
             
-            # Update supplier (supplier_id remains unchanged)
-            supplier.date = date
+            # Update supplier (supplier_id and date remain unchanged)
             supplier.name = name
-            supplier.supplier_type = supplier_type
-            supplier.contact_no = contact_no
-            supplier.contact_person = contact_person
-            supplier.address = address
+            supplier.supplier_type = data.get("supplier_type", "")
+            supplier.contact_no = data.get("contact_no", "")
+            supplier.contact_person = data.get("contact_person", "")
+            supplier.address = data.get("address", "")
             supplier.save()
             
             return JsonResponse({
@@ -2039,7 +2039,7 @@ class StaffAPI(View):
             staff_data = {
                 "id": s.id,
                 "staff_id": s.staff_id,
-                "date": s.date.strftime("%Y-%m-%d"),
+                "date": s.date.strftime("%Y-%m-%d") if s.date else None,
                 "staff_register_no": s.staff_register_no,
                 "first_name": s.first_name,
                 "last_name": s.last_name,
@@ -2060,28 +2060,42 @@ class StaffAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip()
-            staff_register_no = data.get("staff_register_no", "").strip()
+            # Validate only required fields (first_name and last_name)
             first_name = data.get("first_name", "").strip()
             last_name = data.get("last_name", "").strip()
+            
+            if not first_name:
+                return JsonResponse({
+                    "success": False,
+                    "message": "First Name is required."
+                })
+            
+            if not last_name:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Last Name is required."
+                })
+            
+            # Get date from request (should be today's date from frontend)
+            date = data.get("date")
+            
+            # Optional fields
+            staff_register_no = data.get("staff_register_no", "").strip()
             address = data.get("address", "").strip()
             contact_no = data.get("contact_no", "").strip()
             designation = data.get("designation", "").strip()
             shift_assigned = data.get("shift_assigned", "").strip()
             
-            if not all([date, staff_register_no, first_name, last_name, address, contact_no, designation, shift_assigned]):
-                return JsonResponse({
-                    "success": False,
-                    "message": "All fields except Assigned To Press are required."
-                })
-            
-            # Check if staff_register_no already exists
-            if Staff.objects.filter(staff_register_no=staff_register_no).exists():
+            # Check if staff_register_no already exists (only if provided)
+            if staff_register_no and Staff.objects.filter(staff_register_no=staff_register_no).exists():
                 return JsonResponse({
                     "success": False,
                     "message": "Staff Register No already exists."
                 })
+            
+            # If register number is blank, store None instead of empty string
+            if not staff_register_no:
+                staff_register_no = None
             
             # Get assigned press if provided
             assigned_to_press_id = data.get("assigned_to_press")
@@ -2139,7 +2153,7 @@ class StaffDetailAPI(View):
                     "staff": {
                         "id": staff.id,
                         "staff_id": staff.staff_id,
-                        "date": staff.date.strftime("%Y-%m-%d"),
+                        "date": staff.date.strftime("%Y-%m-%d") if staff.date else None,
                         "staff_register_no": staff.staff_register_no,
                         "first_name": staff.first_name,
                         "last_name": staff.last_name,
@@ -2161,24 +2175,31 @@ class StaffDetailAPI(View):
             staff = get_object_or_404(Staff, id=pk)
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip()
-            staff_register_no = data.get("staff_register_no", "").strip()
+            # Validate only required fields (first_name and last_name)
             first_name = data.get("first_name", "").strip()
             last_name = data.get("last_name", "").strip()
+            
+            if not first_name:
+                return JsonResponse({
+                    "success": False,
+                    "message": "First Name is required."
+                })
+            
+            if not last_name:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Last Name is required."
+                })
+            
+            # Optional fields
+            staff_register_no = data.get("staff_register_no", "").strip()
             address = data.get("address", "").strip()
             contact_no = data.get("contact_no", "").strip()
             designation = data.get("designation", "").strip()
             shift_assigned = data.get("shift_assigned", "").strip()
             
-            if not all([date, staff_register_no, first_name, last_name, address, contact_no, designation, shift_assigned]):
-                return JsonResponse({
-                    "success": False,
-                    "message": "All fields except Assigned To Press are required."
-                })
-            
-            # Check if staff_register_no already exists (excluding current staff)
-            if Staff.objects.filter(staff_register_no=staff_register_no).exclude(id=pk).exists():
+            # Check if staff_register_no already exists (excluding current staff, only if provided)
+            if staff_register_no and Staff.objects.filter(staff_register_no=staff_register_no).exclude(id=pk).exists():
                 return JsonResponse({
                     "success": False,
                     "message": "Staff Register No already exists."
@@ -2193,8 +2214,7 @@ class StaffDetailAPI(View):
                 except CompanyPress.DoesNotExist:
                     pass
             
-            # Update staff (staff_id remains unchanged)
-            staff.date = date
+            # Update staff (staff_id and date remain unchanged)
             staff.staff_register_no = staff_register_no
             staff.first_name = first_name
             staff.last_name = last_name
@@ -2309,6 +2329,7 @@ class SectionFormView(View):
     def get(self, request):
         # Generate preview of next Section ID
         next_section_id = Section.generate_section_id()
+        today_date = timezone.now().date()
         
         return render(
             request,
@@ -2316,6 +2337,7 @@ class SectionFormView(View):
             {
                 "edit_mode": False,
                 "next_section_id": next_section_id,
+                "today_date": today_date,
             },
         )
 
@@ -2399,21 +2421,16 @@ class SectionAPI(View):
                         ext = format.split('/')[-1]
                         image_file = ContentFile(base64.b64decode(imgstr), name=f'section_{data.get("section_no")}.{ext}')
             
-            # Validate required fields
-            date = data.get("date", "").strip() if isinstance(data.get("date"), str) else data.get("date")
-            section_no = data.get("section_no", "").strip()
-            section_name = data.get("section_name", "").strip()
-            shape = data.get("shape", "").strip()
-            type_val = data.get("type", "").strip()
-            usage = data.get("usage", "").strip()
-            length_mm = data.get("length_mm", "").strip() if isinstance(data.get("length_mm"), str) else data.get("length_mm")
-            width_mm = data.get("width_mm", "").strip() if isinstance(data.get("width_mm"), str) else data.get("width_mm")
-            thickness_mm = data.get("thickness_mm", "").strip() if isinstance(data.get("thickness_mm"), str) else data.get("thickness_mm")
+            # Date is automatically set to today
+            date = timezone.now().date()
             
-            if not all([date, section_no, section_name, shape, type_val, usage, length_mm, width_mm, thickness_mm]):
+            # Validate required field - only section_no is required
+            section_no = data.get("section_no", "").strip()
+            
+            if not section_no:
                 return JsonResponse({
                     "success": False,
-                    "message": "All fields except Section Image are required."
+                    "message": "Section No is required."
                 })
             
             # Check if section_no already exists
@@ -2423,20 +2440,29 @@ class SectionAPI(View):
                     "message": "Section No already exists."
                 })
             
+            # Get optional fields
+            section_name = data.get("section_name", "").strip()
+            shape = data.get("shape", "").strip()
+            type_val = data.get("type", "").strip()
+            usage = data.get("usage", "").strip()
+            length_mm = data.get("length_mm", "").strip() if isinstance(data.get("length_mm"), str) else data.get("length_mm")
+            width_mm = data.get("width_mm", "").strip() if isinstance(data.get("width_mm"), str) else data.get("width_mm")
+            thickness_mm = data.get("thickness_mm", "").strip() if isinstance(data.get("thickness_mm"), str) else data.get("thickness_mm")
+            
             # Get ionized value
             ionized = data.get("ionized") in ['true', 'True', True, 'on', '1']
             
-            # Create section (section_id will be auto-generated)
+            # Create section (section_id will be auto-generated, date is set to today)
             section = Section.objects.create(
                 date=date,
                 section_no=section_no,
-                section_name=section_name,
-                shape=shape,
-                type=type_val,
-                usage=usage,
-                length_mm=length_mm,
-                width_mm=width_mm,
-                thickness_mm=thickness_mm,
+                section_name=section_name if section_name else "",
+                shape=shape if shape else "",
+                type=type_val if type_val else "",
+                usage=usage if usage else "",
+                length_mm=length_mm if length_mm else 0,
+                width_mm=width_mm if width_mm else 0,
+                thickness_mm=thickness_mm if thickness_mm else 0,
                 ionized=ionized
             )
             
@@ -2518,21 +2544,13 @@ class SectionDetailAPI(View):
                         ext = format.split('/')[-1]
                         image_file = ContentFile(base64.b64decode(imgstr), name=f'section_{data.get("section_no")}.{ext}')
             
-            # Validate required fields
-            date = data.get("date", "").strip() if isinstance(data.get("date"), str) else data.get("date")
+            # Validate required field - only section_no is required
             section_no = data.get("section_no", "").strip()
-            section_name = data.get("section_name", "").strip()
-            shape = data.get("shape", "").strip()
-            type_val = data.get("type", "").strip()
-            usage = data.get("usage", "").strip()
-            length_mm = data.get("length_mm", "").strip() if isinstance(data.get("length_mm"), str) else data.get("length_mm")
-            width_mm = data.get("width_mm", "").strip() if isinstance(data.get("width_mm"), str) else data.get("width_mm")
-            thickness_mm = data.get("thickness_mm", "").strip() if isinstance(data.get("thickness_mm"), str) else data.get("thickness_mm")
             
-            if not all([date, section_no, section_name, shape, type_val, usage, length_mm, width_mm, thickness_mm]):
+            if not section_no:
                 return JsonResponse({
                     "success": False,
-                    "message": "All fields except Section Image are required."
+                    "message": "Section No is required."
                 })
             
             # Check if section_no already exists (excluding current section)
@@ -2542,19 +2560,27 @@ class SectionDetailAPI(View):
                     "message": "Section No already exists."
                 })
             
+            # Get optional fields
+            section_name = data.get("section_name", "").strip()
+            shape = data.get("shape", "").strip()
+            type_val = data.get("type", "").strip()
+            usage = data.get("usage", "").strip()
+            length_mm = data.get("length_mm", "").strip() if isinstance(data.get("length_mm"), str) else data.get("length_mm")
+            width_mm = data.get("width_mm", "").strip() if isinstance(data.get("width_mm"), str) else data.get("width_mm")
+            thickness_mm = data.get("thickness_mm", "").strip() if isinstance(data.get("thickness_mm"), str) else data.get("thickness_mm")
+            
             # Get ionized value
             ionized = data.get("ionized") in ['true', 'True', True, 'on', '1']
             
-            # Update section (section_id remains unchanged)
-            section.date = date
+            # Update section (section_id and date remain unchanged)
             section.section_no = section_no
-            section.section_name = section_name
-            section.shape = shape
-            section.type = type_val
-            section.usage = usage
-            section.length_mm = length_mm
-            section.width_mm = width_mm
-            section.thickness_mm = thickness_mm
+            section.section_name = section_name if section_name else ""
+            section.shape = shape if shape else ""
+            section.type = type_val if type_val else ""
+            section.usage = usage if usage else ""
+            section.length_mm = length_mm if length_mm else 0
+            section.width_mm = width_mm if width_mm else 0
+            section.thickness_mm = thickness_mm if thickness_mm else 0
             section.ionized = ionized
             
             # Handle image upload

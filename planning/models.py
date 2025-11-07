@@ -86,6 +86,8 @@ class DieRequisition(models.Model):
     cut_length = models.CharField(
         max_length=10,
         choices=CUT_LENGTH_CHOICES,
+        blank=True,  # Make cut_length optional
+        null=True,   # Allow null values
         verbose_name="Cut Length"
     )
     remark = models.TextField(
@@ -143,7 +145,10 @@ class ProductionPlan(models.Model):
         editable=False,
         verbose_name="Production Plan ID"
     )
-    date = models.DateField(verbose_name="Date")
+    date = models.DateField(
+        default=timezone.now,
+        verbose_name="Date"
+    )
     press = models.ForeignKey(
         'master.CompanyPress',
         on_delete=models.CASCADE,
@@ -154,67 +159,88 @@ class ProductionPlan(models.Model):
         'master.CompanyShift',
         on_delete=models.CASCADE,
         related_name='production_plans',
-        verbose_name="Shift"
+        verbose_name="Shift",
+        null=True,
+        blank=True
     )
     cust_requisition_id = models.ForeignKey(
         'order_management.Requisition',
         on_delete=models.CASCADE,
         related_name='production_plans',
-        verbose_name="Customer Requisition ID"
+        verbose_name="Customer Requisition ID",
+        null=True,
+        blank=True
     )
     customer_name = models.CharField(
         max_length=200,
-        verbose_name="Customer Name"
+        verbose_name="Customer Name",
+        blank=True
     )
     die_requisition = models.ForeignKey(
         'planning.DieRequisition',
         on_delete=models.CASCADE,
         related_name='production_plans',
-        verbose_name="Die Requisition ID"
+        verbose_name="Die Requisition ID",
+        null=True,
+        blank=True
     )
     die_no = models.CharField(
         max_length=100,
-        verbose_name="Die No"
+        verbose_name="Die No",
+        blank=True
     )
     wt_range = models.CharField(
         max_length=50,
-        verbose_name="WT Range"
+        verbose_name="WT Range",
+        blank=True
     )
     cut_length = models.CharField(
         max_length=10,
-        verbose_name="Cut Length"
+        verbose_name="Cut Length",
+        blank=True
     )
     wt_per_piece = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        verbose_name="WT per Piece"
+        verbose_name="WT per Piece",
+        default=0
     )
     qty = models.IntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name="QTY"
+        verbose_name="QTY",
+        null=True,
+        blank=True
     )
     billet_size = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        verbose_name="Billet Size"
+        verbose_name="Billet Size",
+        null=True,
+        blank=True
     )
     no_of_billet = models.IntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name="No Of Billet"
+        verbose_name="No Of Billet",
+        null=True,
+        blank=True
     )
     plan_recovery = models.DecimalField(
         max_digits=5,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        verbose_name="Plan Recovery"
+        verbose_name="Plan Recovery",
+        null=True,
+        blank=True
     )
     current_recovery = models.DecimalField(
         max_digits=5,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        verbose_name="Current Recovery"
+        verbose_name="Current Recovery",
+        null=True,
+        blank=True
     )
     status = models.CharField(
         max_length=20,

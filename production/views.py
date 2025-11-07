@@ -8,8 +8,15 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import OnlineProductionReport
 from master.models import CompanyPress, CompanyShift, Staff
 from planning.models import ProductionPlan
+from .models import ProductionReport
+from .forms import OnlineProductionReportForm
+from .forms import ProductionFilterForm
+from raw_data.models import Raw_data
+from master.models import Die
 
-
+# ─────────────────────────────────────────────────────────────────────────────
+# Views for Online Production Report functionality
+# ─────────────────────────────────────────────────────────────────────────────
 class OnlineProductionReportListView(View):
     """Render the online production report list page"""
     
@@ -333,3 +340,117 @@ class OnlineProductionReportDeleteView(View):
             return JsonResponse({"success": True, "message": "Online Production Report deleted successfully!"})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
+        
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Views for Total Production Report functionality
+# ─────────────────────────────────────────────────────────────────────────────
+class TotalProductionReportView(View):
+    """Render and filter Total Production Report"""
+    
+    def get(self, request):
+        # Get unique order numbers from OnlineProductionReport
+        order_choices = OnlineProductionReport.objects.values_list(
+            'production_id', 'production_id'
+        ).distinct()
+        
+        # Get unique press names from Raw_data
+        press_choices = Raw_data.objects.values_list(
+            'sensor_name', 'sensor_name'
+        ).distinct()
+        
+        form = ProductionFilterForm()
+        form.fields['order_no'].choices = [('', 'Select Order No')] + list(order_choices)
+        form.fields['press'].choices = [('', 'Select Press')] + list(press_choices)
+        
+        return render(request, "Production/Total_Production_Report/total_production_report.html", {"form": form})
+    
+    def post(self, request):
+        try:
+            order_no = request.POST.get("order_no")
+            press = request.POST.get("press")
+            
+            # Get the OnlineProductionReport to find die_no
+            production_order = OnlineProductionReport.objects.filter(
+                production_id=order_no
+            ).first()
+            
+            if not production_order:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Order not found"
+                })
+            
+            # Get matching raw data
+            raw_data_entries = Raw_data.objects.filter(
+                sensor_name=press,
+                die_number=production_order.die_no
+            ).order_by("datetime")
+            
+            if not raw_data_entries.exists():
+                return JsonResponse({
+                    "success": False,
+                    "message": "No records found for the selected filters."
+                })
+            
+            # Get die information to retrieve die_name
+            die = Die.objects.filter(die_no=production_order.die_no).first()
+            die_name = die.die_name if die and die.die_name else "N/A"
+            
+            # Calculate total length
+            total_length = sum(entry.length for entry in raw_data_entries)
+            
+            # Prepare data for response
+            data = [
+                {
+                    "s_no": i + 1,
+                    "date": entry.datetime.date().strftime("%Y-%m-%d"),
+                    "time": entry.datetime.time().strftime("%H:%M:%S"),
+                    "press": entry.sensor_name,
+                    "die_name": die_name,
+                    "order_no": production_order.production_id,
+                    "length": float(entry.length),
+                }
+                for i, entry in enumerate(raw_data_entries)
+            ]
+            
+            return JsonResponse({
+                "success": True,
+                "records": data,
+                "total_records": len(data),
+                "total_length": float(total_length),
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                "success": False, 
+                "message": str(e)
+            })
+
+
+def populate_production_reports():
+    """Populate ProductionReport from Raw_data and OnlineProductionReport"""
+    from .models import Raw_data, OnlineProductionReport, ProductionReport
+    
+    ProductionReport.objects.all().delete()  # Clear old data
+    
+    all_raw_data = Raw_data.objects.all()
+    created_count = 0
+    
+    for raw_entry in all_raw_data:
+        production_order = OnlineProductionReport.objects.filter(
+            die_no=raw_entry.die_number
+        ).first()
+        
+        if production_order:
+            ProductionReport.objects.create(
+                date=raw_entry.datetime.date(),
+                time=raw_entry.datetime.time(),
+                press=raw_entry.sensor_name,
+                die_no=raw_entry.die_number,
+                order_no=production_order.production_id,
+                length=raw_entry.length
+            )
+            created_count += 1
+    
+    return created_count

@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'planning',  # Custom app for planning
     'login', # Custom app for login functionality
     'production',  # Custom app for production management
+    'raw_data',  # Custom app for raw data handling
+    'current_production',  # Custom app for current production tracking
 ]
 
 MIDDLEWARE = [

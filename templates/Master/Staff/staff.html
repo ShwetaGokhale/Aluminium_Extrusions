@@ -3,7 +3,7 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/staff.css' %}">
+<link rel="stylesheet" href="{% static 'css/staff.css' %}">
 
 <!-- Popup Notification -->
 <div id="popupMessage" class="popup-message hidden"></div>
@@ -30,22 +30,24 @@
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date -->
+        <!-- Date (Auto-filled, Non-editable) -->
         <div>
-            <label for="date">Date <span style="color: red;">*</span></label>
-            <input type="date" name="date" id="date" required
-                value="{% if edit_mode %}{{ staff.date|date:'Y-m-d' }}{% endif %}">
+            <label for="date">Date <span class="auto-gen-label">(Auto-filled)</span></label>
+            <input type="date" name="date" id="date"
+                value="{% if edit_mode %}{{ staff.date|date:'Y-m-d' }}{% endif %}"
+                readonly
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
         <!-- Staff Register No -->
         <div>
-            <label for="staff_register_no">Staff Register No <span style="color: red;">*</span></label>
-            <input type="text" name="staff_register_no" id="staff_register_no" required 
+            <label for="staff_register_no">Staff Register No</label>
+            <input type="text" name="staff_register_no" id="staff_register_no"
                    value="{% if edit_mode %}{{ staff.staff_register_no }}{% endif %}"
                    placeholder="Enter staff register number">
         </div>
 
-        <!-- First Name -->
+        <!-- First Name - REQUIRED -->
         <div>
             <label for="first_name">First Name <span style="color: red;">*</span></label>
             <input type="text" name="first_name" id="first_name" required 
@@ -53,7 +55,7 @@
                    placeholder="Enter first name">
         </div>
 
-        <!-- Last Name -->
+        <!-- Last Name - REQUIRED -->
         <div>
             <label for="last_name">Last Name <span style="color: red;">*</span></label>
             <input type="text" name="last_name" id="last_name" required 
@@ -63,27 +65,28 @@
 
         <!-- Contact No -->
         <div>
-            <label for="contact_no">Contact No <span style="color: red;">*</span></label>
-            <input type="text" name="contact_no" id="contact_no" required 
+            <label for="contact_no">Contact No</label>
+            <input type="text" name="contact_no" id="contact_no"
                    value="{% if edit_mode %}{{ staff.contact_no }}{% endif %}"
                    placeholder="Enter contact number">
         </div>
 
         <!-- Designation -->
         <div>
-            <label for="designation">Designation <span style="color: red;">*</span></label>
-            <select name="designation" id="designation" required>
+            <label for="designation">Designation</label>
+            <select name="designation" id="designation">
                 <option value="">Select Designation</option>
                 <option value="Worker" {% if edit_mode and staff.designation == 'Worker' %}selected{% endif %}>Worker</option>
                 <option value="Machine Operator" {% if edit_mode and staff.designation == 'Machine Operator' %}selected{% endif %}>Machine Operator</option>
                 <option value="Supervisor" {% if edit_mode and staff.designation == 'Supervisor' %}selected{% endif %}>Supervisor</option>
+                <option value="Incharge" {% if edit_mode and staff.designation == 'Incharge' %}selected{% endif %}>Incharge</option>
             </select>
         </div>
 
         <!-- Shift Assigned -->
         <div>
-            <label for="shift_assigned">Shift Assigned <span style="color: red;">*</span></label>
-            <select name="shift_assigned" id="shift_assigned" required>
+            <label for="shift_assigned">Shift Assigned</label>
+            <select name="shift_assigned" id="shift_assigned">
                 <option value="">Select Shift</option>
                 <option value="Morning" {% if edit_mode and staff.shift_assigned == 'Morning' %}selected{% endif %}>Morning</option>
                 <option value="Night" {% if edit_mode and staff.shift_assigned == 'Night' %}selected{% endif %}>Night</option>
@@ -98,8 +101,7 @@
                 {% for press in company_presses %}
                 <option value="{{ press.id }}" 
                     {% if edit_mode and staff.assigned_to_press and staff.assigned_to_press.id == press.id %}selected{% endif %}>
-                    <!-- {{ press.company.name }} - {{ press.name }} -->
-                    {{ press.name}}
+                    {{ press.name }}
                 </option>
                 {% endfor %}
             </select>
@@ -107,8 +109,8 @@
 
         <!-- Address -->
         <div class="full-width">
-            <label for="address">Address <span style="color: red;">*</span></label>
-            <textarea name="address" id="address" rows="3" required 
+            <label for="address">Address</label>
+            <textarea name="address" id="address" rows="3"
                       placeholder="Enter address">{% if edit_mode %}{{ staff.address }}{% endif %}</textarea>
         </div>
 
@@ -134,7 +136,7 @@
 {% endif %}
 
 <!-- JavaScript -->
-<script src="{% static 'Js/staff.js' %}"></script>
+<script src="{% static 'js/staff.js' %}"></script>
 
 <style>
     .auto-gen-label {

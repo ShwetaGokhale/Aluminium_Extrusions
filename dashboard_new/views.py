@@ -4,8 +4,11 @@ from django.http import JsonResponse
 from master.models import CompanyPress
 from planning.models import ProductionPlan
 from django.db.models import Sum
+from production.models import OnlineProductionReport
 
-
+# ─────────────────────────────────────────────────────────────────────────────
+# Views for Order Status
+# ─────────────────────────────────────────────────────────────────────────────
 class DashboardNewView(View):
     """Render the new full-screen dashboard with press cards"""
     
@@ -17,18 +20,25 @@ class DashboardNewView(View):
             # Prepare press data with production counts
             press_data = []
             for press in presses:
-                production_count = press.production_plans.count()
-                total_qty = press.production_plans.aggregate(
-                    total=Sum('qty')
-                )['total'] or 0
-                
-                press_data.append({
-                    'id': press.id,
-                    'name': press.name,
-                    'company_name': press.company.name,
-                    'production_count': production_count,
-                    'total_qty': total_qty
-                })
+                # Total records in OnlineProductionReport for this press
+                production_count = OnlineProductionReport.objects.filter(
+                    press_no=press
+                ).count()
+
+            # Completed records for this press based on status field in OnlineProductionReport
+            completed_orders = OnlineProductionReport.objects.filter(
+                press_no=press,
+                status='completed'
+            ).count()
+
+            press_data.append({
+                'id': press.id,
+                'name': press.name,
+                'company_name': press.company.name,
+                'production_count': production_count,
+                'completed_orders': completed_orders,
+            })
+
             
             # Check if JSON response is requested (for AJAX)
             if (
@@ -56,43 +66,32 @@ class DashboardNewView(View):
 
 
 class PressProductionDataView(View):
-    """API endpoint to get production data for a specific press with status"""
-    
+    """API endpoint to get production data for a specific press with status from OnlineProductionReport"""
+
     def get(self, request, press_id):
         try:
             # Verify press exists
             press = CompanyPress.objects.select_related('company').get(id=press_id)
-            
-            # Get all production plans for this press - including status field
-            production_plans = ProductionPlan.objects.filter(
-                press=press
+
+            # Fetch online production records for that press
+            production_reports = OnlineProductionReport.objects.filter(
+                press_no=press
             ).select_related(
-                'cust_requisition_id'
-            ).only(
-                'id',
-                'die_no',
-                'cut_length',
-                'qty',
-                'status',
-                'cust_requisition_id'
+                'production_plan_id'
             ).order_by('-created_at')
-            
-            # Format production data - including status
+
+            # Prepare response data
             production_data = []
-            for plan in production_plans:
-                try:
-                    production_data.append({
-                        'order_no': plan.cust_requisition_id.requisition_id if plan.cust_requisition_id else 'N/A',
-                        'die_no': plan.die_no or 'N/A',
-                        'cut_length': plan.cut_length or 'N/A',
-                        'planned_qty': plan.qty,
-                        'status': plan.status,
-                        'status_display': plan.get_status_display()  # Get the human-readable status
-                    })
-                except Exception as e:
-                    print(f"Error processing plan {plan.id}: {str(e)}")
-                    continue
-            
+            for report in production_reports:
+                production_data.append({
+                    'order_no': report.production_plan_id.cust_requisition_id.requisition_id if report.production_plan_id and report.production_plan_id.cust_requisition_id else 'N/A',
+                    'die_no': report.die_no or 'N/A',
+                    'cut_length': report.cut_length or 'N/A',
+                    'planned_qty': report.production_plan_id.qty if report.production_plan_id else '-',
+                    'status': report.status,
+                    'status_display': report.get_status_display(),  # Human readable version
+                })
+
             return JsonResponse({
                 'success': True,
                 'press': {
@@ -103,17 +102,11 @@ class PressProductionDataView(View):
                 'production_data': production_data,
                 'total_records': len(production_data)
             })
-            
+
         except CompanyPress.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'message': 'Press not found'
-            }, status=404)
+            return JsonResponse({'success': False, 'message': 'Press not found'}, status=404)
         except Exception as e:
             print(f"Error in PressProductionDataView: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return JsonResponse({
-                'success': False,
-                'message': f'Error loading production data: {str(e)}'
-            }, status=500)
+            import traceback; traceback.print_exc()
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+        

@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("requisitionForm");
     const ordersBody = document.getElementById("ordersTableBody");
     const requisitionIdDisplay = document.getElementById("requisition_id_display");
+    const dateInput = document.getElementById("date");
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -243,16 +244,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- Validate Form ----------------
     function validateForm(formData, orders) {
-        const date = formData.get("date");
         const requisitionNo = formData.get("requisition_no");
         const customer = formData.get("customer");
-        const salesManager = formData.get("sales_manager");
 
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
-
+        // Only check required fields: Requisition No and Customer
         if (!requisitionNo || requisitionNo.trim() === '') {
             showMessage("error", "Customer Requisition No is required");
             return false;
@@ -263,15 +258,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        if (!salesManager) {
-            showMessage("error", "Please select a Sales Manager");
-            return false;
-        }
-
-        if (orders.length === 0) {
-            showMessage("error", "Please add at least one order");
-            return false;
-        }
+        // Orders are optional - no validation needed
 
         return true;
     }
@@ -288,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 customer: formData.get("customer"),
                 contact_no: formData.get("contact_no") || '',
                 address: formData.get("address") || '',
-                sales_manager: formData.get("sales_manager"),
+                sales_manager: formData.get("sales_manager") || null,
                 expiry_date: formData.get("expiry_date") || null,
                 dispatch_date: formData.get("dispatch_date") || null,
                 orders: []
@@ -362,16 +349,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ---------------- Set Default Dates ----------------
+    // ---------------- Set Default Date (Non-editable) ----------------
     const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById("date");
-    const expiryDateInput = document.getElementById("expiry_date");
-    const dispatchDateInput = document.getElementById("dispatch_date");
     
-    if (!window.editMode) {
-        if (dateInput && !dateInput.value) dateInput.value = today;
-        if (expiryDateInput && !expiryDateInput.value) expiryDateInput.value = today;
-        if (dispatchDateInput && !dispatchDateInput.value) dispatchDateInput.value = today;
+    // Always set date to today and make it readonly
+    if (dateInput) {
+        if (!window.editMode || !dateInput.value) {
+            dateInput.value = today;
+        }
+        dateInput.setAttribute('readonly', 'readonly');
+        dateInput.style.backgroundColor = '#f0f0f0';
+        dateInput.style.cursor = 'not-allowed';
+        dateInput.style.fontWeight = '600';
+        dateInput.style.color = '#4a5568';
     }
 
     // ---------------- Initialize ----------------

@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("productionPlanForm");
     const productionPlanIdDisplay = document.getElementById("production_plan_id_display");
+    const dateField = document.getElementById("date");
     const custRequisitionId = document.getElementById("cust_requisition_id");
     const customerName = document.getElementById("customer_name");
     const dieRequisition = document.getElementById("die_requisition");
@@ -8,6 +9,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const wtRange = document.getElementById("wt_range");
     const cutLength = document.getElementById("cut_length");
     const wtPerPiece = document.getElementById("wt_per_piece");
+
+    // ---------------- Set Today's Date ----------------
+    if (!window.editMode && dateField && !dateField.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateField.value = today;
+    }
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -101,72 +108,12 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ---------------- Validate Form ----------------
+    // ---------------- Validate Form (Only Press is required) ----------------
     function validateForm() {
-        const date = document.getElementById("date").value;
         const press = document.getElementById("press").value;
-        const shift = document.getElementById("shift").value;
-        const custReqId = document.getElementById("cust_requisition_id").value;
-        const dieReq = document.getElementById("die_requisition").value;
-        const qty = document.getElementById("qty").value;
-        const billetSize = document.getElementById("billet_size").value;
-        const noOfBillet = document.getElementById("no_of_billet").value;
-        const planRecovery = document.getElementById("plan_recovery").value;
-        const currentRecovery = document.getElementById("current_recovery").value;
-        const status = document.getElementById("status").value;
-
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
 
         if (!press) {
             showMessage("error", "Press is required");
-            return false;
-        }
-
-        if (!shift) {
-            showMessage("error", "Shift is required");
-            return false;
-        }
-
-        if (!custReqId) {
-            showMessage("error", "Customer Requisition ID is required");
-            return false;
-        }
-
-        if (!dieReq) {
-            showMessage("error", "Die Requisition is required");
-            return false;
-        }
-
-        if (!qty || qty < 1) {
-            showMessage("error", "QTY is required and must be at least 1");
-            return false;
-        }
-
-        if (!billetSize) {
-            showMessage("error", "Billet Size is required");
-            return false;
-        }
-
-        if (!noOfBillet || noOfBillet < 1) {
-            showMessage("error", "No Of Billet is required and must be at least 1");
-            return false;
-        }
-
-        if (!planRecovery) {
-            showMessage("error", "Plan Recovery is required");
-            return false;
-        }
-
-        if (!currentRecovery) {
-            showMessage("error", "Current Recovery is required");
-            return false;
-        }
-
-        if (!status) {
-            showMessage("error", "Status is required");
             return false;
         }
 
@@ -185,20 +132,20 @@ document.addEventListener("DOMContentLoaded", function () {
             let payload = {
                 date: formData.get("date"),
                 press: formData.get("press"),
-                shift: formData.get("shift"),
-                cust_requisition_id: formData.get("cust_requisition_id"),
+                shift: formData.get("shift") || "",
+                cust_requisition_id: formData.get("cust_requisition_id") || "",
                 customer_name: formData.get("customer_name") || "",
-                die_requisition: formData.get("die_requisition"),
+                die_requisition: formData.get("die_requisition") || "",
                 die_no: formData.get("die_no") || "",
                 wt_range: formData.get("wt_range") || "",
                 cut_length: formData.get("cut_length") || "",
                 wt_per_piece: formData.get("wt_per_piece") || "0",
-                qty: formData.get("qty"),
-                billet_size: formData.get("billet_size"),
-                no_of_billet: formData.get("no_of_billet"),
-                plan_recovery: formData.get("plan_recovery"),
-                current_recovery: formData.get("current_recovery"),
-                status: formData.get("status")
+                qty: formData.get("qty") || "",
+                billet_size: formData.get("billet_size") || "",
+                no_of_billet: formData.get("no_of_billet") || "",
+                plan_recovery: formData.get("plan_recovery") || "",
+                current_recovery: formData.get("current_recovery") || "",
+                status: formData.get("status") || "planned"
             };
 
             console.log("Payload being sent:", payload);

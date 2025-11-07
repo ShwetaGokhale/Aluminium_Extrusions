@@ -252,18 +252,20 @@ class RequisitionAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip()
+            # Only validate required fields: requisition_no and customer
             requisition_no = data.get("requisition_no", "").strip()
             customer_id = data.get("customer")
-            contact_no = data.get("contact_no", "").strip()
-            address = data.get("address", "").strip()
-            sales_manager_id = data.get("sales_manager")
             
-            if not all([date, requisition_no, customer_id, sales_manager_id]):
+            if not requisition_no:
                 return JsonResponse({
                     "success": False,
-                    "message": "Date, Requisition No, Customer, and Sales Manager are required."
+                    "message": "Requisition No is required."
+                })
+            
+            if not customer_id:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Customer is required."
                 })
             
             # Check if requisition_no already exists
@@ -273,23 +275,34 @@ class RequisitionAPI(View):
                     "message": "Requisition No already exists."
                 })
             
-            # Get customer and sales manager
+            # Get customer
             try:
                 customer = Customer.objects.get(id=customer_id)
-                sales_manager = Staff.objects.get(id=sales_manager_id)
-            except (Customer.DoesNotExist, Staff.DoesNotExist):
+            except Customer.DoesNotExist:
                 return JsonResponse({
                     "success": False,
-                    "message": "Invalid customer or sales manager."
+                    "message": "Invalid customer."
                 })
+            
+            # Get sales manager (optional)
+            sales_manager = None
+            sales_manager_id = data.get("sales_manager")
+            if sales_manager_id:
+                try:
+                    sales_manager = Staff.objects.get(id=sales_manager_id)
+                except Staff.DoesNotExist:
+                    pass
+            
+            # Use today's date if not provided
+            requisition_date = data.get("date") or date.today().strftime("%Y-%m-%d")
             
             # Create requisition (requisition_id will be auto-generated)
             requisition = Requisition.objects.create(
-                date=date,
+                date=requisition_date,
                 requisition_no=requisition_no,
                 customer=customer,
-                contact_no=contact_no,
-                address=address,
+                contact_no=data.get("contact_no", ""),
+                address=data.get("address", ""),
                 sales_manager=sales_manager,
                 expiry_date=data.get("expiry_date") or None,
                 dispatch_date=data.get("dispatch_date") or None
@@ -379,18 +392,20 @@ class RequisitionDetailAPI(View):
             requisition = get_object_or_404(Requisition, id=pk)
             data = json.loads(request.body)
             
-            # Validate required fields
-            date = data.get("date", "").strip()
+            # Only validate required fields: requisition_no and customer
             requisition_no = data.get("requisition_no", "").strip()
             customer_id = data.get("customer")
-            contact_no = data.get("contact_no", "").strip()
-            address = data.get("address", "").strip()
-            sales_manager_id = data.get("sales_manager")
             
-            if not all([date, requisition_no, customer_id, sales_manager_id]):
+            if not requisition_no:
                 return JsonResponse({
                     "success": False,
-                    "message": "Date, Requisition No, Customer, and Sales Manager are required."
+                    "message": "Requisition No is required."
+                })
+            
+            if not customer_id:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Customer is required."
                 })
             
             # Check if requisition_no already exists (excluding current requisition)
@@ -400,22 +415,33 @@ class RequisitionDetailAPI(View):
                     "message": "Requisition No already exists."
                 })
             
-            # Get customer and sales manager
+            # Get customer
             try:
                 customer = Customer.objects.get(id=customer_id)
-                sales_manager = Staff.objects.get(id=sales_manager_id)
-            except (Customer.DoesNotExist, Staff.DoesNotExist):
+            except Customer.DoesNotExist:
                 return JsonResponse({
                     "success": False,
-                    "message": "Invalid customer or sales manager."
+                    "message": "Invalid customer."
                 })
             
+            # Get sales manager (optional)
+            sales_manager = None
+            sales_manager_id = data.get("sales_manager")
+            if sales_manager_id:
+                try:
+                    sales_manager = Staff.objects.get(id=sales_manager_id)
+                except Staff.DoesNotExist:
+                    pass
+            
+            # Use existing date if not provided
+            requisition_date = data.get("date") or requisition.date
+            
             # Update requisition (requisition_id remains unchanged)
-            requisition.date = date
+            requisition.date = requisition_date
             requisition.requisition_no = requisition_no
             requisition.customer = customer
-            requisition.contact_no = contact_no
-            requisition.address = address
+            requisition.contact_no = data.get("contact_no", "")
+            requisition.address = data.get("address", "")
             requisition.sales_manager = sales_manager
             requisition.expiry_date = data.get("expiry_date") or None
             requisition.dispatch_date = data.get("dispatch_date") or None

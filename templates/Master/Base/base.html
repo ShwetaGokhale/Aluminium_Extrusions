@@ -136,7 +136,21 @@
 
         <nav class="main-nav">
             <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home"></i> <span>Dashboard</span></a>
-            <a href="{% url 'dashboard_new' %}"><i class="fa-solid fa-home"></i> <span>Dashboard New</span></a>
+            <!-- ✅ Over Head Screen Dropdown Added -->
+            <div class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">
+                    <i class="fa-solid fa-tv"></i> <span>Over Head Screen</span>
+                    <span class="dropdown-icon">&#9662;</span>
+                </a>
+                <div class="dropdown-content">
+                    <!-- <a href="{% url 'dashboard' %}">Dashboard</a> -->
+                    <!-- Dashboard New -->
+                    <a href="{% url 'dashboard_new' %}">Order Status</a> 
+                    <a href="{% url 'current_production' %}">Current Production</a>   
+                </div>
+            </div>
+
+            <!-- <a href="{% url 'dashboard_new' %}"><i class="fa-solid fa-home"></i> <span>Dashboard New</span></a> -->
 
             <!-- Master Dropdown -->
             <div class="dropdown">
@@ -186,13 +200,13 @@
                     <span class="dropdown-icon">&#9662;</span>
                 </a>
                 <div class="dropdown-content">
-                    <a href="{% url 'online_production_report_list' %}">Online Production Report</a>
-                    <a href="#">Total Production Report</a>
+                    <a href="{% url 'online_production_report_list' %}">Production Status</a>
+                    <a href="{% url 'total_production_report' %}">Total Production Report</a>
                 </div>
             </div>
 
             <!-- Packaging Quality Dropdown -->
-            <div class="dropdown">
+            <!-- <div class="dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
                     <i class="fa fa-clipboard-check"></i> <span>Packaging Quality</span>
                     <span class="dropdown-icon">&#9662;</span>
@@ -200,7 +214,7 @@
                 <div class="dropdown-content">
                     <a href="#">Inspection Report</a>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Logout -->
             <button onclick="showLogoutModal()"

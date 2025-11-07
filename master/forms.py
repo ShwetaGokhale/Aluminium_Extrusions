@@ -428,7 +428,9 @@ class SectionForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'date',
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
             }),
             'section_no': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -473,4 +475,15 @@ class SectionForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['section_image'].required = False
+        
+        # Make all fields optional except section_no
+        for field_name in self.fields:
+            if field_name != 'section_no':
+                self.fields[field_name].required = False
+        
+        # Set today's date as default for new forms
+        if not self.instance.pk:
+            self.fields['date'].initial = timezone.now().date()
+        
+        # Make date field disabled (readonly)
+        self.fields['date'].disabled = True

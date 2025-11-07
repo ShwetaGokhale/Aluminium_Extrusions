@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("dieRequisitionForm");
     const dieRequisitionIdDisplay = document.getElementById("die_requisition_id_display");
+    const dateInput = document.getElementById("date");
     const customerRequisitionNo = document.getElementById("customer_requisition_no");
     const sectionNo = document.getElementById("section_no");
     const sectionName = document.getElementById("section_name");
@@ -135,19 +136,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- Validate Form ----------------
     function validateForm() {
-        const date = document.getElementById("date").value;
         const press = document.getElementById("press").value;
         const shift = document.getElementById("shift").value;
         const staffName = document.getElementById("staff_name").value;
         const custReqNo = document.getElementById("customer_requisition_no").value;
         const section = document.getElementById("section_no").value;
         const die = document.getElementById("die_no").value;
-        const cutLength = document.getElementById("cut_length").value;
-
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
+        const wt = document.getElementById("wt_range").value;
 
         if (!press) {
             showMessage("error", "Press is required");
@@ -179,10 +174,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        if (!cutLength || parseFloat(cutLength) <= 0) {
-            showMessage("error", "Valid Cut Length is required (must be greater than 0)");
+        // WT Range is required
+        if (!wt || wt.trim() === '') {
+            showMessage("error", "WT Range is required");
             return false;
         }
+
+        // Cut Length is optional - no validation needed
 
         return true;
     }
@@ -209,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 die_name: formData.get("die_name") || "",
                 present_wt: formData.get("present_wt") || "0",
                 no_of_cavity: formData.get("no_of_cavity") || "",
-                cut_length: formData.get("cut_length") || "",
+                cut_length: formData.get("cut_length") || null,  // Optional, can be null
                 remark: formData.get("remark") || ""
             };
 
@@ -265,15 +263,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (result.success) {
                     if (result.updated) {
                         showMessage("success", "Die Requisition updated successfully!");
-                        // Redirect to list page after 1 second
                         setTimeout(() => window.location.href = '/planning/die-requisitions/', 1000);
                     } else if (result.created) {
                         showMessage("success", `Die Requisition created successfully! ID: ${result.requisition.die_requisition_id}`);
-                        // Redirect to list page after 1 second
                         setTimeout(() => window.location.href = '/planning/die-requisitions/', 1000);
                     } else {
                         showMessage("success", "Die Requisition saved successfully!");
-                        // Redirect to list page after 1 second
                         setTimeout(() => window.location.href = '/planning/die-requisitions/', 1000);
                     }
                 } else {
@@ -290,6 +285,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         });
+    }
+
+    // ---------------- Set Default Date (Non-editable) ----------------
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Always set date to today and make it readonly
+    if (dateInput) {
+        if (!window.editMode || !dateInput.value) {
+            dateInput.value = today;
+        }
+        dateInput.setAttribute('readonly', 'readonly');
+        dateInput.style.backgroundColor = '#f0f0f0';
+        dateInput.style.cursor = 'not-allowed';
+        dateInput.style.fontWeight = '600';
+        dateInput.style.color = '#4a5568';
     }
 
     // Initial load: Fetch next Die Requisition ID if in create mode

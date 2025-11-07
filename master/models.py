@@ -512,6 +512,7 @@ class Staff(models.Model):
         ('Worker', 'Worker'),
         ('Machine Operator', 'Machine Operator'),
         ('Supervisor', 'Supervisor'),
+        ('Incharge', 'Incharge'),
     ]
     
     SHIFT_CHOICES = [
@@ -529,6 +530,8 @@ class Staff(models.Model):
     staff_register_no = models.CharField(
         max_length=50,
         unique=True,
+        null=True,
+        blank=True,
         verbose_name="Staff Register No"
     )
     first_name = models.CharField(max_length=100, verbose_name="First Name")
@@ -621,7 +624,7 @@ class Section(models.Model):
         ('Industrial', 'Industrial'),
         ('Construction', 'Construction'),
         ('Solar', 'Solar'),
-        ('Auto', 'Auto'),
+        ('Automobile', 'Automobile'),
     ]
     
     section_id = models.CharField(
@@ -630,7 +633,10 @@ class Section(models.Model):
         editable=False,
         verbose_name="Section ID"
     )
-    date = models.DateField(verbose_name="Date")
+    date = models.DateField(
+        default=timezone.now,
+        verbose_name="Date"
+    )
     section_no = models.CharField(
         max_length=50,
         unique=True,
@@ -638,6 +644,7 @@ class Section(models.Model):
     )
     section_name = models.CharField(
         max_length=255,
+        blank=True,
         verbose_name="Section Name"
     )
     section_image = models.ImageField(
@@ -649,31 +656,37 @@ class Section(models.Model):
     shape = models.CharField(
         max_length=50,
         choices=SHAPE_CHOICES,
+        blank=True,
         verbose_name="Shape"
     )
     type = models.CharField(
         max_length=50,
         choices=TYPE_CHOICES,
+        blank=True,
         verbose_name="Type"
     )
     usage = models.CharField(
         max_length=50,
         choices=USAGE_CHOICES,
+        blank=True,
         verbose_name="Usage"
     )
     length_mm = models.DecimalField(
         max_digits=10,
         decimal_places=2,
+        default=0,
         verbose_name="Length in mm"
     )
     width_mm = models.DecimalField(
         max_digits=10,
         decimal_places=2,
+        default=0,
         verbose_name="Width in mm"
     )
     thickness_mm = models.DecimalField(
         max_digits=10,
         decimal_places=2,
+        default=0,
         verbose_name="Thickness in mm"
     )
     ionized = models.BooleanField(
@@ -701,6 +714,8 @@ class Section(models.Model):
     def save(self, *args, **kwargs):
         if not self.section_id:
             self.section_id = Section.generate_section_id()
+        if not self.date:
+            self.date = timezone.now().date()
         super().save(*args, **kwargs)
     
     def __str__(self):

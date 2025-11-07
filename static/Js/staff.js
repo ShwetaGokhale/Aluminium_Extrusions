@@ -1,6 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("staffForm");
     const staffIdDisplay = document.getElementById("staff_id_display");
+    const dateInput = document.getElementById("date");
+
+    // ---------------- Set Today's Date (if not in edit mode) ----------------
+    if (!window.editMode && dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -38,26 +45,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ---------------- Validate Form ----------------
+    // ---------------- Validate Form (Only First Name and Last Name Required) ----------------
     function validateForm() {
-        const date = document.getElementById("date").value;
-        const staffRegisterNo = document.getElementById("staff_register_no").value.trim();
         const firstName = document.getElementById("first_name").value.trim();
         const lastName = document.getElementById("last_name").value.trim();
-        const address = document.getElementById("address").value.trim();
-        const contactNo = document.getElementById("contact_no").value.trim();
-        const designation = document.getElementById("designation").value.trim();
-        const shiftAssigned = document.getElementById("shift_assigned").value.trim();
-
-        if (!date) {
-            showMessage("error", "Date is required");
-            return false;
-        }
-
-        if (!staffRegisterNo) {
-            showMessage("error", "Staff Register No is required");
-            return false;
-        }
 
         if (!firstName) {
             showMessage("error", "First Name is required");
@@ -66,32 +57,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!lastName) {
             showMessage("error", "Last Name is required");
-            return false;
-        }
-
-        if (!address) {
-            showMessage("error", "Address is required");
-            return false;
-        }
-
-        if (!contactNo) {
-            showMessage("error", "Contact No is required");
-            return false;
-        }
-
-        // Validate contact number format (basic validation)
-        if (contactNo.length < 10) {
-            showMessage("error", "Contact number must be at least 10 digits");
-            return false;
-        }
-
-        if (!designation) {
-            showMessage("error", "Designation is required");
-            return false;
-        }
-
-        if (!shiftAssigned) {
-            showMessage("error", "Shift Assigned is required");
             return false;
         }
 
@@ -107,14 +72,14 @@ document.addEventListener("DOMContentLoaded", function () {
             const formData = new FormData(form);
 
             let payload = {
-                date: formData.get("date"),
-                staff_register_no: formData.get("staff_register_no"),
+                date: dateInput.value,  // Always send the date value
+                staff_register_no: formData.get("staff_register_no") || "",
                 first_name: formData.get("first_name"),
                 last_name: formData.get("last_name"),
-                address: formData.get("address"),
-                contact_no: formData.get("contact_no"),
-                designation: formData.get("designation"),
-                shift_assigned: formData.get("shift_assigned"),
+                address: formData.get("address") || "",
+                contact_no: formData.get("contact_no") || "",
+                designation: formData.get("designation") || "",
+                shift_assigned: formData.get("shift_assigned") || "",
                 assigned_to_press: formData.get("assigned_to_press") || null
             };
 

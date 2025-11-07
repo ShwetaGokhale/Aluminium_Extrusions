@@ -3,7 +3,7 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/section.css' %}">
+<link rel="stylesheet" href="{% static 'css/section.css' %}">
 
 <!-- Popup Notification -->
 <div id="popupMessage" class="popup-message hidden"></div>
@@ -30,14 +30,15 @@
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date -->
+        <!-- Date (Auto-filled with today's date, Non-editable) -->
         <div>
-            <label for="date">Date <span style="color: red;">*</span></label>
-            <input type="date" name="date" id="date" required
-                value="{% if edit_mode %}{{ section.date|date:'Y-m-d' }}{% endif %}">
+            <label for="date">Date <span class="auto-gen-label">(Auto-filled)</span></label>
+            <input type="date" name="date" id="date" readonly
+                value="{% if edit_mode %}{{ section.date|date:'Y-m-d' }}{% else %}{{ today_date|date:'Y-m-d' }}{% endif %}"
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Section No -->
+        <!-- Section No (REQUIRED) -->
         <div>
             <label for="section_no">Section No <span style="color: red;">*</span></label>
             <input type="text" name="section_no" id="section_no" required 
@@ -47,8 +48,8 @@
 
         <!-- Section Name -->
         <div>
-            <label for="section_name">Section Name <span style="color: red;">*</span></label>
-            <input type="text" name="section_name" id="section_name" required 
+            <label for="section_name">Section Name</label>
+            <input type="text" name="section_name" id="section_name"
                    value="{% if edit_mode %}{{ section.section_name }}{% endif %}"
                    placeholder="Enter section name">
         </div>
@@ -70,8 +71,8 @@
 
         <!-- Shape -->
         <div>
-            <label for="shape">Shape <span style="color: red;">*</span></label>
-            <select name="shape" id="shape" required>
+            <label for="shape">Shape</label>
+            <select name="shape" id="shape">
                 <option value="">Select Shape</option>
                 <option value="T Profile" {% if edit_mode and section.shape == 'T Profile' %}selected{% endif %}>T Profile</option>
                 <option value="U Profile" {% if edit_mode and section.shape == 'U Profile' %}selected{% endif %}>U Profile</option>
@@ -83,8 +84,8 @@
 
         <!-- Type -->
         <div>
-            <label for="type">Type <span style="color: red;">*</span></label>
-            <select name="type" id="type" required>
+            <label for="type">Type</label>
+            <select name="type" id="type">
                 <option value="">Select Type</option>
                 <option value="Section" {% if edit_mode and section.type == 'Section' %}selected{% endif %}>Section</option>
                 <option value="Channel" {% if edit_mode and section.type == 'Channel' %}selected{% endif %}>Channel</option>
@@ -96,47 +97,47 @@
 
         <!-- Usage -->
         <div>
-            <label for="usage">Usage <span style="color: red;">*</span></label>
-            <select name="usage" id="usage" required>
+            <label for="usage">Usage</label>
+            <select name="usage" id="usage">
                 <option value="">Select Usage</option>
                 <option value="Industrial" {% if edit_mode and section.usage == 'Industrial' %}selected{% endif %}>Industrial</option>
                 <option value="Construction" {% if edit_mode and section.usage == 'Construction' %}selected{% endif %}>Construction</option>
                 <option value="Solar" {% if edit_mode and section.usage == 'Solar' %}selected{% endif %}>Solar</option>
-                <option value="Auto" {% if edit_mode and section.usage == 'Auto' %}selected{% endif %}>Auto</option>
+                <option value="Automobile" {% if edit_mode and section.usage == 'Automobile' %}selected{% endif %}>Automobile</option>
             </select>
         </div>
 
         <!-- Length in mm -->
         <div>
-            <label for="length_mm">Length in mm <span style="color: red;">*</span></label>
-            <input type="number" name="length_mm" id="length_mm" step="0.01" required 
+            <label for="length_mm">Length in mm</label>
+            <input type="number" name="length_mm" id="length_mm" step="0.01"
                    value="{% if edit_mode %}{{ section.length_mm }}{% endif %}"
                    placeholder="Enter length in mm">
         </div>
 
         <!-- Width in mm -->
         <div>
-            <label for="width_mm">Width in mm <span style="color: red;">*</span></label>
-            <input type="number" name="width_mm" id="width_mm" step="0.01" required 
+            <label for="width_mm">Width in mm</label>
+            <input type="number" name="width_mm" id="width_mm" step="0.01"
                    value="{% if edit_mode %}{{ section.width_mm }}{% endif %}"
                    placeholder="Enter width in mm">
         </div>
 
         <!-- Thickness in mm -->
         <div>
-            <label for="thickness_mm">Thickness in mm <span style="color: red;">*</span></label>
-            <input type="number" name="thickness_mm" id="thickness_mm" step="0.01" required 
+            <label for="thickness_mm">Thickness in mm</label>
+            <input type="number" name="thickness_mm" id="thickness_mm" step="0.01"
                    value="{% if edit_mode %}{{ section.thickness_mm }}{% endif %}"
                    placeholder="Enter thickness in mm">
         </div>
 
         <!-- Ionized -->
         <div class="ionized-container">
-            <label class="ionized-label">Ionized <span style="color: red;">*</span></label>
+            <label class="ionized-label">Ionized</label>
             <div class="ionized-options">
                 <label class="checkbox-label">
                     <input type="radio" name="ionized" id="ionized_yes" value="true" 
-                        {% if edit_mode and section.ionized %}checked{% endif %} required>
+                        {% if edit_mode and section.ionized %}checked{% endif %}>
                     <span>Yes</span>
                 </label>
                 <label class="checkbox-label">
@@ -160,16 +161,18 @@
     window.editMode = true;
     window.sectionId = {{ section.id }};
     window.currentSectionId = "{{ section.section_id }}";
+    window.currentDate = "{{ section.date|date:'Y-m-d' }}";
 </script>
 {% else %}
 <script>
     window.editMode = false;
     window.nextSectionId = "{{ next_section_id }}";
+    window.todayDate = "{{ today_date|date:'Y-m-d' }}";
 </script>
 {% endif %}
 
 <!-- JavaScript -->
-<script src="{% static 'Js/section.js' %}"></script>
+<script src="{% static 'js/section.js' %}"></script>
 
 <style>
     .auto-gen-label {

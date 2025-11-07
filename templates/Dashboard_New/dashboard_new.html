@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'Css/dashboard_new.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard_new.css' %}">
 </head>
 
 <body>
@@ -20,7 +20,7 @@
         <div class="bg-gradient-to-r from-blue-900 to-teal-700 px-8 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <div class="bg-white text-blue-900 px-4 py-2 rounded font-bold text-xl">
-                    <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Logo" class="h-12 w-auto">
+                    <img src="{% static 'images/extruedge1.jpeg' %}" alt="Logo" class="h-12 w-auto">
                 </div>
                 <h1 class="text-3xl font-bold flex items-center space-x-2">
                     <span class="factory-animate text-5xl">🏭</span>
@@ -74,19 +74,19 @@
                     <!-- Status Grid -->
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-blue-900 bg-opacity-50 rounded-lg p-4 text-center">
-                            <div class="text-blue-300 text-sm mb-1">Active Plans</div>
+                            <div class="text-blue-300 text-sm mb-1">Total Order</div>
                             <div class="text-white text-3xl font-bold">{{ press.production_count }}</div>
                         </div>
                         <div class="bg-teal-900 bg-opacity-50 rounded-lg p-4 text-center">
-                            <div class="text-teal-300 text-sm mb-1">Total Qty</div>
-                            <div class="text-white text-3xl font-bold">{{ press.total_qty }}</div>
+                            <div class="text-teal-300 text-sm mb-1">Completed Orders</div>
+                            <div class="text-white text-3xl font-bold">{{ press.completed_orders }}</div>
                         </div>
                     </div>
 
                     <!-- View Details Button -->
                     <button
                         class="w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white py-3 rounded-lg transition-all duration-200 font-semibold text-lg">
-                        <i class="fa fa-chart-line mr-2"></i>View Production Details
+                        <i class="fa fa-chart-line mr-2"></i>View Order Details
                     </button>
                 </div>
                 {% endfor %}
@@ -181,6 +181,6 @@
 </body>
 
 <!-- JavaScript -->
-<script src="{% static 'Js/dashboard_new.js' %}"></script>
+<script src="{% static 'js/dashboard_new.js' %}"></script>
 
 </html>
