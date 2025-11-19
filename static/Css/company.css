@@ -247,3 +247,38 @@ button[type="submit"]:hover {
     padding: 6px 4px;
   }
 }
+
+/* ==== Table Select Dropdown Styling ==== */
+.section-table select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: #fff;
+  margin: 0;
+  cursor: pointer;
+  appearance: auto;
+  -webkit-appearance: menulist;
+  -moz-appearance: menulist;
+}
+
+.section-table select:focus {
+  outline: none;
+  border-color: #1e3a8a;
+  box-shadow: 0 0 3px rgba(30, 58, 138, 0.3);
+}
+
+.section-table select:disabled {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+  color: #888;
+  border: none;
+}
+
+/* Ensure select is clickable and not covered */
+.section-table select option {
+  padding: 8px;
+  background-color: #fff;
+  color: #333;
+}

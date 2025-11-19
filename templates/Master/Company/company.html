@@ -28,7 +28,7 @@
 
         <div>
             <label for="date">Date <span class="auto-gen-label">(Auto-generated)</span></label>
-            <input type="date" name="date" id="date" readonly 
+            <input type="date" name="date" id="date" readonly
                 value="{% if edit_mode %}{{ company.date|date:'Y-m-d' }}{% endif %}"
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
@@ -84,7 +84,7 @@
                     <thead>
                         <tr>
                             <th>Name of Press</th>
-                            <th>Capacity</th>
+                            <th>Sensor</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -113,15 +113,19 @@
 {% if edit_mode %}
 {{ shifts|json_script:"shifts-data" }}
 {{ presses|json_script:"presses-data" }}
+{{ sensors|json_script:"sensors-data" }}
 <script>
     window.editMode = true;
     window.companyId = {{ company.id }};
     window.shiftsData = JSON.parse(document.getElementById("shifts-data").textContent);
     window.pressesData = JSON.parse(document.getElementById("presses-data").textContent);
+    window.sensorsData = JSON.parse(document.getElementById("sensors-data").textContent);
 </script>
 {% else %}
+{{ sensors|json_script:"sensors-data" }}
 <script>
     window.editMode = false;
+    window.sensorsData = JSON.parse(document.getElementById("sensors-data").textContent);
 </script>
 {% endif %}
 
@@ -134,6 +138,40 @@
         color: #718096;
         font-style: italic;
         font-weight: normal;
+    }
+
+    /* Select dropdown styling for tables */
+    .section-table select {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 13px;
+        background-color: #fff;
+        margin: 0;
+        cursor: pointer;
+        appearance: auto;
+        -webkit-appearance: menulist;
+        -moz-appearance: menulist;
+    }
+
+    .section-table select:focus {
+        outline: none;
+        border-color: #1e3a8a;
+        box-shadow: 0 0 3px rgba(30, 58, 138, 0.3);
+    }
+
+    .section-table select:disabled {
+        background-color: #f9f9f9;
+        cursor: not-allowed;
+        color: #888;
+        border: none;
+    }
+
+    .section-table select option {
+        padding: 8px;
+        background-color: #fff;
+        color: #333;
     }
 </style>
 

@@ -132,13 +132,6 @@ class DieRequisition(models.Model):
 class ProductionPlan(models.Model):
     """Model for Production Planning management"""
     
-    STATUS_CHOICES = [
-        ('planned', 'Planned'),
-        ('running', 'Running'),
-        ('completed', 'Completed'),
-        ('discard', 'Discard'),
-    ]
-    
     production_plan_id = models.CharField(
         max_length=20,
         unique=True,
@@ -211,42 +204,6 @@ class ProductionPlan(models.Model):
         verbose_name="QTY",
         null=True,
         blank=True
-    )
-    billet_size = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(0)],
-        verbose_name="Billet Size",
-        null=True,
-        blank=True
-    )
-    no_of_billet = models.IntegerField(
-        validators=[MinValueValidator(1)],
-        verbose_name="No Of Billet",
-        null=True,
-        blank=True
-    )
-    plan_recovery = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        validators=[MinValueValidator(0)],
-        verbose_name="Plan Recovery",
-        null=True,
-        blank=True
-    )
-    current_recovery = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        validators=[MinValueValidator(0)],
-        verbose_name="Current Recovery",
-        null=True,
-        blank=True
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='planned',
-        verbose_name="Status"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     

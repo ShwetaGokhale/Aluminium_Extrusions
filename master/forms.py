@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+from  raw_data.models import Raw_data
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Forms for Die Master functionality
@@ -312,13 +313,24 @@ class CompanyShiftForm(forms.ModelForm):
 # Forms for Company Press functionality
 # ──────────────────────────────────────────────────────────────────────────────
 class CompanyPressForm(forms.ModelForm):
+    sensor = forms.ChoiceField(
+        choices=[],
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    
     class Meta:
         model = CompanyPress
-        fields = ['name', 'capacity']
+        fields = ['name', 'sensor']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'capacity': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 500 tons, 1000 kg/hr'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Get unique sensor names from Raw_data
+        sensor_names = Raw_data.objects.values_list('sensor_name', flat=True).distinct().order_by('sensor_name')
+        self.fields['sensor'].choices = [('', 'Select Sensor')] + [(s, s) for s in sensor_names]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Forms for Supplier functionality

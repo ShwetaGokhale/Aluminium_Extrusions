@@ -140,12 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 wt_range: formData.get("wt_range") || "",
                 cut_length: formData.get("cut_length") || "",
                 wt_per_piece: formData.get("wt_per_piece") || "0",
-                qty: formData.get("qty") || "",
-                billet_size: formData.get("billet_size") || "",
-                no_of_billet: formData.get("no_of_billet") || "",
-                plan_recovery: formData.get("plan_recovery") || "",
-                current_recovery: formData.get("current_recovery") || "",
-                status: formData.get("status") || "planned"
+                qty: formData.get("qty") || ""
             };
 
             console.log("Payload being sent:", payload);

@@ -120,8 +120,9 @@ function displayDetailedProduction(productionData) {
             <td class="px-8 py-5 text-blue-400 text-lg font-semibold">${plan.die_no}</td>
             <td class="px-8 py-5 text-yellow-400 text-lg font-medium text-center">${plan.cut_length}</td>
             <td class="px-8 py-5 text-green-400 text-xl font-bold text-center">${plan.planned_qty}</td>
-            <td class="px-8 py-5 text-teal-400 text-xl font-bold text-center">-</td>
-            <td class="px-8 py-5 text-purple-400 text-xl font-bold text-center">-</td>
+            <!-- ✅ Updated: Show actual production from Raw_data -->
+            <td class="px-8 py-5 text-teal-400 text-xl font-bold text-center">${plan.current_production}</td>  
+            <td class="px-8 py-5 text-purple-400 text-xl font-bold text-center">${plan.production_qty}</td>
             <td class="px-8 py-5 text-center">${getStatusBadge(plan.status)}</td>
         </tr>
     `).join('');

@@ -2,156 +2,575 @@
 {% block content %}
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'Css/customer_requisition_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_requisition_list.css' %}">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-<main class="table-container">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl lg:text-3xl font-bold italic text-center flex-grow" style="color: #1a3e8e;">
-            Customer Requisition List
-        </h2>
+<style>
+    /* ========== PAGE LAYOUT WITH RIGHT SIDEBAR ========== */
+    .page-layout {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
 
-        <!-- Search -->
-        <form method="GET" class="flex items-center space-x-2 mr-3">
-            <input type="text" name="global_search" value="{{ global_search|default:'' }}"
-                placeholder="Search By Requisition No/Customer..." 
-                class="rounded-lg px-3 py-2 text-sm text-gray-800 border border-gray-300 shadow-sm
-                       focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
-            <button type="submit"
-                class="text-white font-bold py-2 px-4 rounded-lg shadow flex items-center transition duration-200"
-                style="background-color: #1a3e8e;">
-                <i class="fas fa-search mr-1"></i>
-                Search
-            </button>
-        </form>
+    /* ========== MAIN CONTENT AREA ========== */
+    .main-content-area {
+        flex: 1;
+        min-width: 0;
+        max-width: calc(100% - 300px);
+        animation: slideInLeft 0.5s ease forwards;
+    }
 
-        <!-- Buttons -->
-        <div class="flex space-x-3">
-            <a href="#"
-                class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center">
-                <i class="fas fa-file-excel mr-2"></i>
-            </a>
-            <a href="#"
-                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center">
-                <i class="fas fa-file-pdf mr-2"></i>
-            </a>
-            <a href="{% url 'requisition_form' %}"
-                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center">
-                <i class="fas fa-plus mr-2"></i>
-            </a>
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
 
-            <!-- ✅ Select All Option -->
-            <label
-                class="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-3 rounded-lg shadow-md cursor-pointer">
-                <input type="checkbox" id="selectAllCheckbox" class="form-checkbox h-4 w-4 text-purple-600 mr-2">
-                Select All
-            </label>
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
 
-            <!-- Print Button (initially hidden) -->
-            <button id="printSelectedBtn"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md items-center hidden">
-                <i class="fas fa-print mr-2"></i>
-                Print Selected
-            </button>
+    /* Adjust table container for sidebar layout */
+    .page-layout .table-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 20px;
+    }
+
+    /* Fix table header alignment */
+    .page-layout .table-container .flex.justify-between {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* Ensure table is properly contained */
+    .page-layout table {
+        table-layout: auto;
+        width: 100%;
+    }
+
+    /* Make table responsive within the layout */
+    .page-layout .table-container {
+        overflow-x: auto;
+    }
+
+    /* ========== RIGHT SIDEBAR STYLES ========== */
+    .info-sidebar {
+        width: 280px;
+        min-width: 280px;
+        background: linear-gradient(135deg, #1e3a8a 0%, #0f766e 100%);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+        animation: slideInRight 0.5s ease forwards;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Sidebar Section Cards */
+    .sidebar-section {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 18px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-section:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Section Headers */
+    .sidebar-section h3 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .sidebar-section h3 i {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    /* ========== STATISTICS ITEMS ========== */
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+
+    .stat-item:hover {
+        padding-left: 4px;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+        font-weight: bold;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 12px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .stat-item:hover .stat-value {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+    }
+
+    /* ========== INFO TEXT ========== */
+    .info-text {
+        font-size: 0.85rem;
+        line-height: 1.5;
+        opacity: 0.9;
+        margin-top: 8px;
+        font-style: italic;
+    }
+
+    /* ========== QUICK ACTIONS ========== */
+    .quick-action {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        text-decoration: none;
+        color: white;
+    }
+
+    .quick-action:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(-4px);
+    }
+
+    .quick-action i {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .quick-action span {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    /* ========== RESPONSIVE DESIGN ========== */
+    @media (max-width: 1400px) {
+        .info-sidebar {
+            width: 260px;
+            min-width: 260px;
+            padding: 20px;
+        }
+
+        .sidebar-section {
+            padding: 16px;
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .info-sidebar {
+            width: 240px;
+            min-width: 240px;
+            padding: 18px;
+        }
+
+        .sidebar-section h3 {
+            font-size: 1rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            padding: 3px 10px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .page-layout {
+            flex-direction: column;
+        }
+
+        .main-content-area {
+            max-width: 100%;
+        }
+
+        .info-sidebar {
+            width: 100%;
+            position: static;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 15px;
+            order: -1;
+        }
+
+        .sidebar-section {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .main-content-area {
+            width: 100%;
+        }
+
+        .page-layout .table-container .flex.justify-between {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+
+        .page-layout .table-container .flex.justify-between>* {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .info-sidebar {
+            flex-direction: column;
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .sidebar-section {
+            min-width: 100%;
+        }
+
+        .sidebar-section h3 {
+            font-size: 0.95rem;
+        }
+
+        .quick-action {
+            padding: 8px;
+        }
+
+        .quick-action span {
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .info-sidebar {
+            padding: 12px;
+        }
+
+        .sidebar-section {
+            padding: 12px;
+        }
+
+        .stat-label,
+        .stat-value {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* ========== SCROLLBAR FOR SIDEBAR ========== */
+    .info-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .info-sidebar::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+    }
+
+    .info-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    .info-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+</style>
+
+<div class="page-layout">
+    <!-- Main Content Area -->
+    <div class="main-content-area">
+        <main class="table-container">
+            <div class="flex justify-between items-center mb-6" style="flex-wrap: nowrap; align-items: center;">
+                <h2 class="text-xl lg:text-3xl font-bold"
+                    style="color: black; flex-shrink: 1; white-space: nowrap; margin: 0;">
+                    Orders
+                </h2>
+
+                <!-- Search -->
+                <form method="GET" class="flex items-center space-x-2" style="flex-shrink: 0;">
+                    <input type="text" name="global_search" value="{{ global_search|default:'' }}"
+                        placeholder="Search..." class="rounded-lg px-3 py-2 text-sm text-gray-800 border border-gray-300 shadow-sm
+                               focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                        style="width: 180px;">
+                    <button type="submit"
+                        class="text-white font-bold py-2 px-3 rounded-lg shadow flex items-center transition duration-200"
+                        style="background-color: #1a3e8e;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+
+                <!-- Buttons -->
+                <div class="flex space-x-2" style="flex-shrink: 0;">
+                    <!-- <a href="#"
+                        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg shadow-md flex items-center"
+                        title="Export Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </a>
+                    <a href="#"
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg shadow-md flex items-center"
+                        title="Export PDF">
+                        <i class="fas fa-file-pdf"></i> -->
+                    </a>
+                    <a href="{% url 'requisition_form' %}"
+                        class="bg-white-600 hover:bg-gray-300 text-blue py-2 px-3 rounded-lg  flex items-center gap-2"
+                        style="font-size: 0.875rem; font-weight: normal;" title="Add New">
+                        <i class="fas fa-plus"></i>
+                        <span>Add New Order</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Select All and Print Button Section -->
+            <div class="flex items-center space-x-2 mb-4">
+                <!-- ✅ Select All Option -->
+                <label
+                    class="flex items-center bg-white-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-3 rounded-lg  cursor-pointer"
+                    style="white-space: nowrap;">
+                    <input type="checkbox" id="selectAllCheckbox"
+                        class="form-checkbox h-4 w-4 text-purple-600 mr-2">
+                    <span style="font-size: 0.875rem;">Select All</span>
+                </label>
+
+                <!-- Print Button (initially hidden) -->
+                <button id="printSelectedBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg shadow-md items-center hidden"
+                    style="white-space: nowrap;">
+                    <i class="fas fa-print mr-1"></i>
+                    <span style="font-size: 0.875rem;">Print</span>
+                </button>
+            </div>
+
+            <!-- Table with horizontal scroll -->
+            <div style="overflow-x: auto; width: 100%;">
+                <table style="min-width: 720px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">S.No</th>
+                            <th style="width: 150px;">Order No</th>
+                            <th style="width: 180px;">Customer Name</th>
+                            <th style="width: 120px;">Section No</th>
+                            <th style="width: 100px;">WT Range</th>
+                            <th style="width: 100px;">Cut Length</th>
+                            <th style="width: 80px;">QTY</th>
+                            <th style="width: 110px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requisitionTableBody">
+                        {% for req in page_obj %}
+                        {% for order in req.orders.all %}
+                        <tr data-requisition-id="{{ req.id }}">
+                            {% if forloop.first %}
+                            <td rowspan="{{ req.orders.count }}">
+                                {{ forloop.parentloop.counter|add:page_obj.start_index|add:"-1" }}
+                                <input type="checkbox" class="row-checkbox form-checkbox h-3 w-3 text-purple-600 hidden"
+                                    value="{{ req.id }}">
+                            </td>
+                            <td rowspan="{{ req.orders.count }}">{{ req.requisition_no }}</td>
+                            <td rowspan="{{ req.orders.count }}">{{ req.customer.name }}</td>
+                            {% endif %}
+                            <td>{{ order.section_no.section_no }}</td>
+                            <td>{{ order.wt_range }}</td>
+                            <td>{{ order.cut_length }}</td>
+                            <td>{{ order.qty_in_no }}</td>
+                            {% if forloop.first %}
+                            <td rowspan="{{ req.orders.count }}" style="white-space: nowrap;">
+                                <a href="{% url 'requisition_edit' req.id %}" class="action-btn edit-btn" title="Edit">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </a>
+                                <button type="button" class="action-btn delete-btn" data-requisition-id="{{ req.id }}"
+                                    title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                <a href="{% url 'print_requisition' req.id %}" target="_blank"
+                                    class="action-btn print-btn" title="Print">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-gray-500 italic">No customer requisitions
+                                found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-center mt-6">
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1{% if global_search %}&global_search={{ global_search }}{% endif %}"
+                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
+                        class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                    {% endif %}
+
+                    {% for num in page_range %}
+                    {% if num == current_page %}
+                    <span
+                        class="relative inline-flex items-center px-4 py-2 border border-[#1e3a8a] bg-[#1e3a8a] text-sm font-medium text-white">
+                        {{ num }}
+                    </span>
+                    {% else %}
+                    <a href="?page={{ num }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        {{ num }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
+                        class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ total_pages }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
+                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- Right Sidebar with Information -->
+    <aside class="info-sidebar">
+        <!-- Overview Stats -->
+        <div class="sidebar-section">
+            <h3><i class="fas fa-chart-line"></i> Overview</h3>
+            <div class="stat-item">
+                <span class="stat-label">Total Today</span>
+                <span class="stat-value">239</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Pending</span>
+                <span class="stat-value">12</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Delivered</span>
+                <span class="stat-value">128</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Cancelled</span>
+                <span class="stat-value">25</span>
+            </div>
         </div>
-    </div>
 
-    <!-- Table -->
-    <table>
-        <thead>
-            <tr>
-                <th>S.No</th>
-                <th>Cust Requisition No</th>
-                <th>Customer Name</th>
-                <th>Section No</th>
-                <th>WT Range</th>
-                <th>Cut Length</th>
-                <th>QTY</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="requisitionTableBody">
-            {% for req in page_obj %}
-                {% for order in req.orders.all %}
-                <tr data-requisition-id="{{ req.id }}">
-                    {% if forloop.first %}
-                    <td rowspan="{{ req.orders.count }}">
-                        {{ forloop.parentloop.counter|add:page_obj.start_index|add:"-1" }}
-                        <input type="checkbox" class="row-checkbox form-checkbox h-3 w-3 text-purple-600 hidden"
-                            value="{{ req.id }}">
-                    </td>
-                    <td rowspan="{{ req.orders.count }}">{{ req.requisition_no }}</td>
-                    <td rowspan="{{ req.orders.count }}">{{ req.customer.name }}</td>
-                    {% endif %}
-                    <td>{{ order.section_no.section_no }}</td>
-                    <td>{{ order.wt_range }}</td>
-                    <td>{{ order.cut_length }}</td>
-                    <td>{{ order.qty_in_no }}</td>
-                    {% if forloop.first %}
-                    <td rowspan="{{ req.orders.count }}" style="white-space: nowrap;">
-                        <a href="{% url 'requisition_edit' req.id %}" class="action-btn edit-btn" title="Edit">
-                            <i class="fa-solid fa-pencil"></i>
-                        </a>
-                        <button type="button" class="action-btn delete-btn" data-requisition-id="{{ req.id }}" title="Delete">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                        <a href="{% url 'print_requisition' req.id %}" target="_blank" class="action-btn print-btn" title="Print">
-                            <i class="fa fa-print"></i>
-                        </a>
-                    </td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            {% empty %}
-            <tr>
-                <td colspan="8" class="text-center py-4 text-gray-500 italic">No customer requisitions found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <!-- Recent Activity -->
+        <div class="sidebar-section">
+            <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+            <p class="info-text">
+                Last requisition created 2 minutes ago by the system.
+            </p>
+            <div class="quick-action">
+                <i class="fas fa-file-alt"></i>
+                <span>View All Activity</span>
+            </div>
+        </div>
 
-    <!-- Pagination -->
-    <div class="flex justify-center mt-6">
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            {% if page_obj.has_previous %}
-            <a href="?page=1{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <i class="fas fa-angle-double-left"></i>
-            </a>
-            <a href="?page={{ page_obj.previous_page_number }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <i class="fas fa-angle-left"></i>
-            </a>
-            {% endif %}
+        <!-- Customer Info -->
+        <div class="sidebar-section">
+            <h3><i class="fas fa-users"></i> Customers</h3>
+            <div class="stat-item">
+                <span class="stat-label">Active</span>
+                <span class="stat-value">156</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">VIP</span>
+                <span class="stat-value">23</span>
+            </div>
+            <p class="info-text">
+                Manage customer requisitions efficiently with real-time tracking.
+            </p>
+        </div>
 
-            {% for num in page_range %}
-            {% if num == current_page %}
-            <span
-                class="relative inline-flex items-center px-4 py-2 border border-[#1e3a8a] bg-[#1e3a8a] text-sm font-medium text-white">
-                {{ num }}
-            </span>
-            {% else %}
-            <a href="?page={{ num }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                {{ num }}
-            </a>
-            {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <i class="fas fa-angle-right"></i>
-            </a>
-            <a href="?page={{ total_pages }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <i class="fas fa-angle-double-right"></i>
-            </a>
-            {% endif %}
-        </nav>
-    </div>
-</main>
+        <!-- Quick Actions -->
+        <div class="sidebar-section">
+            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+            <div class="quick-action" onclick="window.location.href='{% url 'requisition_form' %}'">
+                <i class="fas fa-plus-circle"></i>
+                <span>New Requisition</span>
+            </div>
+            <div class="quick-action">
+                <i class="fas fa-download"></i>
+                <span>Export Report</span>
+            </div>
+            <div class="quick-action">
+                <i class="fas fa-filter"></i>
+                <span>Advanced Filter</span>
+            </div>
+        </div>
+    </aside>
+</div>
 
 <!-- Modal for delete confirm -->
 <div id="confirmationModalOverlay" class="modal-overlay">
@@ -167,5 +586,5 @@
 <!-- Success popup -->
 <div id="successPopup" class="success-popup">Action successful!</div>
 
-<script src="{% static 'Js/customer_requisition_list.js' %}"></script>
+<script src="{% static 'js/customer_requisition_list.js' %}"></script>
 {% endblock %}

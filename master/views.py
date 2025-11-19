@@ -1273,9 +1273,13 @@ class CompanyFormView(View):
     """Render the company form page with template."""
 
     def get(self, request):
+        # Get unique sensor names for dropdown
+        sensors = Raw_data.objects.values_list('sensor_name', flat=True).distinct().order_by('sensor_name')
+        
         context = {
             'edit_mode': False,
-            'form': CompanyForm()
+            'form': CompanyForm(),
+            'sensors': list(sensors)
         }
         return render(request, 'Master/Company/company.html', context)
 
@@ -1288,12 +1292,16 @@ class CompanyEditView(View):
         shifts = company.shifts.all()
         presses = company.presses.all()
         
+        # Get unique sensor names for dropdown
+        sensors = Raw_data.objects.values_list('sensor_name', flat=True).distinct().order_by('sensor_name')
+        
         context = {
             'edit_mode': True,
             'company': company,
             'shifts': list(shifts.values('id', 'name', 'timing')),
-            'presses': list(presses.values('id', 'name', 'capacity')),
-            'form': CompanyForm(instance=company)
+            'presses': list(presses.values('id', 'name', 'sensor')),
+            'form': CompanyForm(instance=company),
+            'sensors': list(sensors)
         }
         return render(request, 'Master/Company/company.html', context)
 
@@ -1390,17 +1398,17 @@ class CompanyAPI(View):
             created_presses = []
             for press_data in presses_data:
                 press_name = press_data.get('name', '').strip()
-                press_capacity = press_data.get('capacity', '').strip()
-                if press_name and press_capacity:
+                press_sensor = press_data.get('sensor', '').strip()
+                if press_name and press_sensor:
                     press = CompanyPress.objects.create(
                         company=company,
                         name=press_name,
-                        capacity=press_capacity
+                        sensor=press_sensor
                     )
                     created_presses.append({
                         'id': press.id,
                         'name': press.name,
-                        'capacity': press.capacity
+                        'sensor': press.sensor
                     })
             
             return JsonResponse({
@@ -1441,6 +1449,9 @@ class CompanyDetailAPI(View):
             shifts = company.shifts.all()
             presses = company.presses.all()
             
+            # Get unique sensor names for dropdown
+            sensors = Raw_data.objects.values_list('sensor_name', flat=True).distinct().order_by('sensor_name')
+            
             return JsonResponse({
                 'success': True,
                 'company': {
@@ -1452,7 +1463,8 @@ class CompanyDetailAPI(View):
                     'created_at': company.created_at.strftime("%Y-%m-%d"),
                 },
                 'shifts': list(shifts.values('id', 'name', 'timing')),
-                'presses': list(presses.values('id', 'name', 'capacity'))
+                'presses': list(presses.values('id', 'name', 'sensor')),
+                'sensors': list(sensors)
             })
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
@@ -1524,15 +1536,15 @@ class CompanyDetailAPI(View):
             
             for press_data in presses_data:
                 press_name = press_data.get('name', '').strip()
-                press_capacity = press_data.get('capacity', '').strip()
+                press_sensor = press_data.get('sensor', '').strip()
                 
-                if press_name and press_capacity:
+                if press_name and press_sensor:
                     if press_data.get('id'):
                         # Update existing press
                         try:
                             press = CompanyPress.objects.get(id=press_data['id'], company=company)
                             press.name = press_name
-                            press.capacity = press_capacity
+                            press.sensor = press_sensor
                             press.save()
                             existing_press_ids.append(press.id)
                         except CompanyPress.DoesNotExist:
@@ -1540,7 +1552,7 @@ class CompanyDetailAPI(View):
                             press = CompanyPress.objects.create(
                                 company=company,
                                 name=press_name,
-                                capacity=press_capacity
+                                sensor=press_sensor
                             )
                             existing_press_ids.append(press.id)
                     else:
@@ -1548,7 +1560,7 @@ class CompanyDetailAPI(View):
                         press = CompanyPress.objects.create(
                             company=company,
                             name=press_name,
-                            capacity=press_capacity
+                            sensor=press_sensor
                         )
                         existing_press_ids.append(press.id)
             
@@ -1587,7 +1599,6 @@ class CompanyDetailAPI(View):
                 'success': False, 
                 'message': str(e)
             })
-        
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Views for Supplier functionality

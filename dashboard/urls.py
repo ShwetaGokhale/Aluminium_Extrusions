@@ -1,7 +1,10 @@
 from django.urls import path
-from .views import DashboardView, DieProductionDataView
+from .views import DashboardView
 
 urlpatterns = [
-    path("dashboard/", DashboardView.as_view(), name="dashboard"),
-    path("dashboard/die/<str:die_no>/production/", DieProductionDataView.as_view(), name="die_production_data"),
+    # IOT Dashboard with die cards
+    path('dashboard/', DashboardView.as_view(), name='dashboard'),
+    
+    # API endpoint to refresh die cards data
+    path('dashboard/refresh/', DashboardView.as_view(), name='dashboard_refresh'),
 ]

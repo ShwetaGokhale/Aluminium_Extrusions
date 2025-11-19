@@ -28,6 +28,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 3000);
     }
 
+    // ---------------- Generate Sensor Options HTML ----------------
+    function getSensorOptionsHTML(selectedSensor = '') {
+        let options = '<option value="">Select Sensor</option>';
+        if (window.sensorsData && window.sensorsData.length > 0) {
+            window.sensorsData.forEach(sensor => {
+                const selected = sensor === selectedSensor ? 'selected' : '';
+                options += `<option value="${sensor}" ${selected}>${sensor}</option>`;
+            });
+        }
+        return options;
+    }
+
     // ---------------- Initialize Example Rows ----------------
     function initExampleRows() {
         if (!window.editMode) {
@@ -44,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 pressesBody.innerHTML = `
                     <tr class="example-row" style="background:#f9f9f9; color:#888;">
                         <td><input type="text" placeholder="Hydraulic Press 1" disabled></td>
-                        <td><input type="text" placeholder="500 tons" disabled></td>
+                        <td><select disabled><option>Select Sensor</option></select></td>
                         <td></td>
                     </tr>
                 `;
@@ -86,15 +98,31 @@ document.addEventListener("DOMContentLoaded", function () {
         const row = document.createElement("tr");
         if (data.id) row.dataset.id = data.id;
 
-        row.innerHTML = `
-            <td><input type="text" name="press_name[]" placeholder="Enter press name" value="${data.name || ''}"></td>
-            <td><input type="text" name="press_capacity[]" placeholder="e.g., 500 tons, 1000 kg/hr" value="${data.capacity || ''}"></td>
-            <td>
-                <button type="button" class="delete-row">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        `;
+        const td1 = document.createElement("td");
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.name = "press_name[]";
+        nameInput.placeholder = "Enter press name";
+        nameInput.value = data.name || '';
+        td1.appendChild(nameInput);
+
+        const td2 = document.createElement("td");
+        const sensorSelect = document.createElement("select");
+        sensorSelect.name = "press_sensor[]";
+        sensorSelect.required = true;
+        sensorSelect.innerHTML = getSensorOptionsHTML(data.sensor || '');
+        td2.appendChild(sensorSelect);
+
+        const td3 = document.createElement("td");
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "delete-row";
+        deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        td3.appendChild(deleteBtn);
+
+        row.appendChild(td1);
+        row.appendChild(td2);
+        row.appendChild(td3);
 
         const exampleRow = pressesBody.querySelector(".example-row");
         if (exampleRow) exampleRow.remove();
@@ -134,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 pressesBody.innerHTML = `
                     <tr class="example-row" style="background:#f9f9f9; color:#888;">
                         <td><input type="text" placeholder="Hydraulic Press 1" disabled></td>
-                        <td><input type="text" placeholder="500 tons" disabled></td>
+                        <td><select disabled><option>Select Sensor</option></select></td>
                         <td></td>
                     </tr>
                 `;
@@ -190,13 +218,13 @@ document.addEventListener("DOMContentLoaded", function () {
             if (pressesBody) {
                 pressesBody.querySelectorAll("tr:not(.example-row)").forEach(row => {
                     const nameInput = row.querySelector("input[name='press_name[]']");
-                    const capacityInput = row.querySelector("input[name='press_capacity[]']");
+                    const sensorSelect = row.querySelector("select[name='press_sensor[]']");
 
-                    if (nameInput && capacityInput && nameInput.value.trim() && capacityInput.value.trim()) {
+                    if (nameInput && sensorSelect && nameInput.value.trim() && sensorSelect.value.trim()) {
                         payload.presses.push({
                             id: row.dataset.id || null,
                             name: nameInput.value.trim(),
-                            capacity: capacityInput.value.trim()
+                            sensor: sensorSelect.value.trim()
                         });
                     }
                 });
@@ -226,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const responseText = await response.text();
                 console.log("Response:", responseText); // Debug log
-                
+
                 const contentType = response.headers.get('content-type');
 
                 if (!contentType || !contentType.includes('application/json')) {

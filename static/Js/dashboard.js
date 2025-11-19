@@ -85,7 +85,90 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize production chart
     initializeProductionChart();
+
+    // ✅ Setup navigation
+    setupNavigation();
 });
+
+// ✅ UPDATED: Navigation setup function with Daily/Weekly/Monthly filtering
+function setupNavigation() {
+    // Get current filter from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentFilter = urlParams.get('filter') || 'daily';
+
+    // Handle back arrow click - go to Production Plan List
+    const backButton = document.querySelector('.nav-item:first-child');
+    if (backButton) {
+        backButton.style.cursor = 'pointer';
+        backButton.addEventListener('click', function () {
+            window.location.href = '/planning/production-plan/';
+        });
+    }
+
+    // Get all navigation items
+    const navItems = document.querySelectorAll('.nav-item');
+
+    // Remove active class from all items first
+    navItems.forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Handle HOME button click
+    const homeButton = navItems[1]; // Second nav-item (HOME)
+    if (homeButton) {
+        homeButton.style.cursor = 'pointer';
+        homeButton.addEventListener('click', function () {
+            window.location.href = '/dashboard/dashboard/';
+        });
+
+        // Set active if no filter or on home
+        if (!urlParams.has('filter')) {
+            homeButton.classList.add('active');
+        }
+    }
+
+    // Handle DAILY button click
+    const dailyButton = navItems[3]; // Fourth nav-item (DAILY)
+    if (dailyButton) {
+        dailyButton.style.cursor = 'pointer';
+        dailyButton.addEventListener('click', function () {
+            window.location.href = '/dashboard/dashboard/?filter=daily';
+        });
+
+        // Set active if filter is daily
+        if (currentFilter === 'daily') {
+            dailyButton.classList.add('active');
+        }
+    }
+
+    // Handle WEEKLY button click
+    const weeklyButton = navItems[4]; // Fifth nav-item (WEEKLY)
+    if (weeklyButton) {
+        weeklyButton.style.cursor = 'pointer';
+        weeklyButton.addEventListener('click', function () {
+            window.location.href = '/dashboard/dashboard/?filter=weekly';
+        });
+
+        // Set active if filter is weekly
+        if (currentFilter === 'weekly') {
+            weeklyButton.classList.add('active');
+        }
+    }
+
+    // Handle MONTHLY button click
+    const monthlyButton = navItems[5]; // Sixth nav-item (MONTHLY)
+    if (monthlyButton) {
+        monthlyButton.style.cursor = 'pointer';
+        monthlyButton.addEventListener('click', function () {
+            window.location.href = '/dashboard/dashboard/?filter=monthly';
+        });
+
+        // Set active if filter is monthly
+        if (currentFilter === 'monthly') {
+            monthlyButton.classList.add('active');
+        }
+    }
+}
 
 // Production Chart initialization
 function initializeProductionChart() {
@@ -180,104 +263,6 @@ function initializeProductionChart() {
         }
     });
 }
-
-// Die details modal functionality
-function showDieDetails(dieNo) {
-    const modal = document.getElementById('dieDetailsModal');
-    const modalDieName = document.getElementById('modalDieName');
-    const tableBody = document.getElementById('dieDetailsTableBody');
-    const loading = document.getElementById('dieDetailsLoading');
-    const noData = document.getElementById('dieDetailsNoData');
-    const content = document.getElementById('dieDetailsContent');
-
-    if (!modal) {
-        console.error('Modal element not found');
-        return;
-    }
-
-    // Show modal and reset states
-    modal.classList.remove('hidden');
-    modalDieName.textContent = `Die: ${dieNo}`;
-    loading.classList.remove('hidden');
-    noData.classList.add('hidden');
-    content.classList.add('hidden');
-    tableBody.innerHTML = '';
-
-    // Fetch die details
-    fetch(`/dashboard/die/${encodeURIComponent(dieNo)}/production/`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            loading.classList.add('hidden');
-
-            if (data.success && data.production_data && data.production_data.length > 0) {
-                content.classList.remove('hidden');
-                displayDieProduction(data.production_data);
-            } else {
-                noData.classList.remove('hidden');
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching die details:', error);
-            loading.classList.add('hidden');
-            noData.classList.remove('hidden');
-
-            // Show error message
-            noData.innerHTML = `
-                <div class="text-red-400 text-6xl mb-4">⚠️</div>
-                <p class="text-gray-600 text-lg font-semibold">Error Loading Data</p>
-                <p class="text-gray-500 text-sm mt-2">${error.message}</p>
-            `;
-        });
-}
-
-// Display production data in modal table
-function displayDieProduction(productionData) {
-    const tableBody = document.getElementById('dieDetailsTableBody');
-
-    const statusBadges = {
-        'planned': '<span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">📋 Planned</span>',
-        'running': '<span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 animate-pulse">▶️ Running</span>',
-        'completed': '<span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">✅ Completed</span>',
-        'discard': '<span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">❌ Discard</span>'
-    };
-
-    tableBody.innerHTML = productionData.map((plan, index) => `
-        <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors duration-200" style="animation: fadeIn 0.3s ease ${index * 0.05}s both;">
-            <td class="px-4 py-3 text-gray-700 font-medium">${escapeHtml(plan.order_no)}</td>
-            <td class="px-4 py-3 text-blue-600 font-semibold">${escapeHtml(plan.press_name)}</td>
-            <td class="px-4 py-3 text-center text-gray-700">${escapeHtml(plan.cut_length)}</td>
-            <td class="px-4 py-3 text-center text-green-600 font-bold">${escapeHtml(plan.planned_qty)}</td>
-            <td class="px-4 py-3 text-center">${statusBadges[plan.status] || statusBadges['planned']}</td>
-        </tr>
-    `).join('');
-}
-
-// Close die details modal
-function closeDieDetails() {
-    const modal = document.getElementById('dieDetailsModal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-}
-
-// Close modal on escape key
-document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-        closeDieDetails();
-    }
-});
-
-// Close modal when clicking outside
-document.getElementById('dieDetailsModal')?.addEventListener('click', function (event) {
-    if (event.target === this) {
-        closeDieDetails();
-    }
-});
 
 // Utility function to escape HTML and prevent XSS
 function escapeHtml(text) {

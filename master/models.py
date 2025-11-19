@@ -432,7 +432,7 @@ class CompanyShift(models.Model):
 class CompanyPress(models.Model):
     company = models.ForeignKey(Company, related_name='presses', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    capacity = models.CharField(max_length=50)  # e.g., "500 tons", "1000 kg/hr"
+    sensor = models.CharField(max_length=50)  # Store sensor_name from Raw_data
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -459,7 +459,6 @@ class ProductionPlanListView(View):
                     'cut_length': plan.cut_length,
                     'wt_per_piece': str(plan.wt_per_piece),
                     'qty': plan.qty,
-                    'status': plan.status,
                 })
             
             return JsonResponse(
@@ -561,7 +560,7 @@ class ProductionPlanAPI(View):
                 'next_production_plan_id': next_id
             })
         
-        # Get customer name for a specific requisition
+        # Get customer name
         if request.GET.get('action') == 'get_customer_name':
             requisition_id = request.GET.get('requisition_id')
             try:
@@ -595,7 +594,7 @@ class ProductionPlanAPI(View):
                     'success': False,
                     'message': 'Die Requisition not found'
                 })
-        
+
         # Otherwise return all plans
         plans = ProductionPlan.objects.all().select_related(
             'press', 'shift', 'cust_requisition_id', 'die_requisition'
@@ -617,11 +616,6 @@ class ProductionPlanAPI(View):
                 "cut_length": plan.cut_length,
                 "wt_per_piece": str(plan.wt_per_piece),
                 "qty": plan.qty,
-                "billet_size": str(plan.billet_size) if plan.billet_size else '',
-                "no_of_billet": plan.no_of_billet,
-                "plan_recovery": str(plan.plan_recovery) if plan.plan_recovery else '',
-                "current_recovery": str(plan.current_recovery) if plan.current_recovery else '',
-                "status": plan.status,
                 "created_at": plan.created_at.strftime("%Y-%m-%d"),
             })
         return JsonResponse({"success": True, "plans": formatted})
@@ -631,18 +625,15 @@ class ProductionPlanAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate only Press is required
             if not data.get('press'):
                 return JsonResponse({
                     "success": False,
                     "message": "Press is required."
                 })
-            
-            # Set default date if not provided
+
             if not data.get('date'):
                 data['date'] = timezone.now().date().isoformat()
-            
-            # Create production plan with nullable/optional fields
+
             plan = ProductionPlan.objects.create(
                 date=data['date'],
                 press_id=data['press'],
@@ -655,11 +646,6 @@ class ProductionPlanAPI(View):
                 cut_length=data.get('cut_length', ''),
                 wt_per_piece=data.get('wt_per_piece', 0),
                 qty=data.get('qty') or None,
-                billet_size=data.get('billet_size') or None,
-                no_of_billet=data.get('no_of_billet') or None,
-                plan_recovery=data.get('plan_recovery') or None,
-                current_recovery=data.get('current_recovery') or None,
-                status=data.get('status', 'planned')
             )
             
             return JsonResponse(
@@ -677,6 +663,7 @@ class ProductionPlanAPI(View):
             return JsonResponse({"success": False, "message": str(e)})
 
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class ProductionPlanDetailAPI(View):
     """API for get, edit & delete Production Plan"""
@@ -687,14 +674,12 @@ class ProductionPlanDetailAPI(View):
             plan = get_object_or_404(ProductionPlan, id=pk)
             data = json.loads(request.body)
             
-            # Validate only Press is required
             if not data.get('press'):
                 return JsonResponse({
                     "success": False,
                     "message": "Press is required."
                 })
             
-            # Update fields
             plan.date = data.get('date', plan.date)
             plan.press_id = data.get('press', plan.press_id)
             plan.shift_id = data.get('shift') or None
@@ -706,11 +691,7 @@ class ProductionPlanDetailAPI(View):
             plan.cut_length = data.get('cut_length', plan.cut_length)
             plan.wt_per_piece = data.get('wt_per_piece', plan.wt_per_piece)
             plan.qty = data.get('qty') or None
-            plan.billet_size = data.get('billet_size') or None
-            plan.no_of_billet = data.get('no_of_billet') or None
-            plan.plan_recovery = data.get('plan_recovery') or None
-            plan.current_recovery = data.get('current_recovery') or None
-            plan.status = data.get('status', plan.status)
+
             plan.save()
             
             return JsonResponse({
@@ -732,6 +713,7 @@ class ProductionPlanDetailAPI(View):
             })
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
+
 
 
 class ProductionPlanDeleteView(View):

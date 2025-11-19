@@ -9,22 +9,11 @@
 <div id="popupMessage" class="popup-message hidden"></div>
 
 <div class="form-container">
-    <!-- Header with Status Field -->
+    <!-- Header -->
     <div class="form-header">
         <h3 class="text-2xl font-bold italic"  style="color: #1e3a8a;">
             {% if edit_mode %}Edit Production Plan{% else %}Production Plan Form{% endif %}
         </h3>
-        
-        <!-- Status Dropdown in Top Right Corner -->
-        <div class="status-field-container">
-            <label for="status">Status</label>
-            <select name="status" id="status" form="productionPlanForm">
-                <option value="planned" {% if edit_mode and plan.status == 'planned' %}selected{% endif %}>Planned</option>
-                <option value="running" {% if edit_mode and plan.status == 'running' %}selected{% endif %}>Running</option>
-                <option value="completed" {% if edit_mode and plan.status == 'completed' %}selected{% endif %}>Completed</option>
-                <option value="discard" {% if edit_mode and plan.status == 'discard' %}selected{% endif %}>Discard</option>
-            </select>
-        </div>
     </div>
 
     <form id="productionPlanForm" method="post"
@@ -149,34 +138,6 @@
             <label for="qty">Planned Production in QTY</label>
             <input type="number" name="qty" id="qty" min="1"
                 value="{% if edit_mode %}{{ plan.qty }}{% endif %}">
-        </div>
-
-        <!-- Billet Size (Optional) -->
-        <div>
-            <label for="billet_size">Billet Size</label>
-            <input type="number" step="0.01" name="billet_size" id="billet_size"
-                value="{% if edit_mode %}{{ plan.billet_size }}{% endif %}">
-        </div>
-
-        <!-- No Of Billet (Optional) -->
-        <div>
-            <label for="no_of_billet">No Of Billet</label>
-            <input type="number" name="no_of_billet" id="no_of_billet" min="1"
-                value="{% if edit_mode %}{{ plan.no_of_billet }}{% endif %}">
-        </div>
-
-        <!-- Plan Recovery (Optional) -->
-        <div>
-            <label for="plan_recovery">Plan Recovery</label>
-            <input type="number" step="0.01" name="plan_recovery" id="plan_recovery" 
-                value="{% if edit_mode %}{{ plan.plan_recovery }}{% endif %}">
-        </div>
-
-        <!-- Current Recovery (Optional) -->
-        <div>
-            <label for="current_recovery">Current Recovery</label>
-            <input type="number" step="0.01" name="current_recovery" id="current_recovery" 
-                value="{% if edit_mode %}{{ plan.current_recovery }}{% endif %}">
         </div>
 
         <!-- Submit Button -->
