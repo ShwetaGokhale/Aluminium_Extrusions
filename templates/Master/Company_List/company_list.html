@@ -2,93 +2,238 @@
 {% block content %}
 {% load static %}
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/company_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/company_list.css' %}">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-<main class="table-container">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl lg:text-3xl font-bold italic text-center flex-grow" style="color: #1e3a8a;">
-            Company List
-        </h2>
+<style>
+    /* ====== PAGE LAYOUT (same as die/alloy/customer) ====== */
+    .page-layout {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
 
-        <!-- Search -->
-        <form method="GET" class="flex items-center space-x-2 mr-3">
-            <input type="text" name="global_search" value="{{ global_search|default:'' }}"
-                placeholder="Search By Company Name..." class="rounded-lg px-3 py-2 text-sm text-gray-800 border border-gray-300 shadow-sm
-                          focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
-            <button type="submit"
-                class="text-white font-bold py-2 px-4 rounded-lg shadow flex items-center transition duration-200"
-                style="background-color: #1e3a8a;">
-                <i class="fas fa-search mr-1"></i>
-                Search
-            </button>
-        </form>
+    .main-content-area {
+        flex: 1;
+        min-width: 0;
+        max-width: calc(100% - 300px);
+    }
 
-        <!-- Buttons -->
-        <div class="flex space-x-3">
-            <a href="#"
+    .info-sidebar {
+        width: 280px;
+        min-width: 280px;
+        background: rgb(246, 243, 243);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: none;
+        color: black;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        /* height: fit-content; */
+        height: calc(100vh - 20px);
+        overflow-y: auto;
+        position: sticky;
+        top: 20px;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .sidebar-section {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 18px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-section h3 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #8b7fc0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 0;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #8a8a8a;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #222;
+        padding: 4px 12px;
+        border-radius: 6px;
+    }
+
+    @media (max-width: 992px) {
+        .page-layout {
+            flex-direction: column;
+        }
+
+        .info-sidebar {
+            width: 100%;
+            position: static;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 15px;
+            order: -1;
+        }
+
+        .sidebar-section {
+            flex: 1;
+            min-width: 250px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .info-sidebar {
+            flex-direction: column;
+            padding: 16px;
+            gap: 12px;
+        }
+    }
+</style>
+
+<!-- PAGE WRAPPER (added) -->
+<div class="page-layout">
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content-area">
+
+        <main class="table-container">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl lg:text-3xl font-bold"
+                    style="color: black; flex-shrink: 1; white-space: nowrap; margin: 0;">
+                    Company List
+                </h2>
+
+                <!-- Search -->
+                <form method="GET" class="flex items-center space-x-2 mr-3">
+                    <input type="text" name="global_search" value="{{ global_search|default:'' }}"
+                        placeholder="Search By Company name..." class="rounded-lg px-3 py-2 text-sm text-gray-800 border border-gray-300 shadow-sm
+               focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+
+                    <button type="submit"
+                        class="font-bold py-2 px-4 rounded-lg shadow flex items-center transition duration-200"
+                        style="background-color: #e5e7eb; color: black;">
+                        <i class="fas fa-search mr-1" style="color: black;"></i>
+                    </button>
+                </form>
+
+                <!-- Buttons -->
+                <div class="flex space-x-3">
+                    <!-- <a href="#"
                 class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center">
                 <i class="fas fa-file-excel mr-2"></i>
             </a>
             <a href="#"
                 class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center">
                 <i class="fas fa-file-pdf mr-2"></i>
-            </a>
-            <!-- + Button -->
-            <a href="{% url 'company_create' %}"
-                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md flex items-center">
-                <i class="fas fa-plus mr-2"></i>
-            </a>
+            </a> -->
+                    <!-- + Button -->
+                    <a href="{% url 'company_create' %}"
+                        class="bg-white hover:bg-gray-200 text-blue-600 py-2 px-3 rounded-lg flex items-center gap-2"
+                        style="font-size: 0.875rem; font-weight: normal;" title="Add New">
+                        <i class="fas fa-plus mr-2"></i>
+                        <span>Add New Company</span>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">#</th>
+                        <th style="text-align: center;">Company Name</th>
+                        <th style="text-align: center;">Contact No</th>
+                        <th style="text-align: center;">Address</th>
+                        <th style="text-align: center;">Description</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="companyTableBody">
+                    {% for company in companies %}
+                    <tr data-company-id="{{ company.id }}">
+                        <td style="text-align: center;">{{ forloop.counter }}</td>
+                        <td style="text-align: center;">{{ company.name }}</td>
+                        <td style="text-align: center;">{{ company.contact_no }}</td>
+                        <td style="text-align: center;">{{ company.address|truncatechars:50 }}</td>
+                        <td style="text-align: center;">{{ company.description|truncatechars:40|default:"N/A" }}</td>
+                        <td style="white-space: nowrap; text-align: center;">
+                            <a href="{% url 'company_edit' company.id %}" class="action-btn edit-btn" title="Edit">
+                                <i class="fa-solid fa-pencil"></i>
+                            </a>
+                            <button type="button" class="action-btn delete-btn" data-company-id="{{ company.id }}"
+                                title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-gray-500 italic">No companies found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="flex justify-center mt-6">
+                <nav class="relative inline-flex rounded-md shadow-sm -space-x-px"></nav>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= RIGHT SIDEBAR ================= -->
+    <aside class="info-sidebar">
+
+        <div class="sidebar-section">
+            <h3><i class="fas fa-chart-line"></i> Overview</h3>
+
+            <div class="stat-item">
+                <span class="stat-label">Total Companies</span>
+                <span class="stat-value">{{ companies.count }}</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">With Contact No</span>
+                <span class="stat-value">{{ company_stats.with_contact|default:"0" }}</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">Without Contact</span>
+                <span class="stat-value">{{ company_stats.no_contact|default:"0" }}</span>
+            </div>
+
+            <div class="stat-item">
+                <span class="stat-label">Avg Address Length</span>
+                <span class="stat-value">{{ avg_address|default:"0" }}</span>
+            </div>
+
         </div>
 
-    </div>
+    </aside>
 
-    <!-- Table -->
-    <table>
-        <thead>
-            <tr>
-                <th>S.No</th>
-                <th>Company Name</th>
-                <th>Contact No</th>
-                <th>Address</th>
-                <th>Description</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="companyTableBody">
-            {% for company in companies %}
-            <tr data-company-id="{{ company.id }}">
-                <td>{{ forloop.counter }}</td>
-                <td>{{ company.name }}</td>
-                <td>{{ company.contact_no }}</td>
-                <td>{{ company.address|truncatechars:50 }}</td>
-                <td>{{ company.description|truncatechars:40|default:"N/A" }}</td>
-                <td style="white-space: nowrap;">
-                    <a href="{% url 'company_edit' company.id %}" class="action-btn edit-btn" title="Edit">
-                        <i class="fa-solid fa-pencil"></i>
-                    </a>
-                    <button type="button" class="action-btn delete-btn" data-company-id="{{ company.id }}"
-                        title="Delete">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="9" class="text-center py-4 text-gray-500 italic">No companies found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+</div> <!-- END page-layout -->
 
-    <!-- Pagination (if you implement it later) -->
-    <div class="flex justify-center mt-6">
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            <!-- Add pagination logic here if needed -->
-        </nav>
-    </div>
-</main>
 
 <!-- Modal for delete confirm -->
 <div id="confirmationModalOverlay" class="modal-overlay">
@@ -104,7 +249,7 @@
 <!-- Success popup -->
 <div id="successPopup" class="success-popup">Action successful!</div>
 
-<!-- Company Details Modal -->
+<!-- Details Modal -->
 <div id="companyDetailsModal" class="modal-overlay">
     <div class="modal-content" style="max-width: 600px;">
         <div class="flex justify-between items-center mb-4">
@@ -113,12 +258,10 @@
                 <i class="fa-solid fa-times text-xl"></i>
             </button>
         </div>
-        <div id="companyDetailsContent">
-            <!-- Company details will be loaded here -->
-        </div>
+        <div id="companyDetailsContent"></div>
     </div>
 </div>
 
 <!-- Custom JS -->
-<script src="{% static 'Js/company_list.js' %}"></script>
+<script src="{% static 'js/company_list.js' %}"></script>
 {% endblock %}

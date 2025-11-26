@@ -23,7 +23,8 @@
   background-color: #fff;
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(106, 27, 154, 0.2);
+  /* box-shadow: 0 4px 20px rgba(106, 27, 154, 0.2); */
+  box-shadow: none;
   margin: 32px auto;
   width: 95%;
   max-width: 100%;
@@ -33,9 +34,11 @@
 
 table {
   width: 100%;
-  border-collapse: separate;
+  /* border-collapse: separate; */
+  border-collapse: collapse !important;
   border-spacing: 0;
-  min-width: 1000px;
+  /* min-width: 1000px; */
+  min-width: 720px;
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
@@ -46,14 +49,21 @@ table {
 /* Header style */
 th {
   /* background-color: #7b1fa2; */
-  background-color: #1e3a8a; /* Blue-900 to match dashboard header */;
-  color: #fff;
-  text-transform: uppercase;
-  font-weight: bold;
-  border: none;
+  /* background-color: #1e3a8a; Blue-900 to match dashboard header; */
+  background-color: white;
+  /* color: #fff; */
+  /* color: rgba(0, 0, 0, 0.771); */
+  color: gray;
+  /* text-transform: uppercase; */
+  font-weight: normal;
+  /* border: 1px solid #e2e8f0; */
+  border: none !important;
   padding: 14px 10px;
   text-align: left;
   font-size: 0.875rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 /* Rounded corners for header */
@@ -67,12 +77,24 @@ th:last-child {
 
 td {
   padding: 12px 8px;
-  border: 1px solid #e2e8f0;
+  border: none !important;
+  /* border: 1px solid #e2e8f0; */
   text-align: left;
   font-size: 0.875rem;
-  color: #4a5568;
+  /* color: #4a5568; */
+  color: black;
   animation: slideUp 0.5s ease forwards;
   vertical-align: middle;
+}
+
+/* Line under header only */
+thead tr {
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+/* Optional: NO other row borders */
+tbody tr {
+  border-bottom: 0 !important;
 }
 
 /* Rounded corners for last row */
@@ -123,12 +145,12 @@ tbody tr:hover {
 
 .view-btn {
   /* color: #9c27b0; */
-  color: #1e3a8a; /* Blue-900 to match dashboard header */;
+  color: #1e3a8a; /* Blue-900 to match dashboard header */
 }
 
 .view-btn:hover {
   /* color: #7b1fa2; */
-  color: #1e3a8a; /* Blue-900 to match dashboard header */;
+  color: #1e3a8a; /* Blue-900 to match dashboard header */
   transform: scale(1.15);
 }
 
@@ -276,7 +298,7 @@ tbody tr:hover {
   font-weight: 600;
   font-style: italic;
   /* color: #6a1b9a; */
-  color: #1e3a8a; /* Blue-900 to match dashboard header */;
+  color: #1e3a8a; /* Blue-900 to match dashboard header */
   text-align: center;
 }
 
@@ -290,7 +312,7 @@ tbody tr:hover {
   font-size: 1.2rem;
   font-weight: bold;
   /* color: #6a1b9a; */
-  color: #1e3a8a; /* Blue-900 to match dashboard header */;
+  color: #1e3a8a; /* Blue-900 to match dashboard header */
   margin-bottom: 12px;
   border-bottom: 2px solid #e0e0e0;
   padding-bottom: 6px;

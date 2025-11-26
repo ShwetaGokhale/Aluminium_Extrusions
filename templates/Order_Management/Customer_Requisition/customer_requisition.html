@@ -7,9 +7,24 @@
 <div id="popupMessage" class="popup-message hidden"></div>
 
 <div class="form-container">
-    <h3 class="text-2xl font-bold italic mb-4 text-center" style="color: #1e3a8a;">
-        {% if edit_mode %}Edit Customer Requisition{% else %}Customer Requisition Form{% endif %}
-    </h3>
+    <!-- Header with Status Field -->
+    <div class="form-header">
+        <h3 class="text-2xl font-bold italic" style="color: #1e3a8a;">
+            {% if edit_mode %}Edit Customer Requisition{% else %}Customer Requisition Form{% endif %}
+        </h3>
+        
+        <!-- Status Dropdown in Top Right Corner -->
+        <div class="status-field-container">
+            <label for="status">Status <span style="color: red;">*</span></label>
+            <select name="status" id="status" required form="requisitionForm">
+                <option value="created" {% if edit_mode and requisition.status == 'created' %}selected{% endif %}>Created</option>
+                <option value="in_planning" {% if edit_mode and requisition.status == 'in_planning' %}selected{% endif %}>In Planning</option>
+                <option value="in_production" {% if edit_mode and requisition.status == 'in_production' %}selected{% endif %}>In Production</option>
+                <option value="completed" {% if edit_mode and requisition.status == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="rejected" {% if edit_mode and requisition.status == 'rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+        </div>
+    </div>
 
     <form id="requisitionForm" method="post"
           action="{% if edit_mode %}{% url 'requisition_edit' requisition.id %}{% else %}{% url 'requisition_form' %}{% endif %}">

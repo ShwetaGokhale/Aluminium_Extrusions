@@ -23,34 +23,43 @@
   background-color: #fff;
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(106, 27, 154, 0.2);
+  /* box-shadow: 0 4px 20px rgba(106, 27, 154, 0.2); */
+  box-shadow: none;
   margin: 32px auto;
   width: 95%;
   max-width: 100%;
   overflow-x: auto;
-  /* Enable horizontal scrolling for table */
   animation: slideUp 0.5s ease forwards;
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
-  /* table-layout: fixed; /* Removed fixed layout as it conflicts with content width in inline edit */
-  min-width: 1200px;
-  /* Ensure minimum width for desktop viewing to prevent squishing */
+  /* border-collapse: separate; */
+  border-collapse: collapse !important;
+  border-spacing: 0;
+  /* min-width: 1000px; */
+  min-width: 720px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: none;
+  animation: slideUp 0.5s ease forwards;
 }
 
 th {
-  /* background-color: #6a1b9a; */
-  background-color: #1e3a8a; /* Blue-900 to match dashboard header */;
-  color: white;
-  padding: 12px 8px;
+  /* background-color: #7b1fa2; */
+  /* background-color: #1e3a8a; Blue-900 to match dashboard header; */
+  background-color: white;
+  /* color: #fff; */
+  /* color: rgba(0, 0, 0, 0.771); */
+  color: gray;
+  /* text-transform: uppercase; */
+  font-weight: normal;
+  /* border: 1px solid #e2e8f0; */
+  border: none !important;
+  padding: 14px 10px;
   text-align: left;
   font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  /* border: 1px solid #7b1fa2; */
-  border: 1px solid #1e3a8a; /* Blue-900 to match dashboard header */
   position: sticky;
   top: 0;
   z-index: 10;
@@ -58,22 +67,34 @@ th {
 
 td {
   padding: 12px 8px;
-  border: 1px solid #e2e8f0;
+  border: none !important;
+  /* border: 1px solid #e2e8f0; */
   text-align: left;
   font-size: 0.875rem;
-  color: #4a5568;
+  /* color: #4a5568; */
+  color: black;
   animation: slideUp 0.5s ease forwards;
   vertical-align: middle;
-  /* Align content vertically */
+}
+
+/* Line under header only */
+thead tr {
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+/* Optional: NO other row borders */
+tbody tr {
+  border-bottom: 0 !important;
 }
 
 /* Make the table corners rounded */
 table {
   width: 100%;
-  border-collapse: separate;
-  /* Important for border-radius! */
+  /* border-collapse: separate; */
+  border-collapse: collapse !important;
   border-spacing: 0;
-  min-width: 1000px;
+  /* min-width: 1000px; */
+  min-width: 720px;
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
@@ -84,13 +105,21 @@ table {
 /* Header style */
 th {
   /* background-color: #7b1fa2; */
-  /* Purple */
-  background-color: #1e3a8a; /* Blue-900 to match dashboard header */;
-  color: #fff;
-  text-transform: uppercase;
-  font-weight: bold;
-  border: none;
+  /* background-color: #1e3a8a; Blue-900 to match dashboard header; */
+  background-color: white;
+  /* color: #fff; */
+  /* color: rgba(0, 0, 0, 0.771); */
+  color: gray;
+  /* text-transform: uppercase; */
+  font-weight: normal;
+  /* border: 1px solid #e2e8f0; */
+  border: none !important;
   padding: 14px 10px;
+  text-align: left;
+  font-size: 0.875rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 /* Rounded corners for header */

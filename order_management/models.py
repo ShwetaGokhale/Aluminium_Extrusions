@@ -8,6 +8,14 @@ from master.models import *   # import model from Master app
 # Model for Requisition functionality
 #─────────────────────────────────────────────────────────────────────────────
 class Requisition(models.Model):
+    STATUS_CHOICES = [
+        ('created', 'Created'),
+        ('in_planning', 'In Planning'),
+        ('in_production', 'In Production'),
+        ('completed', 'Completed'),
+        ('rejected', 'Rejected'),
+    ]
+    
     requisition_id = models.CharField(
         max_length=20,
         unique=True,
@@ -34,7 +42,7 @@ class Requisition(models.Model):
         "master.Staff",
         on_delete=models.SET_NULL,
         null=True,
-        blank=True,  # Make sales_manager optional
+        blank=True,
         verbose_name="Sales Manager"
     )
     expiry_date = models.DateField(
@@ -46,6 +54,12 @@ class Requisition(models.Model):
         null=True,
         blank=True,
         verbose_name="Dispatch Date"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='created',
+        verbose_name="Status"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

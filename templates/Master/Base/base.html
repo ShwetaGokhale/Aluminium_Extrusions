@@ -7,7 +7,7 @@
     <title>Aluminium Extrusions</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="{% static 'Css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Base.css' %}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -15,41 +15,61 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
     <style>
-        /* Logout Modal Styles */
+        /* Sidebar Collapse Behavior */
+        .main-header {
+            width: 250px;
+            transition: 0.3s;
+        }
+
+        .main-header.collapsed {
+            width: 60px;
+        }
+
+        .content-wrapper {
+            margin-left: 250px;
+            transition: 0.3s;
+        }
+
+        .content-wrapper.expanded {
+            margin-left: 60px;
+        }
+
+        /* Sidebar Toggle Button */
+        #sidebarToggle {
+            position: fixed;
+            top: 18px;
+            left: 20px;
+            font-size: 26px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 2000;
+        }
+
+        /* Logout Modal Styles (Updated UI like reference image) */
         #logoutModal {
             display: none;
             position: fixed;
             inset: 0;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.55);
             z-index: 9999;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.2s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
         }
 
         #logoutModalContent {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            background: #ffffff;
             width: 90%;
-            max-width: 400px;
-            animation: slideDown 0.3s ease;
+            max-width: 420px;
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 16px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.28);
+            animation: modalDrop 0.3s ease;
         }
 
-        @keyframes slideDown {
+        @keyframes modalDrop {
             from {
-                transform: translateY(-50px);
+                transform: translateY(-40px);
                 opacity: 0;
             }
 
@@ -59,100 +79,104 @@
             }
         }
 
-        .modal-icon {
-            width: 60px;
-            height: 60px;
-            background: #fee;
+        /* Icon Circle */
+        .logout-icon-box {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 15px;
+            background: #ffe8e8;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
         }
 
-        .modal-icon i {
-            color: #dc2626;
-            font-size: 28px;
+        .logout-icon-box i {
+            font-size: 32px;
+            color: #e53935;
         }
 
+        /* Title */
         .modal-title {
             font-size: 22px;
-            font-weight: bold;
-            color: #1f2937;
-            text-align: center;
-            margin-bottom: 10px;
+            font-weight: 700;
+            color: #333;
+            margin-top: 10px;
         }
 
+        /* Text */
         .modal-text {
-            color: #6b7280;
-            text-align: center;
-            margin-bottom: 25px;
             font-size: 15px;
+            color: #666;
+            margin: 10px 0 25px;
         }
 
+        /* Buttons container */
         .modal-actions {
             display: flex;
-            gap: 12px;
             justify-content: center;
+            gap: 15px;
         }
 
         .modal-btn {
-            padding: 10px 24px;
+            padding: 10px 22px;
             border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
             cursor: pointer;
-            transition: all 0.2s;
             border: none;
+            transition: 0.2s;
+            min-width: 120px;
         }
 
+        /* Cancel Button */
         .modal-btn-cancel {
-            background: #f3f4f6;
-            color: #374151;
+            background: #f1f1f5;
+            color: #333;
         }
 
         .modal-btn-cancel:hover {
-            background: #e5e7eb;
+            background: #e3e3e8;
         }
 
+        /* Logout Button */
         .modal-btn-logout {
-            background: #dc2626;
+            background: #e53935;
             color: white;
         }
 
         .modal-btn-logout:hover {
-            background: #b91c1c;
+            background: #c62828;
         }
     </style>
 </head>
 
 <body>
+
     <!-- Sidebar Header -->
     <header class="main-header">
-        <!-- Sidebar Logo -->
         <div class="sidebar-logo">
-            <img src="{% static 'Images/extruedge1.jpeg' %}" alt="Company Logo">
+            <i class="fa-solid fa-bars" id="sidebarToggle"></i>
+            <img src="{% static 'images/extruedge1.jpeg' %}" alt="Company Logo">
         </div>
 
+
+
         <nav class="main-nav">
+
             <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home"></i> <span>Dashboard</span></a>
-            <!-- ✅ Over Head Screen Dropdown Added -->
+
             <div class="dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
                     <i class="fa-solid fa-tv"></i> <span>Over Head Screen</span>
                     <span class="dropdown-icon">&#9662;</span>
                 </a>
                 <div class="dropdown-content">
-                    <!-- <a href="{% url 'dashboard' %}">Dashboard</a> -->
-                    <!-- Dashboard New -->
-                    <a href="{% url 'dashboard_new' %}">Order Status</a> 
-                    <a href="{% url 'current_production' %}">Current Production</a>   
+                    <a href="{% url 'dashboard_new' %}">Order Status</a>
+                    <a href="{% url 'current_production' %}">Current Production</a>
                 </div>
             </div>
 
-            <!-- <a href="{% url 'dashboard_new' %}"><i class="fa-solid fa-home"></i> <span>Dashboard New</span></a> -->
-
-            <!-- Master Dropdown -->
+            <!-- Master -->
             <div class="dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
                     <i class="fa-solid fa-layer-group"></i> <span>Master</span>
@@ -169,7 +193,7 @@
                 </div>
             </div>
 
-            <!-- Order Management Dropdown -->
+            <!-- Order -->
             <div class="dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
                     <i class="fa fa-box"></i> <span>Order Management</span>
@@ -177,11 +201,10 @@
                 </a>
                 <div class="dropdown-content">
                     <a href="{% url 'requisition_list' %}">Customer Requisition</a>
-                    <!-- <a href="{% url 'work_order_list' %}">Work Order</a> -->
                 </div>
             </div>
 
-            <!-- Planning Dropdown -->
+            <!-- Planning -->
             <div class="dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
                     <i class="fa fa-tasks"></i> <span>Planning</span>
@@ -193,7 +216,7 @@
                 </div>
             </div>
 
-            <!-- Production Dropdown -->
+            <!-- Production -->
             <div class="dropdown">
                 <a href="javascript:void(0)" class="dropbtn">
                     <i class="fa fa-industry"></i> <span>Production</span>
@@ -205,25 +228,17 @@
                 </div>
             </div>
 
-            <!-- Packaging Quality Dropdown -->
-            <!-- <div class="dropdown">
-                <a href="javascript:void(0)" class="dropbtn">
-                    <i class="fa fa-clipboard-check"></i> <span>Packaging Quality</span>
-                    <span class="dropdown-icon">&#9662;</span>
-                </a>
-                <div class="dropdown-content">
-                    <a href="#">Inspection Report</a>
-                </div>
-            </div> -->
-
             <!-- Logout -->
-            <button onclick="showLogoutModal()"
-                class="border border-white text-white bg-transparent hover:bg-red-600 hover:border-red-600 hover:text-white px-3 py-1.5 text-sm rounded flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out">
-                <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                <span class="font-medium tracking-wide">Logout</span>
+            <button onclick="showLogoutModal()" class="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
             </button>
+
+
         </nav>
     </header>
+
+
 
     <!-- Main Page Content -->
     <main class="content-wrapper">
@@ -234,65 +249,76 @@
     <!-- Logout Confirmation Modal -->
     <div id="logoutModal">
         <div id="logoutModalContent">
-            <div class="modal-icon">
+
+            <div class="logout-icon-box">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </div>
+
             <h3 class="modal-title">Logout Confirmation</h3>
+
             <p class="modal-text">Are you sure you want to logout from your account?</p>
+
             <div class="modal-actions">
-                <button onclick="closeLogoutModal()" class="modal-btn modal-btn-cancel">
-                    Cancel
-                </button>
-                <button onclick="confirmLogout()" class="modal-btn modal-btn-logout">
-                    Yes, Logout
-                </button>
+                <button onclick="closeLogoutModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button onclick="confirmLogout()" class="modal-btn modal-btn-logout">Yes, Logout</button>
             </div>
+
         </div>
     </div>
-
+    <script src="{% static 'js/login_script.js' %}"></script>
     <script>
-        // Show logout modal
-        function showLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'flex';
-        }
+        const sidebar = document.querySelector('.main-header');
+        const content = document.querySelector('.content-wrapper');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const dropdowns = document.querySelectorAll('.dropdown');
 
-        // Close logout modal
-        function closeLogoutModal() {
-            document.getElementById('logoutModal').style.display = 'none';
-        }
+        // ========== Toggle Manually ==========
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+        });
 
-        // Confirm logout
-        function confirmLogout() {
-            window.location.href = "{% url 'logout' %}";
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('logoutModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeLogoutModal();
+        // ========== Auto Open When Clicking the Collapsed Sidebar ==========
+        sidebar.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('collapsed') && e.target !== toggleBtn) {
+                sidebar.classList.remove('collapsed');
+                content.classList.remove('expanded');
             }
         });
 
-        // Close modal with Escape key
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                closeLogoutModal();
-            }
-        });
+        // ========== Dropdown Feature ==========
+        dropdowns.forEach((menu) => {
+            const button = menu.querySelector('.dropbtn');
 
-        // Dropdown toggle
-        document.querySelectorAll('.dropbtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const parent = btn.parentElement;
-                parent.classList.toggle('active');
+            button.addEventListener('click', (e) => {
 
-                // Close others
-                document.querySelectorAll('.dropdown').forEach(drop => {
-                    if (drop !== parent) drop.classList.remove('active');
+                // 🚫 Block dropdown opening if sidebar collapsed
+                if (sidebar.classList.contains('collapsed')) {
+                    // Just open sidebar, do **not** open dropdown
+                    sidebar.classList.remove('collapsed');
+                    content.classList.remove('expanded');
+                    return; // Stop here ❌
+                }
+
+                // Normal dropdown toggle when expanded
+                dropdowns.forEach(d => {
+                    if (d !== menu) d.classList.remove('active');
                 });
+                menu.classList.toggle('active');
             });
         });
+
+        // ========== Logout Modal ==========
+        function showLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; }
+        function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
+        function confirmLogout() { window.location.href = "{% url 'logout' %}"; }
     </script>
+
+
+<!-- Footer -->
+<footer class="app-footer">
+    Powered by <strong>Extrudge</strong>
+</footer>
 </body>
 
 </html>

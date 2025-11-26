@@ -34,6 +34,20 @@ class RequisitionListView(View):
                 'customer', 'sales_manager'
             ).all().order_by("-created_at")
         
+        # ---------------- Calculate Status Counts ----------------
+        from django.db.models import Count
+        
+        # Get all requisitions for counting (not paginated)
+        all_requisitions = Requisition.objects.all()
+        
+        status_counts = {
+            'created': all_requisitions.filter(status='created').count(),
+            'in_planning': all_requisitions.filter(status='in_planning').count(),
+            'in_production': all_requisitions.filter(status='in_production').count(),
+            'completed': all_requisitions.filter(status='completed').count(),
+            'rejected': all_requisitions.filter(status='rejected').count(),
+        }
+        
         # ---------------- Pagination ----------------
         paginator = Paginator(requisitions, 10)  # 10 per page
         page_number = request.GET.get("page")
@@ -52,6 +66,8 @@ class RequisitionListView(View):
             for req in page_obj:
                 req_dict = model_to_dict(req)
                 req_dict['customer_name'] = req.customer.name
+                req_dict['status'] = req.status
+                req_dict['status_display'] = req.get_status_display()
                 req_dict['orders'] = list(
                     req.orders.values(
                         'section_no__section_no',
@@ -65,6 +81,7 @@ class RequisitionListView(View):
             return JsonResponse(
                 {
                     "requisitions": requisition_list,
+                    "status_counts": status_counts,
                     "current_page": page_obj.number,
                     "total_pages": paginator.num_pages,
                     "start_page": start_page,
@@ -85,6 +102,7 @@ class RequisitionListView(View):
                 "end_page": end_page,
                 "total_pages": paginator.num_pages,
                 "global_search": search_query,
+                "status_counts": status_counts,  # Add status counts
             },
         )
 
@@ -241,6 +259,8 @@ class RequisitionAPI(View):
                 "sales_manager_name": f"{req.sales_manager.first_name} {req.sales_manager.last_name}" if req.sales_manager else "",
                 "expiry_date": req.expiry_date.strftime("%Y-%m-%d") if req.expiry_date else "",
                 "dispatch_date": req.dispatch_date.strftime("%Y-%m-%d") if req.dispatch_date else "",
+                "status": req.status,
+                "status_display": req.get_status_display(),
                 "created_at": req.created_at.strftime("%Y-%m-%d"),
             }
             formatted.append(req_data)
@@ -252,9 +272,10 @@ class RequisitionAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Only validate required fields: requisition_no and customer
+            # Validate required fields: requisition_no, customer, and status
             requisition_no = data.get("requisition_no", "").strip()
             customer_id = data.get("customer")
+            status = data.get("status", "created")  # Default to 'created'
             
             if not requisition_no:
                 return JsonResponse({
@@ -266,6 +287,20 @@ class RequisitionAPI(View):
                 return JsonResponse({
                     "success": False,
                     "message": "Customer is required."
+                })
+            
+            if not status:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Status is required."
+                })
+            
+            # Validate status is one of the allowed choices
+            valid_statuses = ['created', 'in_planning', 'in_production', 'completed', 'rejected']
+            if status not in valid_statuses:
+                return JsonResponse({
+                    "success": False,
+                    "message": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
                 })
             
             # Check if requisition_no already exists
@@ -305,7 +340,8 @@ class RequisitionAPI(View):
                 address=data.get("address", ""),
                 sales_manager=sales_manager,
                 expiry_date=data.get("expiry_date") or None,
-                dispatch_date=data.get("dispatch_date") or None
+                dispatch_date=data.get("dispatch_date") or None,
+                status=status  # Add status field
             )
             
             # Create orders
@@ -334,6 +370,8 @@ class RequisitionAPI(View):
                         "id": requisition.id,
                         "requisition_id": requisition.requisition_id,
                         "requisition_no": requisition.requisition_no,
+                        "status": requisition.status,
+                        "status_display": requisition.get_status_display(),
                         "created_at": requisition.created_at.strftime("%Y-%m-%d"),
                     },
                 }
@@ -379,6 +417,8 @@ class RequisitionDetailAPI(View):
                         "sales_manager": requisition.sales_manager.id if requisition.sales_manager else None,
                         "expiry_date": requisition.expiry_date.strftime("%Y-%m-%d") if requisition.expiry_date else "",
                         "dispatch_date": requisition.dispatch_date.strftime("%Y-%m-%d") if requisition.dispatch_date else "",
+                        "status": requisition.status,
+                        "status_display": requisition.get_status_display(),
                         "orders": orders_data
                     },
                 }
@@ -392,9 +432,10 @@ class RequisitionDetailAPI(View):
             requisition = get_object_or_404(Requisition, id=pk)
             data = json.loads(request.body)
             
-            # Only validate required fields: requisition_no and customer
+            # Validate required fields: requisition_no, customer, and status
             requisition_no = data.get("requisition_no", "").strip()
             customer_id = data.get("customer")
+            status = data.get("status")
             
             if not requisition_no:
                 return JsonResponse({
@@ -406,6 +447,20 @@ class RequisitionDetailAPI(View):
                 return JsonResponse({
                     "success": False,
                     "message": "Customer is required."
+                })
+            
+            if not status:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Status is required."
+                })
+            
+            # Validate status is one of the allowed choices
+            valid_statuses = ['created', 'in_planning', 'in_production', 'completed', 'rejected']
+            if status not in valid_statuses:
+                return JsonResponse({
+                    "success": False,
+                    "message": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
                 })
             
             # Check if requisition_no already exists (excluding current requisition)
@@ -445,6 +500,7 @@ class RequisitionDetailAPI(View):
             requisition.sales_manager = sales_manager
             requisition.expiry_date = data.get("expiry_date") or None
             requisition.dispatch_date = data.get("dispatch_date") or None
+            requisition.status = status  # Update status field
             requisition.save()
             
             # Handle orders (update/create/delete)

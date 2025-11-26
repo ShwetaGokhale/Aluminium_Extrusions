@@ -2,15 +2,12 @@ from django import forms
 from .models import *
 from datetime import date
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Forms for Requisition functionality
-# ──────────────────────────────────────────────────────────────────────────────
 class RequisitionForm(forms.ModelForm):
     class Meta:
         model = Requisition
         fields = [
             'date', 'requisition_no', 'customer', 'contact_no',
-            'address', 'sales_manager', 'expiry_date', 'dispatch_date'
+            'address', 'sales_manager', 'expiry_date', 'dispatch_date', 'status'
         ]
         widgets = {
             'date': forms.DateInput(attrs={
@@ -46,6 +43,10 @@ class RequisitionForm(forms.ModelForm):
                 'class': 'form-control',
                 'type': 'date'
             }),
+            'status': forms.Select(attrs={
+                'class': 'form-control',
+                'required': True
+            })
         }
     
     def __init__(self, *args, **kwargs):
@@ -56,11 +57,12 @@ class RequisitionForm(forms.ModelForm):
         
         self.fields['sales_manager'].queryset = Staff.objects.all()
         self.fields['sales_manager'].empty_label = "Select Sales Manager"
-        self.fields['sales_manager'].required = False  # Make sales manager optional
+        self.fields['sales_manager'].required = False
         
-        # Set default date to today
+        # Set default date and status
         if not self.instance.pk:
             self.fields['date'].initial = date.today()
+            self.fields['status'].initial = 'created'
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Forms for Requisition's Goods functionality

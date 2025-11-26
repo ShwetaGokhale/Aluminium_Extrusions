@@ -444,3 +444,10 @@ label[for="selectAllCheckbox"],
   line-height: 1;
 }
 
+.action-menu-wrapper {
+    position: relative !important;
+}
+
+.action-menu-wrapper .absolute {
+    z-index: 999999 !important;
+}

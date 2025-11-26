@@ -1,6 +1,6 @@
 /* ========== GLOBAL ========== */
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
   background: #ffffff;
@@ -60,8 +60,13 @@ body {
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 10px;
-  transition: width 0.3s ease, height 0.3s ease, font-size 0.3s ease,
-    background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  transition:
+    width 0.3s ease,
+    height 0.3s ease,
+    font-size 0.3s ease,
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s ease;
 }
 
 #sidebarToggle:hover {
@@ -210,50 +215,22 @@ body {
 }
 
 /* ================= SCROLLBAR ================= */
-.main-header::-webkit-scrollbar {
-  width: 6px;
-}
-.main-header::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-}
+.main-header::-webkit-scrollbar { width: 6px; }
+.main-header::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
 .main-header::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 3px;
+  background: rgba(0,0,0,0.3); border-radius: 3px;
 }
 .main-header::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0,0,0,0.5);
 }
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
-  .main-header {
-    width: 220px;
-  }
-  .content-wrapper {
-    margin-left: 220px;
-    width: calc(100% - 220px);
-  }
+  .main-header { width: 220px; }
+  .content-wrapper { margin-left: 220px; width: calc(100% - 220px); }
 }
 
 @media (max-width: 480px) {
-  .main-header {
-    width: 200px;
-  }
-  .content-wrapper {
-    margin-left: 200px;
-    width: calc(100% - 200px);
-  }
-}
-
-.app-footer {
-    width: 100%;
-    text-align: center;
-    padding: 10px 0;
-    font-size: 14px;
-    color: #111; /* dark text */
-    background: #9ca3af; /* darker grey */
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    z-index: 500;
+  .main-header { width: 200px; }
+  .content-wrapper { margin-left: 200px; width: calc(100% - 200px); }
 }

@@ -47,9 +47,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---------------- Load Edit Data ----------------
     function loadEditData() {
         if (window.editMode && window.ordersData) {
-            ordersBody.innerHTML = "";  // Clear any existing rows
+            ordersBody.innerHTML = "";
             window.ordersData.forEach(order => {
-                // Convert order data to match addOrderRow format
                 const orderData = {
                     id: order.id,
                     section_no__id: order.section_no || order.section_no__id,
@@ -209,7 +208,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         ordersBody.appendChild(row);
 
-        // Attach section dropdown with section name update
         const sectionInput = row.querySelector(".section-input");
         const sectionDropdown = row.querySelector(".section-dropdown");
         const sectionHidden = row.querySelector("input[name='section_no[]']");
@@ -235,7 +233,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const row = e.target.closest("tr");
             if (row) row.remove();
             
-            // Show example row if no orders left
             if (ordersBody.querySelectorAll("tr:not(.example-row)").length === 0 && !window.editMode) {
                 initExampleRows();
             }
@@ -246,8 +243,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function validateForm(formData, orders) {
         const requisitionNo = formData.get("requisition_no");
         const customer = formData.get("customer");
+        const status = formData.get("status");
 
-        // Only check required fields: Requisition No and Customer
         if (!requisitionNo || requisitionNo.trim() === '') {
             showMessage("error", "Customer Requisition No is required");
             return false;
@@ -258,7 +255,17 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        // Orders are optional - no validation needed
+        if (!status) {
+            showMessage("error", "Status is required");
+            return false;
+        }
+
+        // Validate status is one of the allowed values
+        const validStatuses = ['created', 'in_planning', 'in_production', 'completed', 'rejected'];
+        if (!validStatuses.includes(status)) {
+            showMessage("error", "Invalid status selected");
+            return false;
+        }
 
         return true;
     }
@@ -278,6 +285,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 sales_manager: formData.get("sales_manager") || null,
                 expiry_date: formData.get("expiry_date") || null,
                 dispatch_date: formData.get("dispatch_date") || null,
+                status: formData.get("status") || 'created',
                 orders: []
             };
 
@@ -302,7 +310,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             }
 
-            // Validate
             if (!validateForm(formData, payload.orders)) {
                 return;
             }
@@ -352,7 +359,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---------------- Set Default Date (Non-editable) ----------------
     const today = new Date().toISOString().split('T')[0];
     
-    // Always set date to today and make it readonly
     if (dateInput) {
         if (!window.editMode || !dateInput.value) {
             dateInput.value = today;

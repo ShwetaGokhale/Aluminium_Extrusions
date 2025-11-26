@@ -7,6 +7,42 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
+    /* ========== STATUS BADGE STYLES ========== */
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        white-space: nowrap;
+    }
+
+    .status-created {
+        background-color: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .status-in_planning {
+        background-color: #fff3e0;
+        color: #e65100;
+    }
+
+    .status-in_production {
+        background-color: #fff9c4;
+        color: #f57f17;
+    }
+
+    .status-completed {
+        background-color: #c8e6c9;
+        color: #2e7d32;
+    }
+
+    .status-rejected {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+
     /* ========== PAGE LAYOUT WITH RIGHT SIDEBAR ========== */
     .page-layout {
         display: flex;
@@ -16,27 +52,12 @@
         padding: 0;
     }
 
-    /* ========== MAIN CONTENT AREA ========== */
     .main-content-area {
         flex: 1;
         min-width: 0;
         max-width: calc(100% - 300px);
-        animation: slideInLeft 0.5s ease forwards;
     }
 
-    @keyframes slideInLeft {
-        from {
-            opacity: 0;
-            transform: translateX(-30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    /* Adjust table container for sidebar layout */
     .page-layout .table-container {
         width: 100%;
         max-width: 100%;
@@ -44,19 +65,16 @@
         padding: 20px;
     }
 
-    /* Fix table header alignment */
     .page-layout .table-container .flex.justify-between {
         flex-wrap: wrap;
         gap: 10px;
     }
 
-    /* Ensure table is properly contained */
     .page-layout table {
         table-layout: auto;
         width: 100%;
     }
 
-    /* Make table responsive within the layout */
     .page-layout .table-container {
         overflow-x: auto;
     }
@@ -65,49 +83,30 @@
     .info-sidebar {
         width: 280px;
         min-width: 280px;
-        background: linear-gradient(135deg, #1e3a8a 0%, #0f766e 100%);
+        background: rgb(246, 243, 243);
         border-radius: 12px;
         padding: 24px;
-        box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
-        color: white;
+        box-shadow: none;
+        color: black;
         display: flex;
         flex-direction: column;
         gap: 20px;
-        height: fit-content;
+        /* height: fit-content; */
+        height: calc(100vh - 20px);
+        overflow-y: auto;
         position: sticky;
         top: 20px;
-        animation: slideInRight 0.5s ease forwards;
+        font-family: 'Inter', sans-serif !important;
     }
 
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    /* Sidebar Section Cards */
     .sidebar-section {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
         padding: 18px;
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
     }
 
-    .sidebar-section:hover {
-        background: rgba(255, 255, 255, 0.15);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Section Headers */
     .sidebar-section h3 {
         font-size: 1.1rem;
         font-weight: bold;
@@ -115,7 +114,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #fff;
+        color: #8b7fc0;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -128,81 +127,34 @@
     /* ========== STATISTICS ITEMS ========== */
     .stat-item {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.2s ease;
+        flex-direction: column;
+        /* vertical */
+        align-items: flex-start;
+        /* left side */
+        padding: 10px 0;
+        gap: 2px;
     }
 
     .stat-item:last-child {
         border-bottom: none;
     }
 
-    .stat-item:hover {
-        padding-left: 4px;
-    }
-
     .stat-label {
         font-size: 0.9rem;
-        opacity: 0.9;
+        color: #8a8a8a;
         font-weight: 500;
     }
 
     .stat-value {
         font-size: 1.1rem;
         font-weight: bold;
-        background: rgba(255, 255, 255, 0.2);
+        color: #222;
+        font-size: 20px;
+        font-weight: 600;
+        background: none;
+        padding: 0;
         padding: 4px 12px;
         border-radius: 6px;
-        transition: all 0.2s ease;
-    }
-
-    .stat-item:hover .stat-value {
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(1.05);
-    }
-
-    /* ========== INFO TEXT ========== */
-    .info-text {
-        font-size: 0.85rem;
-        line-height: 1.5;
-        opacity: 0.9;
-        margin-top: 8px;
-        font-style: italic;
-    }
-
-    /* ========== QUICK ACTIONS ========== */
-    .quick-action {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 10px;
-        border-radius: 8px;
-        margin-top: 8px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 1px solid transparent;
-        text-decoration: none;
-        color: white;
-    }
-
-    .quick-action:hover {
-        background: rgba(255, 255, 255, 0.25);
-        border-color: rgba(255, 255, 255, 0.3);
-        transform: translateX(-4px);
-    }
-
-    .quick-action i {
-        font-size: 1.1rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .quick-action span {
-        font-size: 0.9rem;
-        font-weight: 500;
     }
 
     /* ========== RESPONSIVE DESIGN ========== */
@@ -316,7 +268,6 @@
         }
     }
 
-    /* ========== SCROLLBAR FOR SIDEBAR ========== */
     .info-sidebar::-webkit-scrollbar {
         width: 6px;
     }
@@ -347,32 +298,23 @@
                 </h2>
 
                 <!-- Search -->
-                <form method="GET" class="flex items-center space-x-2" style="flex-shrink: 0;">
+                <form method="GET" class="flex items-center space-x-2 mr-3">
                     <input type="text" name="global_search" value="{{ global_search|default:'' }}"
-                        placeholder="Search..." class="rounded-lg px-3 py-2 text-sm text-gray-800 border border-gray-300 shadow-sm
-                               focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                        style="width: 180px;">
+                        placeholder="Search By Die No..." class="rounded-lg px-3 py-2 text-sm text-gray-800 border border-gray-300 shadow-sm
+               focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+
                     <button type="submit"
-                        class="text-white font-bold py-2 px-3 rounded-lg shadow flex items-center transition duration-200"
-                        style="background-color: #1a3e8e;">
-                        <i class="fas fa-search"></i>
+                        class="font-bold py-2 px-4 rounded-lg shadow flex items-center transition duration-200"
+                        style="background-color: #e5e7eb; color: black;">
+                        <i class="fas fa-search mr-1" style="color: black;"></i>
                     </button>
                 </form>
 
+
                 <!-- Buttons -->
                 <div class="flex space-x-2" style="flex-shrink: 0;">
-                    <!-- <a href="#"
-                        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg shadow-md flex items-center"
-                        title="Export Excel">
-                        <i class="fas fa-file-excel"></i>
-                    </a>
-                    <a href="#"
-                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg shadow-md flex items-center"
-                        title="Export PDF">
-                        <i class="fas fa-file-pdf"></i> -->
-                    </a>
                     <a href="{% url 'requisition_form' %}"
-                        class="bg-white-600 hover:bg-gray-300 text-blue py-2 px-3 rounded-lg  flex items-center gap-2"
+                        class="bg-white hover:bg-gray-200 text-blue-600 py-2 px-3 rounded-lg flex items-center gap-2"
                         style="font-size: 0.875rem; font-weight: normal;" title="Add New">
                         <i class="fas fa-plus"></i>
                         <span>Add New Order</span>
@@ -382,16 +324,13 @@
 
             <!-- Select All and Print Button Section -->
             <div class="flex items-center space-x-2 mb-4">
-                <!-- ✅ Select All Option -->
                 <label
-                    class="flex items-center bg-white-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-3 rounded-lg  cursor-pointer"
+                    class="flex items-center bg-white-200 hover:bg-gray-300 text-gray-500 py-2 px-3 rounded-lg cursor-pointer"
                     style="white-space: nowrap;">
-                    <input type="checkbox" id="selectAllCheckbox"
-                        class="form-checkbox h-4 w-4 text-purple-600 mr-2">
+                    <input type="checkbox" id="selectAllCheckbox" class="form-checkbox h-4 w-4 text-purple-600 mr-2">
                     <span style="font-size: 0.875rem;">Select All</span>
                 </label>
 
-                <!-- Print Button (initially hidden) -->
                 <button id="printSelectedBtn"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg shadow-md items-center hidden"
                     style="white-space: nowrap;">
@@ -405,14 +344,16 @@
                 <table style="min-width: 720px;">
                     <thead>
                         <tr>
-                            <th style="width: 60px;">S.No</th>
-                            <th style="width: 150px;">Order No</th>
-                            <th style="width: 180px;">Customer Name</th>
-                            <th style="width: 120px;">Section No</th>
-                            <th style="width: 100px;">WT Range</th>
-                            <th style="width: 100px;">Cut Length</th>
-                            <th style="width: 80px;">QTY</th>
-                            <th style="width: 110px;">Actions</th>
+                            <th style="width: 60px; text-align: center;">#</th>
+                            <th style="width: 100px; text-align: center;">Order</th>
+                            <th style="width: 100px; text-align: center;">Created</th>
+                            <th style="width: 180px; text-align: center;">Customer</th>
+                            <th style="width: 120px; text-align: center;">Section</th>
+                            <th style="width: 100px; text-align: center;">Weight</th>
+                            <th style="width: 100px; text-align: center;">C/L</th>
+                            <th style="width: 80px; text-align: center;">Qty</th>
+                            <th style="width: 130px; text-align: center;">Status</th>
+                            <th style="width: 110px; text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="requisitionTableBody">
@@ -420,19 +361,28 @@
                         {% for order in req.orders.all %}
                         <tr data-requisition-id="{{ req.id }}">
                             {% if forloop.first %}
-                            <td rowspan="{{ req.orders.count }}">
+                            <td rowspan="{{ req.orders.count }}" style="text-align: center;">
                                 {{ forloop.parentloop.counter|add:page_obj.start_index|add:"-1" }}
                                 <input type="checkbox" class="row-checkbox form-checkbox h-3 w-3 text-purple-600 hidden"
                                     value="{{ req.id }}">
                             </td>
-                            <td rowspan="{{ req.orders.count }}">{{ req.requisition_no }}</td>
-                            <td rowspan="{{ req.orders.count }}">{{ req.customer.name }}</td>
+                            <td rowspan="{{ req.orders.count }}" style="text-align: center;">{{ req.requisition_no }}
+                            </td>
+                            <td rowspan="{{ req.orders.count }}" style="text-align: center;">
+                                {{req.created_at|date:"Y-m-d" }}</td>
+                            <td rowspan="{{ req.orders.count }}" style="text-align: center;">{{ req.customer.name }}
+                            </td>
                             {% endif %}
-                            <td>{{ order.section_no.section_no }}</td>
-                            <td>{{ order.wt_range }}</td>
-                            <td>{{ order.cut_length }}</td>
-                            <td>{{ order.qty_in_no }}</td>
+                            <td style="text-align: center;">{{ order.section_no.section_no }}</td>
+                            <td style="text-align: center;">{{ order.wt_range }}</td>
+                            <td style="text-align: center;">{{ order.cut_length }}</td>
+                            <td style="text-align: center;">{{ order.qty_in_no }}</td>
                             {% if forloop.first %}
+                            <td rowspan="{{ req.orders.count }}" style="text-align: center;">
+                                <span class="status-badge status-{{ req.status }}">
+                                    {{ req.get_status_display }}
+                                </span>
+                            </td>
                             <td rowspan="{{ req.orders.count }}" style="white-space: nowrap;">
                                 <a href="{% url 'requisition_edit' req.id %}" class="action-btn edit-btn" title="Edit">
                                     <i class="fa-solid fa-pencil"></i>
@@ -451,53 +401,12 @@
                         {% endfor %}
                         {% empty %}
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-gray-500 italic">No customer requisitions
+                            <td colspan="10" class="text-center py-4 text-gray-500 italic">No customer requisitions
                                 found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="flex justify-center mt-6">
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    {% if page_obj.has_previous %}
-                    <a href="?page=1{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-angle-double-left"></i>
-                    </a>
-                    <a href="?page={{ page_obj.previous_page_number }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                        class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-angle-left"></i>
-                    </a>
-                    {% endif %}
-
-                    {% for num in page_range %}
-                    {% if num == current_page %}
-                    <span
-                        class="relative inline-flex items-center px-4 py-2 border border-[#1e3a8a] bg-[#1e3a8a] text-sm font-medium text-white">
-                        {{ num }}
-                    </span>
-                    {% else %}
-                    <a href="?page={{ num }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        {{ num }}
-                    </a>
-                    {% endif %}
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                        class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-angle-right"></i>
-                    </a>
-                    <a href="?page={{ total_pages }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
-                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
-                    {% endif %}
-                </nav>
             </div>
         </main>
     </div>
@@ -508,65 +417,24 @@
         <div class="sidebar-section">
             <h3><i class="fas fa-chart-line"></i> Overview</h3>
             <div class="stat-item">
-                <span class="stat-label">Total Today</span>
-                <span class="stat-value">239</span>
+                <span class="stat-label">Created</span>
+                <span class="stat-value">{{ status_counts.created|default:0 }}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Pending</span>
-                <span class="stat-value">12</span>
+                <span class="stat-label">In planning</span>
+                <span class="stat-value">{{ status_counts.in_planning|default:0 }}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Delivered</span>
-                <span class="stat-value">128</span>
+                <span class="stat-label">In production</span>
+                <span class="stat-value">{{ status_counts.in_production|default:0 }}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Cancelled</span>
-                <span class="stat-value">25</span>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="sidebar-section">
-            <h3><i class="fas fa-clock"></i> Recent Activity</h3>
-            <p class="info-text">
-                Last requisition created 2 minutes ago by the system.
-            </p>
-            <div class="quick-action">
-                <i class="fas fa-file-alt"></i>
-                <span>View All Activity</span>
-            </div>
-        </div>
-
-        <!-- Customer Info -->
-        <div class="sidebar-section">
-            <h3><i class="fas fa-users"></i> Customers</h3>
-            <div class="stat-item">
-                <span class="stat-label">Active</span>
-                <span class="stat-value">156</span>
+                <span class="stat-label">Completed</span>
+                <span class="stat-value">{{ status_counts.completed|default:0 }}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">VIP</span>
-                <span class="stat-value">23</span>
-            </div>
-            <p class="info-text">
-                Manage customer requisitions efficiently with real-time tracking.
-            </p>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="sidebar-section">
-            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-            <div class="quick-action" onclick="window.location.href='{% url 'requisition_form' %}'">
-                <i class="fas fa-plus-circle"></i>
-                <span>New Requisition</span>
-            </div>
-            <div class="quick-action">
-                <i class="fas fa-download"></i>
-                <span>Export Report</span>
-            </div>
-            <div class="quick-action">
-                <i class="fas fa-filter"></i>
-                <span>Advanced Filter</span>
+                <span class="stat-label">Rejected</span>
+                <span class="stat-value">{{ status_counts.rejected|default:0 }}</span>
             </div>
         </div>
     </aside>

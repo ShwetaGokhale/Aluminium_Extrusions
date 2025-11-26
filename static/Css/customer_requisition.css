@@ -9,13 +9,80 @@
   margin: 0 auto 30px auto;
 }
 
-h3 {
-  text-align: center;
-  /* color: #4a148c; */
-  color: #1e3a8a; /* Blue-900 to match dashboard header */;
+/* ==== Form Header with Status Field ==== */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 25px;
+  gap: 20px;
   animation: slideUp 0.8s ease forwards;
   transform: translateY(20px);
+}
+
+.form-header h3 {
+  flex: 1;
+  text-align: center;
+  color: #1e3a8a;
+  margin: 0;
+}
+
+.status-field-container {
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.status-field-container label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+  font-size: 14px;
+}
+
+.status-field-container select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #1e3a8a;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #f9f9f9;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  font-weight: 500;
+}
+
+.status-field-container select:focus {
+  outline: none;
+  border-color: #153e75;
+  box-shadow: 0 0 8px rgba(30, 58, 138, 0.5);
+  background-color: #fff;
+}
+
+/* Status color indicators */
+.status-field-container select option[value="created"] {
+  background-color: #e3f2fd;
+}
+
+.status-field-container select option[value="in_planning"] {
+  background-color: #fff3e0;
+}
+
+.status-field-container select option[value="in_production"] {
+  background-color: #fff9c4;
+}
+
+.status-field-container select option[value="completed"] {
+  background-color: #c8e6c9;
+}
+
+.status-field-container select option[value="rejected"] {
+  background-color: #ffebee;
+}
+
+h3 {
+  text-align: center;
+  color: #1e3a8a;
+  margin-bottom: 25px;
 }
 
 form {
@@ -94,8 +161,7 @@ textarea {
 button[type="submit"] {
   grid-column: 1 / 3;
   padding: 12px;
-  /* background-color: #6a1b9a; */
-  background-color: #1e3a8a; /* Blue-900 to match dashboard header */
+  background-color: #1e3a8a;
   color: white;
   border: none;
   border-radius: 6px;
@@ -105,8 +171,7 @@ button[type="submit"] {
   transition: background 0.2s ease;
 }
 button[type="submit"]:hover {
-  /* background-color: #4a148c; */
-  background-color: #153e75; /* Darker Blue-900 */
+  background-color: #153e75;
 }
 
 /* ==== Orders table ==== */
@@ -165,9 +230,7 @@ button[type="submit"]:hover {
 /* ==== Searchable Input Focus ==== */
 .searchable-input:focus {
   outline: none;
-  /* border-color: #6a1b9a; */
-  border-color: #1e3a8a; /* Blue-900 to match dashboard header */
-  /* box-shadow: 0 0 5px rgba(106, 27, 154, 0.5); */
+  border-color: #1e3a8a;
   box-shadow: 0 0 5px rgba(30, 58, 138, 0.5);
   background-color: #fff;
 }
@@ -178,8 +241,7 @@ button[type="submit"]:hover {
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  /* color: #6a1b9a; */
-  color: #1e3a8a; /* Blue-900 to match dashboard header */
+  color: #1e3a8a;
   cursor: pointer;
   font-size: 1.1em;
   transition: transform 0.2s;
@@ -233,8 +295,7 @@ button[type="submit"]:hover {
 .custom-dropdown-list .dropdown-item.active,
 .custom-dropdown-list .dropdown-item:hover {
   background: #e0f7fa;
-  /* color: #4a148c; */
-  color: #1e3a8a; /* Blue-900 to match dashboard header */
+  color: #1e3a8a;
 }
 
 /* Popup Notification */
@@ -268,4 +329,39 @@ button[type="submit"]:hover {
 
 .popup-message.hidden {
   display: none;
+}
+
+/* ==== Responsive Design ==== */
+@media (max-width: 768px) {
+  .form-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-header h3 {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
+  .status-field-container {
+    min-width: 100%;
+  }
+
+  form {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .full-width {
+    grid-column: 1;
+  }
+
+  button[type="submit"] {
+    grid-column: 1;
+  }
+
+  .form-container {
+    padding: 20px;
+    margin: 10px;
+  }
 }
