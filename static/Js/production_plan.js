@@ -6,15 +6,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const customerName = document.getElementById("customer_name");
     const dieRequisition = document.getElementById("die_requisition");
     const dieNo = document.getElementById("die_no");
-    const wtRange = document.getElementById("wt_range");
-    const cutLength = document.getElementById("cut_length");
+    const sectionNo = document.getElementById("section_no");
+    const sectionName = document.getElementById("section_name");
     const wtPerPiece = document.getElementById("wt_per_piece");
-
-    // ---------------- Set Today's Date ----------------
-    if (!window.editMode && dateField && !dateField.value) {
-        const today = new Date().toISOString().split('T')[0];
-        dateField.value = today;
-    }
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -36,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- Fetch Next Production Plan ID ----------------
     async function fetchNextProductionPlanId() {
-        if (window.editMode) return; // Don't fetch in edit mode
+        if (window.editMode) return;
         
         try {
             const response = await fetch('/planning/api/production-plans/?action=get_next_id');
@@ -82,9 +76,10 @@ document.addEventListener("DOMContentLoaded", function () {
         dieRequisition.addEventListener("change", async function () {
             const dieReqId = this.value;
 
+            // Clear all fields
             dieNo.value = '';
-            wtRange.value = '';
-            cutLength.value = '';
+            sectionNo.value = '';
+            sectionName.value = '';
             wtPerPiece.value = '';
 
             if (!dieReqId) return;
@@ -95,8 +90,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (data.success && data.die_requisition) {
                     dieNo.value = data.die_requisition.die_no || '';
-                    wtRange.value = data.die_requisition.wt_range || '';
-                    cutLength.value = data.die_requisition.cut_length || '';
+                    sectionNo.value = data.die_requisition.section_no || '';
+                    sectionName.value = data.die_requisition.section_name || '';
                     wtPerPiece.value = data.die_requisition.present_wt || '';
                 } else {
                     showMessage("error", "Error loading die requisition details");
@@ -108,39 +103,27 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ---------------- Validate Form (Only Press is required) ----------------
-    function validateForm() {
-        const press = document.getElementById("press").value;
-
-        if (!press) {
-            showMessage("error", "Press is required");
-            return false;
-        }
-
-        return true;
-    }
-
     // ---------------- Form Submit ----------------
     if (form) {
         form.addEventListener("submit", async function (e) {
             e.preventDefault();
 
-            if (!validateForm()) return;
-
             const formData = new FormData(form);
 
             let payload = {
                 date: formData.get("date"),
-                press: formData.get("press"),
-                shift: formData.get("shift") || "",
                 cust_requisition_id: formData.get("cust_requisition_id") || "",
                 customer_name: formData.get("customer_name") || "",
                 die_requisition: formData.get("die_requisition") || "",
                 die_no: formData.get("die_no") || "",
-                wt_range: formData.get("wt_range") || "",
-                cut_length: formData.get("cut_length") || "",
+                section_no: formData.get("section_no") || "",
+                section_name: formData.get("section_name") || "",
                 wt_per_piece: formData.get("wt_per_piece") || "0",
-                qty: formData.get("qty") || ""
+                press: formData.get("press") || "",
+                date_of_production: formData.get("date_of_production") || "",
+                shift: formData.get("shift") || "",
+                operator: formData.get("operator") || "",
+                planned_qty: formData.get("planned_qty") || ""
             };
 
             console.log("Payload being sent:", payload);
@@ -194,15 +177,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (result.success) {
                     if (result.updated) {
                         showMessage("success", "Production Plan updated successfully!");
-                        // Redirect to list page after 1 second
                         setTimeout(() => window.location.href = '/planning/production-plans/', 1000);
                     } else if (result.created) {
                         showMessage("success", `Production Plan created successfully! ID: ${result.plan.production_plan_id}`);
-                        // Redirect to list page after 1 second
                         setTimeout(() => window.location.href = '/planning/production-plans/', 1000);
                     } else {
                         showMessage("success", "Production Plan saved successfully!");
-                        // Redirect to list page after 1 second
                         setTimeout(() => window.location.href = '/planning/production-plans/', 1000);
                     }
                 } else {
@@ -219,6 +199,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         });
+    }
+
+    // ---------------- Set Default Date (Non-editable) ----------------
+    const today = new Date().toISOString().split('T')[0];
+    
+    if (dateField) {
+        if (!window.editMode || !dateField.value) {
+            dateField.value = today;
+        }
+        dateField.setAttribute('readonly', 'readonly');
+        dateField.style.backgroundColor = '#f0f0f0';
+        dateField.style.cursor = 'not-allowed';
+        dateField.style.fontWeight = '600';
+        dateField.style.color = '#4a5568';
     }
 
     // ---------------- Initial Load ----------------

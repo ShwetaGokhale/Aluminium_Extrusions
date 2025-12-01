@@ -38,50 +38,11 @@
                 style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Press -->
-        <div>
-            <label for="press">Press <span style="color: red;">*</span></label>
-            <select name="press" id="press" required>
-                <option value="">Select Press</option>
-                {% for p in presses %}
-                <option value="{{ p.id }}" {% if edit_mode and requisition.press.id == p.id %}selected{% endif %}>
-                    {{ p.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Shift -->
-        <div>
-            <label for="shift">Shift <span style="color: red;">*</span></label>
-            <select name="shift" id="shift" required>
-                <option value="">Select Shift</option>
-                {% for s in shifts %}
-                <option value="{{ s.id }}" {% if edit_mode and requisition.shift.id == s.id %}selected{% endif %}>
-                    {{ s.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Staff Name -->
-        <div>
-            <label for="staff_name">Staff Name <span style="color: red;">*</span></label>
-            <select name="staff_name" id="staff_name" required>
-                <option value="">Select Staff</option>
-                {% for st in staff %}
-                <option value="{{ st.id }}" {% if edit_mode and requisition.staff_name.id == st.id %}selected{% endif %}>
-                    {{ st.get_full_name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
         <!-- Customer Requisition No -->
         <div>
-            <label for="customer_requisition_no">Customer Requisition No <span style="color: red;">*</span></label>
+            <label for="customer_requisition_no">Order No <span style="color: red;">*</span></label>
             <select name="customer_requisition_no" id="customer_requisition_no" required>
-                <option value="">Select Requisition</option>
+                <option value="">Select Order</option>
                 {% for req in requisitions %}
                 <option value="{{ req.id }}" {% if edit_mode and requisition.customer_requisition_no.id == req.id %}selected{% endif %}>
                     {{ req.requisition_no }}
@@ -151,7 +112,7 @@
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
-        <!-- Cut Length (OPTIONAL - no red asterisk) -->
+        <!-- Cut Length (OPTIONAL) -->
         <div>
             <label for="cut_length">Cut Length</label>
             <select name="cut_length" id="cut_length">
@@ -164,13 +125,6 @@
                     {% endif %}
                 {% endfor %}
             </select>
-        </div>
-
-        <!-- Remark -->
-        <div class="full-width">
-            <label for="remark">Remark</label>
-            <textarea name="remark" id="remark" rows="3"
-                placeholder="Enter remarks">{% if edit_mode %}{{ requisition.remark }}{% endif %}</textarea>
         </div>
 
         <!-- Submit Button -->

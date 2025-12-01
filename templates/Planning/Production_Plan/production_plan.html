@@ -9,12 +9,9 @@
 <div id="popupMessage" class="popup-message hidden"></div>
 
 <div class="form-container">
-    <!-- Header -->
-    <div class="form-header">
-        <h3 class="text-2xl font-bold italic"  style="color: #1e3a8a;">
-            {% if edit_mode %}Edit Production Plan{% else %}Production Plan Form{% endif %}
-        </h3>
-    </div>
+    <h3 class="text-2xl font-bold italic mb-4 text-center" style="color: #1e3a8a;">
+        {% if edit_mode %}Edit Production Plan{% else %}Production Plan Form{% endif %}
+    </h3>
 
     <form id="productionPlanForm" method="post"
         action="{% if edit_mode %}{% url 'production_plan_edit' plan.id %}{% else %}{% url 'production_plan' %}{% endif %}">
@@ -26,50 +23,23 @@
 
         <!-- Production Plan ID (Auto-generated, Read-only) -->
         <div>
-            <label for="production_plan_id_display">Production Plan ID <span
-                    class="auto-gen-label">(Auto-generated)</span></label>
+            <label for="production_plan_id_display">Production Plan ID <span class="auto-gen-label">(Auto-generated)</span></label>
             <input type="text" id="production_plan_id_display"
                 value="{% if edit_mode %}{{ plan.production_plan_id }}{% else %}{{ next_production_plan_id }}{% endif %}"
                 readonly style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Date (Non-editable, defaults to today) -->
+        <!-- Date (Auto-set to today, non-editable) -->
         <div>
-            <label for="date">Date <span class="auto-gen-label">(Auto-set to today)</span></label>
+            <label for="date">Date</label>
             <input type="date" name="date" id="date" readonly
                 value="{% if edit_mode %}{{ plan.date|date:'Y-m-d' }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
+                style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
         </div>
 
-        <!-- Press (Only Required Field) -->
+        <!-- Cust Requisition ID -->
         <div>
-            <label for="press">Press <span style="color: red;">*</span></label>
-            <select name="press" id="press" required>
-                <option value="">Select Press</option>
-                {% for p in presses %}
-                <option value="{{ p.id }}" {% if edit_mode and plan.press.id == p.id %}selected{% endif %}>
-                    {{ p.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Shift (Optional) -->
-        <div>
-            <label for="shift">Shift</label>
-            <select name="shift" id="shift">
-                <option value="">Select Shift</option>
-                {% for s in shifts %}
-                <option value="{{ s.id }}" {% if edit_mode and plan.shift and plan.shift.id == s.id %}selected{% endif %}>
-                    {{ s.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Customer Requisition ID (Optional) -->
-        <div>
-            <label for="cust_requisition_id">Cust Requisition ID</label>
+            <label for="cust_requisition_id">Order ID</label>
             <select name="cust_requisition_id" id="cust_requisition_id">
                 <option value="">Select Requisition</option>
                 {% for req in requisitions %}
@@ -88,7 +58,7 @@
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
-        <!-- Die Requisition ID (Optional) -->
+        <!-- Die Requisition ID -->
         <div>
             <label for="die_requisition">Die Requisition ID</label>
             <select name="die_requisition" id="die_requisition">
@@ -109,19 +79,19 @@
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
-        <!-- WT Range (Auto-retrieve) -->
+        <!-- Section No (Auto-retrieve) -->
         <div>
-            <label for="wt_range">WT Range</label>
-            <input type="text" name="wt_range" id="wt_range" readonly
-                value="{% if edit_mode %}{{ plan.wt_range }}{% endif %}"
+            <label for="section_no">Section No</label>
+            <input type="text" name="section_no" id="section_no" readonly
+                value="{% if edit_mode %}{{ plan.section_no }}{% endif %}"
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
-        <!-- Cut Length (Auto-retrieve) -->
+        <!-- Section Name (Auto-retrieve) -->
         <div>
-            <label for="cut_length">Cut Length</label>
-            <input type="text" name="cut_length" id="cut_length" readonly
-                value="{% if edit_mode %}{{ plan.cut_length }}{% endif %}"
+            <label for="section_name">Section Name</label>
+            <input type="text" name="section_name" id="section_name" readonly
+                value="{% if edit_mode %}{{ plan.section_name }}{% endif %}"
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
@@ -133,11 +103,65 @@
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
-        <!-- Planned Production in QTY (Optional) -->
+        <!-- Spacer to push next field to new row -->
+        <div style="grid-column: 1 / 3; height: 0;"></div>
+
+        <!-- Production Planning Details Heading -->
+        <div class="section-heading">
+            <h4>Production Planning Details</h4>
+        </div>
+
+        <!-- Press -->
         <div>
-            <label for="qty">Planned Production in QTY</label>
-            <input type="number" name="qty" id="qty" min="1"
-                value="{% if edit_mode %}{{ plan.qty }}{% endif %}">
+            <label for="press">Press</label>
+            <select name="press" id="press">
+                <option value="">Select Press</option>
+                {% for p in presses %}
+                <option value="{{ p.id }}" {% if edit_mode and plan.press and plan.press.id == p.id %}selected{% endif %}>
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Date of Production (Editable) -->
+        <div>
+            <label for="date_of_production">Date of Production</label>
+            <input type="date" name="date_of_production" id="date_of_production"
+                value="{% if edit_mode and plan.date_of_production %}{{ plan.date_of_production|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Shift -->
+        <div>
+            <label for="shift">Shift</label>
+            <select name="shift" id="shift">
+                <option value="">Select Shift</option>
+                {% for s in shifts %}
+                <option value="{{ s.id }}" {% if edit_mode and plan.shift and plan.shift.id == s.id %}selected{% endif %}>
+                    {{ s.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Operator -->
+        <div>
+            <label for="operator">Operator</label>
+            <select name="operator" id="operator">
+                <option value="">Select Operator</option>
+                {% for staff in staff_list %}
+                <option value="{{ staff.id }}" {% if edit_mode and plan.operator and plan.operator.id == staff.id %}selected{% endif %}>
+                    {{ staff.get_full_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Planned QTY -->
+        <div>
+            <label for="planned_qty">Planned QTY</label>
+            <input type="number" name="planned_qty" id="planned_qty" min="1"
+                value="{% if edit_mode %}{{ plan.planned_qty }}{% endif %}">
         </div>
 
         <!-- Submit Button -->
@@ -158,15 +182,6 @@
 <script>
     window.editMode = false;
     window.nextProductionPlanId = "{{ next_production_plan_id }}";
-    
-    // Set today's date
-    document.addEventListener("DOMContentLoaded", function() {
-        const dateField = document.getElementById("date");
-        if (dateField && !dateField.value) {
-            const today = new Date().toISOString().split('T')[0];
-            dateField.value = today;
-        }
-    });
 </script>
 {% endif %}
 
@@ -179,6 +194,21 @@
         color: #718096;
         font-style: italic;
         font-weight: normal;
+    }
+    
+    .section-heading {
+        grid-column: 1 / 3;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #1e3a8a;
+    }
+    
+    .section-heading h4 {
+        color: #1e3a8a;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
     }
 </style>
 

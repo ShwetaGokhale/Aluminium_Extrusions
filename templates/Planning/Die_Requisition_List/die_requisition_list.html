@@ -3,7 +3,7 @@
 {% load static %}
 
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{% static 'Css/die_requisition_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/die_requisition_list.css' %}">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -163,9 +163,7 @@
                     <tr>
                         <th style="text-align: center;">#</th>
                         <th style="text-align: center;">Die Requisition ID</th>
-                        <th style="text-align: center;">Press</th>
-                        <th style="text-align: center;">Shift</th>
-                        <th style="text-align: center;">Customer Requisition No</th>
+                        <th style="text-align: center;">Order No</th>
                         <th style="text-align: center;">Section No</th>
                         <th style="text-align: center;">Die No</th>
                         <th style="text-align: center;">Actions</th>
@@ -176,8 +174,6 @@
                     <tr data-requisition-id="{{ req.id }}">
                         <td style="text-align: center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                         <td style="text-align: center;">{{ req.die_requisition_id }}</td>
-                        <td style="text-align: center;">{{ req.press.name }}</td>
-                        <td style="text-align: center;">{{ req.shift.name }}</td>
                         <td style="text-align: center;">{{ req.customer_requisition_no.requisition_no }}</td>
                         <td style="text-align: center;">{{ req.section_no.section_no }}</td>
                         <td style="text-align: center;">{{ req.die_no.die_no }}</td>
@@ -213,7 +209,7 @@
                 <span class="stat-value">{{ page_obj.paginator.count }}</span>
             </div>
 
-            <div class="stat-item">
+            <!-- <div class="stat-item">
                 <span class="stat-label">Morning Shift</span>
                 <span class="stat-value">{{ requisition_stats.morning|default:"0" }}</span>
             </div>
@@ -226,7 +222,7 @@
             <div class="stat-item">
                 <span class="stat-label">Night Shift</span>
                 <span class="stat-value">{{ requisition_stats.night|default:"0" }}</span>
-            </div>
+            </div> -->
 
         </div>
 
@@ -250,6 +246,6 @@
 <div id="successPopup" class="success-popup">Action successful!</div>
 
 <!-- Custom JS -->
-<script src="{% static 'Js/die_requisition_list.js' %}"></script>
+<script src="{% static 'js/die_requisition_list.js' %}"></script>
 
 {% endblock %}

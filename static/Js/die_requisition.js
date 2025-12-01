@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- Fetch Next Die Requisition ID ----------------
     async function fetchNextDieRequisitionId() {
-        if (window.editMode) return; // Don't fetch in edit mode
+        if (window.editMode) return;
         
         try {
             const response = await fetch('/planning/api/die-requisitions/?action=get_next_id');
@@ -136,28 +136,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- Validate Form ----------------
     function validateForm() {
-        const press = document.getElementById("press").value;
-        const shift = document.getElementById("shift").value;
-        const staffName = document.getElementById("staff_name").value;
         const custReqNo = document.getElementById("customer_requisition_no").value;
         const section = document.getElementById("section_no").value;
         const die = document.getElementById("die_no").value;
         const wt = document.getElementById("wt_range").value;
-
-        if (!press) {
-            showMessage("error", "Press is required");
-            return false;
-        }
-
-        if (!shift) {
-            showMessage("error", "Shift is required");
-            return false;
-        }
-
-        if (!staffName) {
-            showMessage("error", "Staff Name is required");
-            return false;
-        }
 
         if (!custReqNo) {
             showMessage("error", "Customer Requisition No is required");
@@ -174,13 +156,10 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        // WT Range is required
         if (!wt || wt.trim() === '') {
             showMessage("error", "WT Range is required");
             return false;
         }
-
-        // Cut Length is optional - no validation needed
 
         return true;
     }
@@ -196,9 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let payload = {
                 date: formData.get("date"),
-                press: formData.get("press"),
-                shift: formData.get("shift"),
-                staff_name: formData.get("staff_name"),
                 customer_requisition_no: formData.get("customer_requisition_no"),
                 section_no: formData.get("section_no"),
                 section_name: formData.get("section_name") || "",
@@ -207,11 +183,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 die_name: formData.get("die_name") || "",
                 present_wt: formData.get("present_wt") || "0",
                 no_of_cavity: formData.get("no_of_cavity") || "",
-                cut_length: formData.get("cut_length") || null,  // Optional, can be null
-                remark: formData.get("remark") || ""
+                cut_length: formData.get("cut_length") || null
             };
 
-            // Debug: Log payload
             console.log("Payload being sent:", payload);
 
             try {
@@ -234,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 const responseText = await response.text();
-                console.log("Response:", responseText); // Debug log
+                console.log("Response:", responseText);
                 
                 const contentType = response.headers.get('content-type');
 
@@ -290,7 +264,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---------------- Set Default Date (Non-editable) ----------------
     const today = new Date().toISOString().split('T')[0];
     
-    // Always set date to today and make it readonly
     if (dateInput) {
         if (!window.editMode || !dateInput.value) {
             dateInput.value = today;
@@ -302,11 +275,10 @@ document.addEventListener("DOMContentLoaded", function () {
         dateInput.style.color = '#4a5568';
     }
 
-    // Initial load: Fetch next Die Requisition ID if in create mode
+    // Initial load
     if (!window.editMode) {
         fetchNextDieRequisitionId();
     } else {
-        // In edit mode, trigger change events to populate dependent fields
         if (customerRequisitionNo && customerRequisitionNo.value) {
             customerRequisitionNo.dispatchEvent(new Event('change'));
         }

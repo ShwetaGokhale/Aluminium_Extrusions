@@ -25,24 +25,6 @@ class DieRequisition(models.Model):
         verbose_name="Die Requisition ID"
     )
     date = models.DateField(verbose_name="Date")
-    press = models.ForeignKey(
-        'master.CompanyPress',
-        on_delete=models.CASCADE,
-        related_name='die_requisitions',
-        verbose_name="Press"
-    )
-    shift = models.ForeignKey(
-        'master.CompanyShift',
-        on_delete=models.CASCADE,
-        related_name='die_requisitions',
-        verbose_name="Shift"
-    )
-    staff_name = models.ForeignKey(
-        'master.Staff',
-        on_delete=models.CASCADE,
-        related_name='die_requisitions',
-        verbose_name="Staff Name"
-    )
     customer_requisition_no = models.ForeignKey(
         'order_management.Requisition',
         on_delete=models.CASCADE,
@@ -86,13 +68,9 @@ class DieRequisition(models.Model):
     cut_length = models.CharField(
         max_length=10,
         choices=CUT_LENGTH_CHOICES,
-        blank=True,  # Make cut_length optional
-        null=True,   # Allow null values
-        verbose_name="Cut Length"
-    )
-    remark = models.TextField(
         blank=True,
-        verbose_name="Remark"
+        null=True,
+        verbose_name="Cut Length"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -142,25 +120,11 @@ class ProductionPlan(models.Model):
         default=timezone.now,
         verbose_name="Date"
     )
-    press = models.ForeignKey(
-        'master.CompanyPress',
-        on_delete=models.CASCADE,
-        related_name='production_plans',
-        verbose_name="Press"
-    )
-    shift = models.ForeignKey(
-        'master.CompanyShift',
-        on_delete=models.CASCADE,
-        related_name='production_plans',
-        verbose_name="Shift",
-        null=True,
-        blank=True
-    )
     cust_requisition_id = models.ForeignKey(
         'order_management.Requisition',
         on_delete=models.CASCADE,
         related_name='production_plans',
-        verbose_name="Customer Requisition ID",
+        verbose_name="Cust Requisition ID",
         null=True,
         blank=True
     )
@@ -182,14 +146,14 @@ class ProductionPlan(models.Model):
         verbose_name="Die No",
         blank=True
     )
-    wt_range = models.CharField(
+    section_no = models.CharField(
         max_length=50,
-        verbose_name="WT Range",
+        verbose_name="Section No",
         blank=True
     )
-    cut_length = models.CharField(
-        max_length=10,
-        verbose_name="Cut Length",
+    section_name = models.CharField(
+        max_length=200,
+        verbose_name="Section Name",
         blank=True
     )
     wt_per_piece = models.DecimalField(
@@ -199,9 +163,37 @@ class ProductionPlan(models.Model):
         verbose_name="WT per Piece",
         default=0
     )
-    qty = models.IntegerField(
+    # Production Planning Details
+    press = models.ForeignKey(
+        'master.CompanyPress',
+        on_delete=models.CASCADE,
+        related_name='production_plans',
+        verbose_name="Press"
+    )
+    date_of_production = models.DateField(
+        verbose_name="Date of Production",
+        null=True,
+        blank=True
+    )
+    shift = models.ForeignKey(
+        'master.CompanyShift',
+        on_delete=models.CASCADE,
+        related_name='production_plans',
+        verbose_name="Shift",
+        null=True,
+        blank=True
+    )
+    operator = models.ForeignKey(
+        'master.Staff',
+        on_delete=models.SET_NULL,
+        related_name='production_plans',
+        verbose_name="Operator",
+        null=True,
+        blank=True
+    )
+    planned_qty = models.IntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name="QTY",
+        verbose_name="Planned QTY",
         null=True,
         blank=True
     )

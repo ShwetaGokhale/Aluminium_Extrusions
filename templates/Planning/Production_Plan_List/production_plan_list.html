@@ -168,12 +168,10 @@
                             <th style="text-align: center;">Production Plan ID</th>
                             <th style="text-align: center;">Date</th>
                             <th style="text-align: center;">Shift</th>
-                            <th style="text-align: center;">Cust Requisition ID</th>
+                            <th style="text-align: center;">Order ID</th>
                             <th style="text-align: center;">Die No</th>
-                            <th style="text-align: center;">WT Range</th>
-                            <th style="text-align: center;">Cut Length</th>
                             <th style="text-align: center;">WT per Piece</th>
-                            <th style="text-align: center;">Planned Production in QTY</th>
+                            <th style="text-align: center;">Planned Qty</th>
                             <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
@@ -186,10 +184,8 @@
                             <td style="text-align: center;">{{ plan.shift.name }}</td>
                             <td style="text-align: center;">{{ plan.cust_requisition_id.requisition_id }}</td>
                             <td style="text-align: center;">{{ plan.die_no|default:"-" }}</td>
-                            <td style="text-align: center;">{{ plan.wt_range|default:"-" }}</td>
-                            <td style="text-align: center;">{{ plan.cut_length|default:"-" }}</td>
                             <td style="text-align: center;">{{ plan.wt_per_piece|default:"-" }}</td>
-                            <td style="text-align: center;">{{ plan.qty }}</td>
+                            <td style="text-align: center;">{{ plan.planned_qty }}</td>
                             <td style="white-space: nowrap; text-align: center;">
                                 <a href="{% url 'production_plan_edit' plan.id %}" class="action-btn edit-btn"
                                     title="Edit">

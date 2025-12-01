@@ -8,29 +8,16 @@ class DieRequisitionForm(forms.ModelForm):
     class Meta:
         model = DieRequisition
         fields = [
-            'date', 'press', 'shift', 'staff_name', 
-            'customer_requisition_no', 'section_no', 'section_name',
+            'date', 'customer_requisition_no', 'section_no', 'section_name',
             'wt_range', 'die_no', 'die_name', 'present_wt',
-            'no_of_cavity','cut_length', 'remark'
+            'no_of_cavity', 'cut_length'
         ]
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date',
-                'readonly': 'readonly',  # Make date non-editable
+                'readonly': 'readonly',
                 'style': 'background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;'
-            }),
-            'press': forms.Select(attrs={
-                'class': 'form-control',
-                'id': 'press'
-            }),
-            'shift': forms.Select(attrs={
-                'class': 'form-control',
-                'id': 'shift'
-            }),
-            'staff_name': forms.Select(attrs={
-                'class': 'form-control',
-                'id': 'staff_name'
             }),
             'customer_requisition_no': forms.Select(attrs={
                 'class': 'form-control',
@@ -74,11 +61,6 @@ class DieRequisitionForm(forms.ModelForm):
             'cut_length': forms.Select(attrs={
                 'class': 'form-control'
             }),
-            'remark': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter remarks'
-            }),
         }
     
     def __init__(self, *args, **kwargs):
@@ -89,16 +71,14 @@ class DieRequisitionForm(forms.ModelForm):
             self.fields['date'].initial = date.today()
         
         # Make fields optional/required as needed
-        self.fields['remark'].required = False
         self.fields['section_name'].required = False
         self.fields['die_name'].required = False
         self.fields['present_wt'].required = False
         self.fields['no_of_cavity'].required = False
-        self.fields['cut_length'].required = False  # Make cut_length optional
+        self.fields['cut_length'].required = False
         
         # Make wt_range required
         self.fields['wt_range'].required = True
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Forms for Production Planning functionality
@@ -107,24 +87,17 @@ class ProductionPlanForm(forms.ModelForm):
     class Meta:
         model = ProductionPlan
         fields = [
-            'date', 'press', 'shift', 'cust_requisition_id', 
-            'customer_name', 'die_requisition', 'die_no', 'wt_range',
-            'cut_length', 'wt_per_piece', 'qty'
+            'date', 'cust_requisition_id', 'customer_name', 
+            'die_requisition', 'die_no', 'section_no', 'section_name',
+            'wt_per_piece', 'press', 'date_of_production', 'shift', 
+            'operator', 'planned_qty'
         ]
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date',
                 'readonly': 'readonly',
-                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
-            }),
-            'press': forms.Select(attrs={
-                'class': 'form-control',
-                'id': 'press'
-            }),
-            'shift': forms.Select(attrs={
-                'class': 'form-control',
-                'id': 'shift'
+                'style': 'background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;'
             }),
             'cust_requisition_id': forms.Select(attrs={
                 'class': 'form-control',
@@ -133,7 +106,8 @@ class ProductionPlanForm(forms.ModelForm):
             'customer_name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'id': 'customer_name',
-                'readonly': 'readonly'
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
             }),
             'die_requisition': forms.Select(attrs={
                 'class': 'form-control',
@@ -142,27 +116,48 @@ class ProductionPlanForm(forms.ModelForm):
             'die_no': forms.TextInput(attrs={
                 'class': 'form-control',
                 'id': 'die_no',
-                'readonly': 'readonly'
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
             }),
-            'wt_range': forms.TextInput(attrs={
+            'section_no': forms.TextInput(attrs={
                 'class': 'form-control',
-                'id': 'wt_range',
-                'readonly': 'readonly'
+                'id': 'section_no',
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
             }),
-            'cut_length': forms.TextInput(attrs={
+            'section_name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'id': 'cut_length',
-                'readonly': 'readonly'
+                'id': 'section_name',
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
             }),
             'wt_per_piece': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'id': 'wt_per_piece',
                 'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;',
                 'step': '0.01'
             }),
-            'qty': forms.NumberInput(attrs={
+            'press': forms.Select(attrs={
                 'class': 'form-control',
-                'id': 'qty',
+                'id': 'press'
+            }),
+            'date_of_production': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'id': 'date_of_production'
+            }),
+            'shift': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'shift'
+            }),
+            'operator': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'operator'
+            }),
+            'planned_qty': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'id': 'planned_qty',
                 'min': '1'
             }),
         }
@@ -174,17 +169,6 @@ class ProductionPlanForm(forms.ModelForm):
         if not self.instance.pk:
             self.initial['date'] = timezone.now().date()
         
-        # Only Press is required
-        self.fields['press'].required = True
-        
-        # Make all other fields optional
-        self.fields['date'].required = False
-        self.fields['shift'].required = False
-        self.fields['cust_requisition_id'].required = False
-        self.fields['customer_name'].required = False
-        self.fields['die_requisition'].required = False
-        self.fields['die_no'].required = False
-        self.fields['wt_range'].required = False
-        self.fields['cut_length'].required = False
-        self.fields['wt_per_piece'].required = False
-        self.fields['qty'].required = False
+        # Make all fields optional
+        for field in self.fields:
+            self.fields[field].required = False

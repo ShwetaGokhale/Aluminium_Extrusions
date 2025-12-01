@@ -28,17 +28,15 @@ class DieRequisitionListView(View):
             requisitions = DieRequisition.objects.filter(
                 die_requisition_id__icontains=search_query
             ).select_related(
-                'press', 'shift', 'customer_requisition_no', 
-                'section_no', 'die_no'
+                'customer_requisition_no', 'section_no', 'die_no'
             ).order_by("-created_at")
         else:
             requisitions = DieRequisition.objects.all().select_related(
-                'press', 'shift', 'customer_requisition_no', 
-                'section_no', 'die_no'
+                'customer_requisition_no', 'section_no', 'die_no'
             ).order_by("-created_at")
         
         # ---------------- Pagination ----------------
-        paginator = Paginator(requisitions, 10)  # 10 per page
+        paginator = Paginator(requisitions, 10)
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
         
@@ -57,8 +55,6 @@ class DieRequisitionListView(View):
                     'id': req.id,
                     'die_requisition_id': req.die_requisition_id,
                     'date': req.date.strftime("%Y-%m-%d"),
-                    'press': req.press.name if req.press else '',
-                    'shift': req.shift.name if req.shift else '',
                     'customer_requisition_no': req.customer_requisition_no.requisition_no,
                     'section_no': req.section_no.section_no if req.section_no else '',
                     'die_no': req.die_no.die_no if req.die_no else '',
@@ -101,9 +97,6 @@ class DieRequisitionFormView(View):
         next_die_requisition_id = DieRequisition.generate_die_requisition_id()
         
         # Get dropdown data
-        presses = CompanyPress.objects.all()
-        shifts = CompanyShift.objects.all()
-        staff = Staff.objects.all()
         requisitions = Requisition.objects.all()
         dies = Die.objects.all()
         cut_lengths = DieRequisition.CUT_LENGTH_CHOICES
@@ -114,9 +107,6 @@ class DieRequisitionFormView(View):
             {
                 "edit_mode": False,
                 "next_die_requisition_id": next_die_requisition_id,
-                "presses": presses,
-                "shifts": shifts,
-                "staff": staff,
                 "requisitions": requisitions,
                 "dies": dies,
                 "cut_lengths": cut_lengths,
@@ -130,16 +120,12 @@ class DieRequisitionEditView(View):
     def get(self, request, pk):
         try:
             requisition = DieRequisition.objects.select_related(
-                'press', 'shift', 'staff_name', 'customer_requisition_no',
-                'section_no', 'die_no'
+                'customer_requisition_no', 'section_no', 'die_no'
             ).get(id=pk)
         except DieRequisition.DoesNotExist:
             return redirect("die_requisition_list")
         
         # Get dropdown data
-        presses = CompanyPress.objects.all()
-        shifts = CompanyShift.objects.all()
-        staff = Staff.objects.all()
         requisitions = Requisition.objects.all()
         dies = Die.objects.all()
         cut_lengths = DieRequisition.CUT_LENGTH_CHOICES
@@ -150,9 +136,6 @@ class DieRequisitionEditView(View):
             {
                 "requisition": requisition,
                 "edit_mode": True,
-                "presses": presses,
-                "shifts": shifts,
-                "staff": staff,
                 "requisitions": requisitions,
                 "dies": dies,
                 "cut_lengths": cut_lengths,
@@ -221,8 +204,7 @@ class DieRequisitionAPI(View):
         
         # Otherwise return all requisitions
         requisitions = DieRequisition.objects.all().select_related(
-            'press', 'shift', 'staff_name', 'customer_requisition_no',
-            'section_no', 'die_no'
+            'customer_requisition_no', 'section_no', 'die_no'
         ).order_by("-created_at")
         
         formatted = []
@@ -231,9 +213,6 @@ class DieRequisitionAPI(View):
                 "id": req.id,
                 "die_requisition_id": req.die_requisition_id,
                 "date": req.date.strftime("%Y-%m-%d"),
-                "press": req.press.name if req.press else '',
-                "shift": req.shift.name if req.shift else '',
-                "staff_name": req.staff_name.get_full_name() if req.staff_name else '',
                 "customer_requisition_no": req.customer_requisition_no.requisition_no,
                 "section_no": req.section_no.section_no if req.section_no else '',
                 "section_name": req.section_name,
@@ -243,7 +222,6 @@ class DieRequisitionAPI(View):
                 "present_wt": str(req.present_wt),
                 "no_of_cavity": req.no_of_cavity,
                 "cut_length": req.cut_length or '',
-                "remark": req.remark,
                 "created_at": req.created_at.strftime("%Y-%m-%d"),
             })
         return JsonResponse({"success": True, "requisitions": formatted})
@@ -253,9 +231,8 @@ class DieRequisitionAPI(View):
         try:
             data = json.loads(request.body)
             
-            # Validate required fields (cut_length removed, wt_range added)
+            # Validate required fields
             required_fields = [
-                'press', 'shift', 'staff_name',
                 'customer_requisition_no', 'section_no', 'die_no', 'wt_range'
             ]
             
@@ -272,9 +249,6 @@ class DieRequisitionAPI(View):
             # Create die requisition
             requisition = DieRequisition.objects.create(
                 date=requisition_date,
-                press_id=data['press'],
-                shift_id=data['shift'],
-                staff_name_id=data['staff_name'],
                 customer_requisition_no_id=data['customer_requisition_no'],
                 section_no_id=data['section_no'],
                 section_name=data.get('section_name', ''),
@@ -283,8 +257,7 @@ class DieRequisitionAPI(View):
                 die_name=data.get('die_name', ''),
                 present_wt=data.get('present_wt', 0),
                 no_of_cavity=data.get('no_of_cavity', ''),
-                cut_length=data.get('cut_length') or None,  # Optional, can be null
-                remark=data.get('remark', '')
+                cut_length=data.get('cut_length') or None
             )
             
             return JsonResponse(
@@ -318,9 +291,6 @@ class DieRequisitionDetailAPI(View):
                         "id": requisition.id,
                         "die_requisition_id": requisition.die_requisition_id,
                         "date": requisition.date.strftime("%Y-%m-%d"),
-                        "press": requisition.press.id if requisition.press else None,
-                        "shift": requisition.shift.id if requisition.shift else None,
-                        "staff_name": requisition.staff_name.id if requisition.staff_name else None,
                         "customer_requisition_no": requisition.customer_requisition_no.id,
                         "section_no": requisition.section_no.id if requisition.section_no else None,
                         "section_name": requisition.section_name,
@@ -330,7 +300,6 @@ class DieRequisitionDetailAPI(View):
                         "present_wt": str(requisition.present_wt),
                         "no_of_cavity": requisition.no_of_cavity,
                         "cut_length": requisition.cut_length or '',
-                        "remark": requisition.remark,
                     },
                 }
             )
@@ -343,9 +312,8 @@ class DieRequisitionDetailAPI(View):
             requisition = get_object_or_404(DieRequisition, id=pk)
             data = json.loads(request.body)
             
-            # Validate required fields (cut_length removed, wt_range added)
+            # Validate required fields
             required_fields = [
-                'press', 'shift', 'staff_name',
                 'customer_requisition_no', 'section_no', 'die_no', 'wt_range'
             ]
             
@@ -361,9 +329,6 @@ class DieRequisitionDetailAPI(View):
             
             # Update fields
             requisition.date = requisition_date
-            requisition.press_id = data.get('press', requisition.press_id)
-            requisition.shift_id = data.get('shift', requisition.shift_id)
-            requisition.staff_name_id = data.get('staff_name', requisition.staff_name_id)
             requisition.customer_requisition_no_id = data.get('customer_requisition_no', requisition.customer_requisition_no_id)
             requisition.section_no_id = data.get('section_no', requisition.section_no_id)
             requisition.section_name = data.get('section_name', requisition.section_name)
@@ -372,8 +337,7 @@ class DieRequisitionDetailAPI(View):
             requisition.die_name = data.get('die_name', requisition.die_name)
             requisition.present_wt = data.get('present_wt', requisition.present_wt)
             requisition.no_of_cavity = data.get('no_of_cavity', requisition.no_of_cavity)
-            requisition.cut_length = data.get('cut_length') or None  # Optional, can be null
-            requisition.remark = data.get('remark', requisition.remark)
+            requisition.cut_length = data.get('cut_length') or None
             requisition.save()
             
             return JsonResponse({
@@ -409,7 +373,6 @@ class DieRequisitionDeleteView(View):
             return JsonResponse({"success": False, "message": str(e)})
 
 
-
 # ==============================================================================================
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -425,15 +388,17 @@ class ProductionPlanListView(View):
             plans = ProductionPlan.objects.filter(
                 production_plan_id__icontains=search_query
             ).select_related(
-                'shift', 'cust_requisition_id', 'die_requisition'
+                'cust_requisition_id', 'die_requisition', 'press', 
+                'shift', 'operator'
             ).order_by("-created_at")
         else:
             plans = ProductionPlan.objects.all().select_related(
-                'shift', 'cust_requisition_id', 'die_requisition'
+                'cust_requisition_id', 'die_requisition', 'press', 
+                'shift', 'operator'
             ).order_by("-created_at")
         
         # ---------------- Pagination ----------------
-        paginator = Paginator(plans, 10)  # 10 per page
+        paginator = Paginator(plans, 10)
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
         
@@ -452,13 +417,17 @@ class ProductionPlanListView(View):
                     'id': plan.id,
                     'production_plan_id': plan.production_plan_id,
                     'date': plan.date.strftime("%Y-%m-%d"),
-                    'shift': plan.shift.name if plan.shift else '',
-                    'cust_requisition_id': plan.cust_requisition_id.requisition_no if plan.cust_requisition_id else '',
+                    'cust_requisition_id': plan.cust_requisition_id.requisition_id if plan.cust_requisition_id else '',
+                    'customer_name': plan.customer_name,
+                    'die_requisition_id': plan.die_requisition.die_requisition_id if plan.die_requisition else '',
                     'die_no': plan.die_no,
-                    'wt_range': plan.wt_range,
-                    'cut_length': plan.cut_length,
+                    'section_no': plan.section_no,
                     'wt_per_piece': str(plan.wt_per_piece),
-                    'qty': plan.qty,
+                    'press': plan.press.name if plan.press else '',
+                    'date_of_production': plan.date_of_production.strftime("%Y-%m-%d") if plan.date_of_production else '',
+                    'shift': plan.shift.name if plan.shift else '',
+                    'operator': plan.operator.get_full_name() if plan.operator else '',
+                    'planned_qty': plan.planned_qty,
                 })
             
             return JsonResponse(
@@ -496,10 +465,11 @@ class ProductionPlanFormView(View):
         next_production_plan_id = ProductionPlan.generate_production_plan_id()
         
         # Get dropdown data
-        presses = CompanyPress.objects.all()
-        shifts = CompanyShift.objects.all()
         requisitions = Requisition.objects.all()
         die_requisitions = DieRequisition.objects.all()
+        presses = CompanyPress.objects.all()
+        shifts = CompanyShift.objects.all()
+        staff_list = Staff.objects.all()
 
         return render(
             request,
@@ -507,10 +477,11 @@ class ProductionPlanFormView(View):
             {
                 "edit_mode": False,
                 "next_production_plan_id": next_production_plan_id,
-                "presses": presses,
-                "shifts": shifts,
                 "requisitions": requisitions,
                 "die_requisitions": die_requisitions,
+                "presses": presses,
+                "shifts": shifts,
+                "staff_list": staff_list,
             },
         )
 
@@ -521,16 +492,18 @@ class ProductionPlanEditView(View):
     def get(self, request, pk):
         try:
             plan = ProductionPlan.objects.select_related(
-                'press', 'shift', 'cust_requisition_id', 'die_requisition'
+                'cust_requisition_id', 'die_requisition', 'press',
+                'shift', 'operator'
             ).get(id=pk)
         except ProductionPlan.DoesNotExist:
             return redirect("production_plan_list")
         
         # Get dropdown data
-        presses = CompanyPress.objects.all()
-        shifts = CompanyShift.objects.all()
         requisitions = Requisition.objects.all()
         die_requisitions = DieRequisition.objects.all()
+        presses = CompanyPress.objects.all()
+        shifts = CompanyShift.objects.all()
+        staff_list = Staff.objects.all()
         
         return render(
             request,
@@ -538,10 +511,11 @@ class ProductionPlanEditView(View):
             {
                 "plan": plan,
                 "edit_mode": True,
-                "presses": presses,
-                "shifts": shifts,
                 "requisitions": requisitions,
                 "die_requisitions": die_requisitions,
+                "presses": presses,
+                "shifts": shifts,
+                "staff_list": staff_list,
             },
         )
 
@@ -579,13 +553,13 @@ class ProductionPlanAPI(View):
         if request.GET.get('action') == 'get_die_requisition_details':
             die_req_id = request.GET.get('die_requisition_id')
             try:
-                die_req = DieRequisition.objects.select_related('die_no').get(id=die_req_id)
+                die_req = DieRequisition.objects.select_related('die_no', 'section_no').get(id=die_req_id)
                 return JsonResponse({
                     'success': True,
                     'die_requisition': {
                         'die_no': die_req.die_no.die_no if die_req.die_no else '',
-                        'wt_range': die_req.wt_range,
-                        'cut_length': die_req.cut_length,
+                        'section_no': die_req.section_no.section_no if die_req.section_no else '',
+                        'section_name': die_req.section_name,
                         'present_wt': str(die_req.present_wt)
                     }
                 })
@@ -597,7 +571,8 @@ class ProductionPlanAPI(View):
 
         # Otherwise return all plans
         plans = ProductionPlan.objects.all().select_related(
-            'press', 'shift', 'cust_requisition_id', 'die_requisition'
+            'cust_requisition_id', 'die_requisition', 'press', 
+            'shift', 'operator'
         ).order_by("-created_at")
         
         formatted = []
@@ -606,16 +581,18 @@ class ProductionPlanAPI(View):
                 "id": plan.id,
                 "production_plan_id": plan.production_plan_id,
                 "date": plan.date.strftime("%Y-%m-%d"),
-                "press": plan.press.name if plan.press else '',
-                "shift": plan.shift.name if plan.shift else '',
-                "cust_requisition_id": plan.cust_requisition_id.requisition_no if plan.cust_requisition_id else '',
+                "cust_requisition_id": plan.cust_requisition_id.requisition_id if plan.cust_requisition_id else '',
                 "customer_name": plan.customer_name,
                 "die_requisition": plan.die_requisition.die_requisition_id if plan.die_requisition else '',
                 "die_no": plan.die_no,
-                "wt_range": plan.wt_range,
-                "cut_length": plan.cut_length,
+                "section_no": plan.section_no,
+                "section_name": plan.section_name,
                 "wt_per_piece": str(plan.wt_per_piece),
-                "qty": plan.qty,
+                "press": plan.press.name if plan.press else '',
+                "date_of_production": plan.date_of_production.strftime("%Y-%m-%d") if plan.date_of_production else '',
+                "shift": plan.shift.name if plan.shift else '',
+                "operator": plan.operator.get_full_name() if plan.operator else '',
+                "planned_qty": plan.planned_qty,
                 "created_at": plan.created_at.strftime("%Y-%m-%d"),
             })
         return JsonResponse({"success": True, "plans": formatted})
@@ -625,27 +602,24 @@ class ProductionPlanAPI(View):
         try:
             data = json.loads(request.body)
             
-            if not data.get('press'):
-                return JsonResponse({
-                    "success": False,
-                    "message": "Press is required."
-                })
-
+            # Use today's date if not provided
             if not data.get('date'):
                 data['date'] = timezone.now().date().isoformat()
 
             plan = ProductionPlan.objects.create(
                 date=data['date'],
-                press_id=data['press'],
-                shift_id=data.get('shift') or None,
                 cust_requisition_id_id=data.get('cust_requisition_id') or None,
                 customer_name=data.get('customer_name', ''),
                 die_requisition_id=data.get('die_requisition') or None,
                 die_no=data.get('die_no', ''),
-                wt_range=data.get('wt_range', ''),
-                cut_length=data.get('cut_length', ''),
+                section_no=data.get('section_no', ''),
+                section_name=data.get('section_name', ''),
                 wt_per_piece=data.get('wt_per_piece', 0),
-                qty=data.get('qty') or None,
+                press_id=data.get('press') or None,
+                date_of_production=data.get('date_of_production') or None,
+                shift_id=data.get('shift') or None,
+                operator_id=data.get('operator') or None,
+                planned_qty=data.get('planned_qty') or None,
             )
             
             return JsonResponse(
@@ -663,10 +637,39 @@ class ProductionPlanAPI(View):
             return JsonResponse({"success": False, "message": str(e)})
 
 
-
 @method_decorator(csrf_exempt, name="dispatch")
 class ProductionPlanDetailAPI(View):
     """API for get, edit & delete Production Plan"""
+    
+    def get(self, request, pk):
+        """Get production plan details"""
+        try:
+            plan = get_object_or_404(ProductionPlan, id=pk)
+            
+            return JsonResponse(
+                {
+                    "success": True,
+                    "plan": {
+                        "id": plan.id,
+                        "production_plan_id": plan.production_plan_id,
+                        "date": plan.date.strftime("%Y-%m-%d"),
+                        "cust_requisition_id": plan.cust_requisition_id.id if plan.cust_requisition_id else None,
+                        "customer_name": plan.customer_name,
+                        "die_requisition": plan.die_requisition.id if plan.die_requisition else None,
+                        "die_no": plan.die_no,
+                        "section_no": plan.section_no,
+                        "section_name": plan.section_name,
+                        "wt_per_piece": str(plan.wt_per_piece),
+                        "press": plan.press.id if plan.press else None,
+                        "date_of_production": plan.date_of_production.strftime("%Y-%m-%d") if plan.date_of_production else '',
+                        "shift": plan.shift.id if plan.shift else None,
+                        "operator": plan.operator.id if plan.operator else None,
+                        "planned_qty": plan.planned_qty,
+                    },
+                }
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
     
     def post(self, request, pk):
         """Update production plan"""
@@ -674,23 +677,20 @@ class ProductionPlanDetailAPI(View):
             plan = get_object_or_404(ProductionPlan, id=pk)
             data = json.loads(request.body)
             
-            if not data.get('press'):
-                return JsonResponse({
-                    "success": False,
-                    "message": "Press is required."
-                })
-            
+            # Update fields
             plan.date = data.get('date', plan.date)
-            plan.press_id = data.get('press', plan.press_id)
-            plan.shift_id = data.get('shift') or None
             plan.cust_requisition_id_id = data.get('cust_requisition_id') or None
             plan.customer_name = data.get('customer_name', plan.customer_name)
             plan.die_requisition_id = data.get('die_requisition') or None
             plan.die_no = data.get('die_no', plan.die_no)
-            plan.wt_range = data.get('wt_range', plan.wt_range)
-            plan.cut_length = data.get('cut_length', plan.cut_length)
+            plan.section_no = data.get('section_no', plan.section_no)
+            plan.section_name = data.get('section_name', plan.section_name)
             plan.wt_per_piece = data.get('wt_per_piece', plan.wt_per_piece)
-            plan.qty = data.get('qty') or None
+            plan.press_id = data.get('press') or None
+            plan.date_of_production = data.get('date_of_production') or None
+            plan.shift_id = data.get('shift') or None
+            plan.operator_id = data.get('operator') or None
+            plan.planned_qty = data.get('planned_qty') or None
 
             plan.save()
             
@@ -713,7 +713,6 @@ class ProductionPlanDetailAPI(View):
             })
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-
 
 
 class ProductionPlanDeleteView(View):

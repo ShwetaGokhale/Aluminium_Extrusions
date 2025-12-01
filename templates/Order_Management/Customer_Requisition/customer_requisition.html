@@ -10,7 +10,7 @@
     <!-- Header with Status Field -->
     <div class="form-header">
         <h3 class="text-2xl font-bold italic" style="color: #1e3a8a;">
-            {% if edit_mode %}Edit Customer Requisition{% else %}Customer Requisition Form{% endif %}
+            {% if edit_mode %}Edit Order{% else %}Order Form{% endif %}
         </h3>
         
         <!-- Status Dropdown in Top Right Corner -->
@@ -35,7 +35,7 @@
 
         <!-- Requisition ID -->
         <div>
-            <label for="requisition_id_display">Cust Requisition ID <span class="auto-gen-label">(Auto-generated)</span></label>
+            <label for="requisition_id_display">Order ID <span class="auto-gen-label">(Auto-generated)</span></label>
             <input type="text" id="requisition_id_display" 
                 value="{% if edit_mode %}{{ requisition.requisition_id }}{% else %}{{ next_requisition_id }}{% endif %}" 
                 readonly
@@ -52,10 +52,10 @@
 
         <!-- Requisition No -->
         <div>
-            <label for="requisition_no">Cust Requisition No <span style="color: red;">*</span></label>
+            <label for="requisition_no">Order No <span style="color: red;">*</span></label>
             <input type="text" name="requisition_no" id="requisition_no" required 
                    value="{% if edit_mode %}{{ requisition.requisition_no }}{% endif %}"
-                   placeholder="Enter requisition number">
+                   placeholder="Enter order no">
         </div>
 
         <!-- Customer Dropdown -->
