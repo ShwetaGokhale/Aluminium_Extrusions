@@ -14,20 +14,20 @@ class OnlineProductionReportForm(forms.ModelForm):
         model = OnlineProductionReport
         fields = [
             'date',
-            'cast_no',
-            'press_no',
-            'shift',
-            'start_time',
-            'end_time',
-            'operator',
             'production_plan_id',
+            'customer_name',
+            'die_requisition_id',
             'die_no',
-            'cut_length',
             'section_no',
             'section_name',
             'wt_per_piece',
-            'billet_size',
-            'no_of_billet',
+            'press_no',
+            'date_of_production',
+            'shift',
+            'operator',
+            'planned_qty',
+            'start_time',
+            'end_time',
             'status'
         ]
         
@@ -39,59 +39,27 @@ class OnlineProductionReportForm(forms.ModelForm):
                     'placeholder': 'Select Date'
                 }
             ),
-            'cast_no': forms.TextInput(
-                attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Enter Cast No'
-                }
-            ),
-            'press_no': forms.Select(
-                attrs={
-                    'class': 'form-control select2',
-                    'data-placeholder': 'Select Press',
-                    'required': True
-                }
-            ),
-            'shift': forms.Select(
-                attrs={
-                    'class': 'form-control select2',
-                    'data-placeholder': 'Select Shift'
-                }
-            ),
-            'start_time': forms.TimeInput(
-                attrs={
-                    'type': 'time',
-                    'class': 'form-control',
-                    'placeholder': 'Start Time'
-                }
-            ),
-            'end_time': forms.TimeInput(
-                attrs={
-                    'type': 'time',
-                    'class': 'form-control',
-                    'placeholder': 'End Time'
-                }
-            ),
-            'operator': forms.Select(
-                attrs={
-                    'class': 'form-control select2',
-                    'data-placeholder': 'Select Operator'
-                }
-            ),
             'production_plan_id': forms.Select(
                 attrs={
                     'class': 'form-control select2',
                     'data-placeholder': 'Select Production Plan'
                 }
             ),
-            'die_no': forms.TextInput(
+            'customer_name': forms.TextInput(
                 attrs={
                     'class': 'form-control',
                     'readonly': True,
                     'placeholder': 'Auto-retrieved'
                 }
             ),
-            'cut_length': forms.TextInput(
+            'die_requisition_id': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'readonly': True,
+                    'placeholder': 'Auto-retrieved'
+                }
+            ),
+            'die_no': forms.TextInput(
                 attrs={
                     'class': 'form-control',
                     'readonly': True,
@@ -117,22 +85,60 @@ class OnlineProductionReportForm(forms.ModelForm):
                     'class': 'form-control',
                     'step': '0.01',
                     'min': '0',
-                    'placeholder': 'Enter WT Per Piece'
+                    'readonly': True,
+                    'placeholder': 'Auto-retrieved'
                 }
             ),
-            'billet_size': forms.NumberInput(
+            'press_no': forms.Select(
                 attrs={
-                    'class': 'form-control',
-                    'step': '0.01',
-                    'min': '0',
-                    'placeholder': 'Enter Billet Size'
+                    'class': 'form-control select2',
+                    'data-placeholder': 'Select Press',
+                    'required': True,
+                    'style': 'background-color: #f0f0f0;'
                 }
             ),
-            'no_of_billet': forms.NumberInput(
+            'date_of_production': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control',
+                    'readonly': True,
+                    'placeholder': 'Auto-retrieved'
+                }
+            ),
+            'shift': forms.Select(
+                attrs={
+                    'class': 'form-control select2',
+                    'data-placeholder': 'Select Shift',
+                    'style': 'background-color: #f0f0f0;'
+                }
+            ),
+            'operator': forms.Select(
+                attrs={
+                    'class': 'form-control select2',
+                    'data-placeholder': 'Select Operator',
+                    'style': 'background-color: #f0f0f0;'
+                }
+            ),
+            'planned_qty': forms.NumberInput(
                 attrs={
                     'class': 'form-control',
                     'min': '1',
-                    'placeholder': 'Enter No Of Billet'
+                    'readonly': True,
+                    'placeholder': 'Auto-retrieved'
+                }
+            ),
+            'start_time': forms.TimeInput(
+                attrs={
+                    'type': 'time',
+                    'class': 'form-control',
+                    'placeholder': 'Start Time'
+                }
+            ),
+            'end_time': forms.TimeInput(
+                attrs={
+                    'type': 'time',
+                    'class': 'form-control',
+                    'placeholder': 'End Time'
                 }
             ),
             'status': forms.Select(
@@ -145,20 +151,20 @@ class OnlineProductionReportForm(forms.ModelForm):
         
         labels = {
             'date': 'Date',
-            'cast_no': 'Cast No',
-            'press_no': 'Press No',
-            'shift': 'Shift',
-            'start_time': 'Start Time',
-            'end_time': 'End Time',
-            'operator': 'Operator',
             'production_plan_id': 'Production Plan ID',
+            'customer_name': 'Customer Name',
+            'die_requisition_id': 'Die Requisition ID',
             'die_no': 'Die No',
-            'cut_length': 'Cut Length',
             'section_no': 'Section No',
             'section_name': 'Section Name',
             'wt_per_piece': 'WT Per Piece',
-            'billet_size': 'Billet Size',
-            'no_of_billet': 'No Of Billet',
+            'press_no': 'Press',
+            'date_of_production': 'Date of Production',
+            'shift': 'Shift',
+            'operator': 'Operator',
+            'planned_qty': 'Planned QTY',
+            'start_time': 'Start Time',
+            'end_time': 'End Time',
             'status': 'Status'
         }
     
@@ -174,15 +180,19 @@ class OnlineProductionReportForm(forms.ModelForm):
         # Make press_no required, others optional
         self.fields['press_no'].required = True
         self.fields['date'].required = False
-        self.fields['cast_no'].required = False
+        self.fields['production_plan_id'].required = False
+        self.fields['customer_name'].required = False
+        self.fields['die_requisition_id'].required = False
+        self.fields['die_no'].required = False
+        self.fields['section_no'].required = False
+        self.fields['section_name'].required = False
+        self.fields['wt_per_piece'].required = False
+        self.fields['date_of_production'].required = False
         self.fields['shift'].required = False
+        self.fields['operator'].required = False
+        self.fields['planned_qty'].required = False
         self.fields['start_time'].required = False
         self.fields['end_time'].required = False
-        self.fields['operator'].required = False
-        self.fields['production_plan_id'].required = False
-        self.fields['wt_per_piece'].required = False
-        self.fields['billet_size'].required = False
-        self.fields['no_of_billet'].required = False
         
         # Set queryset for dropdowns
         self.fields['press_no'].queryset = CompanyPress.objects.all().order_by('name')
@@ -208,8 +218,7 @@ class OnlineProductionReportForm(forms.ModelForm):
                     "End time must be after start time."
                 )
         
-        return cleaned_data
-    
+        return cleaned_data    
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Forms for Total Production Report functionality

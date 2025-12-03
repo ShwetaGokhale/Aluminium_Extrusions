@@ -27,44 +27,6 @@ class OnlineProductionReport(models.Model):
         null=True,
         blank=True
     )
-    cast_no = models.CharField(
-        max_length=100,
-        verbose_name="Cast No",
-        blank=True,
-        null=True
-    )
-    press_no = models.ForeignKey(
-        'master.CompanyPress',
-        on_delete=models.CASCADE,
-        related_name='production_reports',
-        verbose_name="Press No"
-    )
-    shift = models.ForeignKey(
-        'master.CompanyShift',
-        on_delete=models.CASCADE,
-        related_name='production_reports',
-        verbose_name="Shift",
-        null=True,
-        blank=True
-    )
-    start_time = models.TimeField(
-        verbose_name="Start Time",
-        null=True,
-        blank=True
-    )
-    end_time = models.TimeField(
-        verbose_name="End Time",
-        null=True,
-        blank=True
-    )
-    operator = models.ForeignKey(
-        'master.Staff',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='production_reports',
-        verbose_name="Operator"
-    )
     production_plan_id = models.ForeignKey(
         'planning.ProductionPlan',
         on_delete=models.CASCADE,
@@ -73,14 +35,19 @@ class OnlineProductionReport(models.Model):
         null=True,
         blank=True
     )
+    customer_name = models.CharField(
+        max_length=200,
+        verbose_name="Customer Name",
+        blank=True
+    )
+    die_requisition_id = models.CharField(
+        max_length=100,
+        verbose_name="Die Requisition ID",
+        blank=True
+    )
     die_no = models.CharField(
         max_length=100,
         verbose_name="Die No",
-        blank=True
-    )
-    cut_length = models.CharField(
-        max_length=10,
-        verbose_name="Cut Length",
         blank=True
     )
     section_no = models.CharField(
@@ -101,17 +68,46 @@ class OnlineProductionReport(models.Model):
         null=True,
         blank=True
     )
-    billet_size = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(0)],
-        verbose_name="Billet Size",
+    press_no = models.ForeignKey(
+        'master.CompanyPress',
+        on_delete=models.CASCADE,
+        related_name='production_reports',
+        verbose_name="Press No"
+    )
+    date_of_production = models.DateField(
+        verbose_name="Date of Production",
         null=True,
         blank=True
     )
-    no_of_billet = models.IntegerField(
+    shift = models.ForeignKey(
+        'master.CompanyShift',
+        on_delete=models.CASCADE,
+        related_name='production_reports',
+        verbose_name="Shift",
+        null=True,
+        blank=True
+    )
+    operator = models.ForeignKey(
+        'master.Staff',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='production_reports',
+        verbose_name="Operator"
+    )
+    planned_qty = models.IntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name="No Of Billet",
+        verbose_name="Planned QTY",
+        null=True,
+        blank=True
+    )
+    start_time = models.TimeField(
+        verbose_name="Start Time",
+        null=True,
+        blank=True
+    )
+    end_time = models.TimeField(
+        verbose_name="End Time",
         null=True,
         blank=True
     )
@@ -151,8 +147,7 @@ class OnlineProductionReport(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"{self.production_id} - {self.press_no.name if self.press_no else 'N/A'}"
-    
+        return f"{self.production_id} - {self.press_no.name if self.press_no else 'N/A'}"    
 
 
 # ─────────────────────────────────────────────────────────────────────────────

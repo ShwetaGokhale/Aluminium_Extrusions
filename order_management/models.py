@@ -70,13 +70,13 @@ class Requisition(models.Model):
             last_req = Requisition.objects.select_for_update().order_by('-id').first()
             if last_req and last_req.requisition_id:
                 try:
-                    last_number = int(last_req.requisition_id.replace('REQ', ''))
+                    last_number = int(last_req.requisition_id.replace('ORD', ''))
                     new_number = last_number + 1
                 except (ValueError, AttributeError):
                     new_number = 1
             else:
                 new_number = 1
-            return f'REQ{str(new_number).zfill(5)}'
+            return f'ORD{str(new_number).zfill(5)}'
 
     def save(self, *args, **kwargs):
         if not self.requisition_id:

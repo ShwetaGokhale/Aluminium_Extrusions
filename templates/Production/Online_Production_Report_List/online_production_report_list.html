@@ -167,13 +167,11 @@
                         <tr>
                             <th style="text-align: center;">#</th>
                             <th style="text-align: center;">Production ID</th>
-                            <th style="text-align: center;">Cast No</th>
                             <th style="text-align: center;">Date</th>
                             <th style="text-align: center;">Press</th>
                             <th style="text-align: center;">Die No</th>
                             <th style="text-align: center;">Start Time</th>
                             <th style="text-align: center;">End Time</th>
-                            <th style="text-align: center;">Cut Length</th>
                             <th style="text-align: center;">Status</th>
                             <th style="text-align: center;">Actions</th>
                         </tr>
@@ -184,13 +182,11 @@
                         <tr data-report-id="{{ report.id }}">
                             <td style="text-align: center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                             <td style="text-align: center;">{{ report.production_id }}</td>
-                            <td style="text-align: center;">{{ report.cast_no|default:"-" }}</td>
                             <td style="text-align: center;">{{ report.date|date:"Y-m-d"|default:"-" }}</td>
                             <td style="text-align: center;">{{ report.press_no.name }}</td>
                             <td style="text-align: center;">{{ report.die_no|default:"-" }}</td>
                             <td style="text-align: center;">{{ report.start_time|time:"H:i"|default:"-" }}</td>
                             <td style="text-align: center;">{{ report.end_time|time:"H:i"|default:"-" }}</td>
-                            <td style="text-align: center;">{{ report.cut_length|default:"-" }}</td>
                             <td style="text-align: center;">{{ report.status|default:"-" }}</td>
 
                             <td style="white-space: nowrap; text-align: center;">

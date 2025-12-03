@@ -2,11 +2,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("productionReportForm");
     const productionIdDisplay = document.getElementById("production_id_display");
     const productionPlanId = document.getElementById("production_plan_id");
+    const customerName = document.getElementById("customer_name");
+    const dieRequisitionId = document.getElementById("die_requisition_id");
     const dieNo = document.getElementById("die_no");
-    const cutLength = document.getElementById("cut_length");
     const sectionNo = document.getElementById("section_no");
     const sectionName = document.getElementById("section_name");
     const wtPerPiece = document.getElementById("wt_per_piece");
+    const pressNo = document.getElementById("press_no");
+    const dateOfProduction = document.getElementById("date_of_production");
+    const shift = document.getElementById("shift");
+    const operator = document.getElementById("operator");
+    const plannedQty = document.getElementById("planned_qty");
     const dateField = document.getElementById("date");
 
     // ---------------- Set today's date as default (for create mode) ----------------
@@ -57,10 +63,17 @@ document.addEventListener("DOMContentLoaded", function () {
             const planId = this.value;
 
             // Clear all auto-populated fields
+            customerName.value = '';
+            dieRequisitionId.value = '';
             dieNo.value = '';
-            cutLength.value = '';
             sectionNo.value = '';
             sectionName.value = '';
+            wtPerPiece.value = '';
+            pressNo.value = '';
+            dateOfProduction.value = '';
+            shift.value = '';
+            operator.value = '';
+            plannedQty.value = '';
 
             if (!planId) return;
 
@@ -69,13 +82,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = await response.json();
 
                 if (data.success && data.production_plan) {
+                    customerName.value = data.production_plan.customer_name || '';
+                    dieRequisitionId.value = data.production_plan.die_requisition_id || '';
                     dieNo.value = data.production_plan.die_no || '';
-                    cutLength.value = data.production_plan.cut_length || '';
                     sectionNo.value = data.production_plan.section_no || '';
                     sectionName.value = data.production_plan.section_name || '';
-                    if (wtPerPiece && !wtPerPiece.value) {
-                        wtPerPiece.value = data.production_plan.wt_per_piece || '';
-                    }
+                    wtPerPiece.value = data.production_plan.wt_per_piece || '';
+                    pressNo.value = data.production_plan.press || '';
+                    dateOfProduction.value = data.production_plan.date_of_production || '';
+                    shift.value = data.production_plan.shift || '';
+                    operator.value = data.production_plan.operator || '';
+                    plannedQty.value = data.production_plan.planned_qty || '';
                 } else {
                     showMessage("error", "Error loading production plan details");
                 }
@@ -96,19 +113,17 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!time24) return { hour: 12, minute: 0, period: 'AM' };
         
         const [hours, minutes] = time24.split(':').map(Number);
-        let hour = hours % 12 || 12;
-        const period = hours >= 12 ? 'PM' : 'AM';
+        
+        // Just use the hour as stored, no conversion
+        let hour = hours;
+        let period = 'AM'; // Default period
         
         return { hour, minute: minutes, period };
     }
 
     function convertTo24Hour(hour, minute, period) {
-        let hour24 = hour;
-        if (period === 'PM' && hour !== 12) {
-            hour24 = hour + 12;
-        } else if (period === 'AM' && hour === 12) {
-            hour24 = 0;
-        }
+        // Just store the hour as selected, no conversion
+        let hour24 = parseInt(hour);
         return `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
     }
 
@@ -285,10 +300,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- Validate Form ----------------
     function validateForm() {
-        const pressNo = document.getElementById("press_no").value;
+        const pressNoValue = document.getElementById("press_no").value;
         const status = document.getElementById("status").value;
 
-        if (!pressNo) {
+        if (!pressNoValue) {
             showMessage("error", "Press No is required");
             return false;
         }
@@ -312,20 +327,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let payload = {
                 date: formData.get("date") || null,
-                cast_no: formData.get("cast_no") || "",
-                press_no: formData.get("press_no"),
-                shift: formData.get("shift") || null,
-                start_time: formData.get("start_time") || null,
-                end_time: formData.get("end_time") || null,
-                operator: formData.get("operator") || null,
                 production_plan_id: formData.get("production_plan_id") || null,
+                customer_name: formData.get("customer_name") || "",
+                die_requisition_id: formData.get("die_requisition_id") || "",
                 die_no: formData.get("die_no") || "",
-                cut_length: formData.get("cut_length") || "",
                 section_no: formData.get("section_no") || "",
                 section_name: formData.get("section_name") || "",
                 wt_per_piece: formData.get("wt_per_piece") || null,
-                billet_size: formData.get("billet_size") || null,
-                no_of_billet: formData.get("no_of_billet") || null,
+                press_no: formData.get("press_no"),
+                date_of_production: formData.get("date_of_production") || null,
+                shift: formData.get("shift") || null,
+                operator: formData.get("operator") || null,
+                planned_qty: formData.get("planned_qty") || null,
+                start_time: formData.get("start_time") || null,
+                end_time: formData.get("end_time") || null,
                 status: formData.get("status")
             };
 

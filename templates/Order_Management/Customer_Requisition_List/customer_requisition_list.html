@@ -340,20 +340,16 @@
             </div>
 
             <!-- Table with horizontal scroll -->
-            <div style="overflow-x: auto; width: 100%;">
-                <table style="min-width: 720px;">
+            <div class="table-wrapper">
+                <table>
                     <thead>
                         <tr>
-                            <th style="width: 60px; text-align: center;">#</th>
-                            <th style="width: 100px; text-align: center;">Order</th>
-                            <th style="width: 100px; text-align: center;">Created</th>
-                            <th style="width: 180px; text-align: center;">Customer</th>
-                            <th style="width: 120px; text-align: center;">Section</th>
-                            <th style="width: 100px; text-align: center;">Weight</th>
-                            <th style="width: 100px; text-align: center;">C/L</th>
-                            <th style="width: 80px; text-align: center;">Qty</th>
-                            <th style="width: 130px; text-align: center;">Status</th>
-                            <th style="width: 110px; text-align: center;">Actions</th>
+                            <th style="text-align: center;">#</th>
+                            <th style="text-align: center;">Order</th>
+                            <th style="text-align: center;">Created</th>
+                            <th style="text-align: center;">Customer</th>
+                            <th style="text-align: center;">Status</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="requisitionTableBody">
@@ -373,17 +369,13 @@
                             <td rowspan="{{ req.orders.count }}" style="text-align: center;">{{ req.customer.name }}
                             </td>
                             {% endif %}
-                            <td style="text-align: center;">{{ order.section_no.section_no }}</td>
-                            <td style="text-align: center;">{{ order.wt_range }}</td>
-                            <td style="text-align: center;">{{ order.cut_length }}</td>
-                            <td style="text-align: center;">{{ order.qty_in_no }}</td>
                             {% if forloop.first %}
                             <td rowspan="{{ req.orders.count }}" style="text-align: center;">
                                 <span class="status-badge status-{{ req.status }}">
                                     {{ req.get_status_display }}
                                 </span>
                             </td>
-                            <td rowspan="{{ req.orders.count }}" style="white-space: nowrap;">
+                            <td rowspan="{{ req.orders.count }}" style="white-space: nowrap; text-align: center;">
                                 <a href="{% url 'requisition_edit' req.id %}" class="action-btn edit-btn" title="Edit">
                                     <i class="fa-solid fa-pencil"></i>
                                 </a>
@@ -419,14 +411,6 @@
             <div class="stat-item">
                 <span class="stat-label">Created</span>
                 <span class="stat-value">{{ status_counts.created|default:0 }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">In planning</span>
-                <span class="stat-value">{{ status_counts.in_planning|default:0 }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">In production</span>
-                <span class="stat-value">{{ status_counts.in_production|default:0 }}</span>
             </div>
             <div class="stat-item">
                 <span class="stat-label">Completed</span>

@@ -54,19 +54,20 @@ class OnlineProductionReportListView(View):
                     'id': report.id,
                     'production_id': report.production_id,
                     'date': report.date.strftime("%Y-%m-%d") if report.date else '',
-                    'cast_no': report.cast_no or '',
-                    'press_no': report.press_no.name if report.press_no else '',
-                    'shift': report.shift.name if report.shift else '',
-                    'start_time': report.start_time.strftime("%H:%M") if report.start_time else '',
-                    'end_time': report.end_time.strftime("%H:%M") if report.end_time else '',
-                    'operator': report.operator.get_full_name() if report.operator else '',
+                    'production_plan_id': report.production_plan_id.production_plan_id if report.production_plan_id else '',
+                    'customer_name': report.customer_name,
+                    'die_requisition_id': report.die_requisition_id,
                     'die_no': report.die_no,
-                    'cut_length': report.cut_length,
                     'section_no': report.section_no,
                     'section_name': report.section_name,
                     'wt_per_piece': str(report.wt_per_piece) if report.wt_per_piece else '',
-                    'billet_size': str(report.billet_size) if report.billet_size else '',
-                    'no_of_billet': report.no_of_billet,
+                    'press_no': report.press_no.name if report.press_no else '',
+                    'date_of_production': report.date_of_production.strftime("%Y-%m-%d") if report.date_of_production else '',
+                    'shift': report.shift.name if report.shift else '',
+                    'operator': report.operator.get_full_name() if report.operator else '',
+                    'planned_qty': report.planned_qty,
+                    'start_time': report.start_time.strftime("%H:%M") if report.start_time else '',
+                    'end_time': report.end_time.strftime("%H:%M") if report.end_time else '',
                     'status': report.status,
                 })
             
@@ -173,28 +174,32 @@ class OnlineProductionReportAPI(View):
         if request.GET.get('action') == 'get_production_plan_details':
             plan_id = request.GET.get('production_plan_id')
             try:
-                plan = ProductionPlan.objects.select_related('die_requisition').get(id=plan_id)
+                plan = ProductionPlan.objects.select_related(
+                    'die_requisition',
+                    'press',
+                    'shift',
+                    'operator'
+                ).get(id=plan_id)
                 
-                # Get die requisition details for section info
-                section_no_value = ''
-                section_name_value = ''
-                
-                # Get section info from die_requisition
+                # Get die requisition ID
+                die_requisition_id = ''
                 if plan.die_requisition:
-                    die_req = plan.die_requisition
-                    if die_req.section_no:
-                        section_no_value = str(die_req.section_no.section_no) if hasattr(die_req.section_no, 'section_no') else str(die_req.section_no)
-                    if die_req.section_name:
-                        section_name_value = die_req.section_name
+                    die_requisition_id = plan.die_requisition.die_requisition_id if hasattr(plan.die_requisition, 'die_requisition_id') else str(plan.die_requisition.id)
                 
                 return JsonResponse({
                     'success': True,
                     'production_plan': {
+                        'customer_name': plan.customer_name,
+                        'die_requisition_id': die_requisition_id,
                         'die_no': plan.die_no,
-                        'cut_length': plan.cut_length,
-                        'wt_per_piece': str(plan.wt_per_piece),
-                        'section_no': section_no_value,
-                        'section_name': section_name_value
+                        'section_no': plan.section_no,
+                        'section_name': plan.section_name,
+                        'wt_per_piece': str(plan.wt_per_piece) if plan.wt_per_piece else '',
+                        'press': plan.press.id if plan.press else '',
+                        'date_of_production': plan.date_of_production.strftime("%Y-%m-%d") if plan.date_of_production else '',
+                        'shift': plan.shift.id if plan.shift else '',
+                        'operator': plan.operator.id if plan.operator else '',
+                        'planned_qty': plan.planned_qty if plan.planned_qty else ''
                     }
                 })
             except ProductionPlan.DoesNotExist:
@@ -214,20 +219,20 @@ class OnlineProductionReportAPI(View):
                 "id": report.id,
                 "production_id": report.production_id,
                 "date": report.date.strftime("%Y-%m-%d") if report.date else '',
-                "cast_no": report.cast_no or '',
-                "press_no": report.press_no.name if report.press_no else '',
-                "shift": report.shift.name if report.shift else '',
-                "start_time": report.start_time.strftime("%H:%M") if report.start_time else '',
-                "end_time": report.end_time.strftime("%H:%M") if report.end_time else '',
-                "operator": report.operator.get_full_name() if report.operator else '',
                 "production_plan_id": report.production_plan_id.production_plan_id if report.production_plan_id else '',
+                "customer_name": report.customer_name,
+                "die_requisition_id": report.die_requisition_id,
                 "die_no": report.die_no,
-                "cut_length": report.cut_length,
                 "section_no": report.section_no,
                 "section_name": report.section_name,
                 "wt_per_piece": str(report.wt_per_piece) if report.wt_per_piece else '',
-                "billet_size": str(report.billet_size) if report.billet_size else '',
-                "no_of_billet": report.no_of_billet,
+                "press_no": report.press_no.name if report.press_no else '',
+                "date_of_production": report.date_of_production.strftime("%Y-%m-%d") if report.date_of_production else '',
+                "shift": report.shift.name if report.shift else '',
+                "operator": report.operator.get_full_name() if report.operator else '',
+                "planned_qty": report.planned_qty,
+                "start_time": report.start_time.strftime("%H:%M") if report.start_time else '',
+                "end_time": report.end_time.strftime("%H:%M") if report.end_time else '',
                 "status": report.status,
                 "created_at": report.created_at.strftime("%Y-%m-%d"),
             })
@@ -248,20 +253,20 @@ class OnlineProductionReportAPI(View):
             # Create production report
             report = OnlineProductionReport.objects.create(
                 date=data.get('date') or None,
-                cast_no=data.get('cast_no', ''),
-                press_no_id=data['press_no'],
-                shift_id=data.get('shift') or None,
-                start_time=data.get('start_time') or None,
-                end_time=data.get('end_time') or None,
-                operator_id=data.get('operator') or None,
                 production_plan_id_id=data.get('production_plan_id') or None,
+                customer_name=data.get('customer_name', ''),
+                die_requisition_id=data.get('die_requisition_id', ''),
                 die_no=data.get('die_no', ''),
-                cut_length=data.get('cut_length', ''),
                 section_no=data.get('section_no', ''),
                 section_name=data.get('section_name', ''),
                 wt_per_piece=data.get('wt_per_piece') or None,
-                billet_size=data.get('billet_size') or None,
-                no_of_billet=data.get('no_of_billet') or None,
+                press_no_id=data['press_no'],
+                date_of_production=data.get('date_of_production') or None,
+                shift_id=data.get('shift') or None,
+                operator_id=data.get('operator') or None,
+                planned_qty=data.get('planned_qty') or None,
+                start_time=data.get('start_time') or None,
+                end_time=data.get('end_time') or None,
                 status=data.get('status', 'in_progress')
             )
             
@@ -292,20 +297,20 @@ class OnlineProductionReportDetailAPI(View):
             
             # Update fields
             report.date = data.get('date') or report.date
-            report.cast_no = data.get('cast_no', report.cast_no)
-            report.press_no_id = data.get('press_no', report.press_no_id)
-            report.shift_id = data.get('shift') or report.shift_id
-            report.start_time = data.get('start_time') or report.start_time
-            report.end_time = data.get('end_time') or report.end_time
-            report.operator_id = data.get('operator') or report.operator_id
             report.production_plan_id_id = data.get('production_plan_id') or report.production_plan_id_id
+            report.customer_name = data.get('customer_name', report.customer_name)
+            report.die_requisition_id = data.get('die_requisition_id', report.die_requisition_id)
             report.die_no = data.get('die_no', report.die_no)
-            report.cut_length = data.get('cut_length', report.cut_length)
             report.section_no = data.get('section_no', report.section_no)
             report.section_name = data.get('section_name', report.section_name)
             report.wt_per_piece = data.get('wt_per_piece') or report.wt_per_piece
-            report.billet_size = data.get('billet_size') or report.billet_size
-            report.no_of_billet = data.get('no_of_billet') or report.no_of_billet
+            report.press_no_id = data.get('press_no', report.press_no_id)
+            report.date_of_production = data.get('date_of_production') or report.date_of_production
+            report.shift_id = data.get('shift') or report.shift_id
+            report.operator_id = data.get('operator') or report.operator_id
+            report.planned_qty = data.get('planned_qty') or report.planned_qty
+            report.start_time = data.get('start_time') or report.start_time
+            report.end_time = data.get('end_time') or report.end_time
             report.status = data.get('status', report.status)
             report.save()
             
