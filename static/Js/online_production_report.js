@@ -1,25 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("productionReportForm");
     const productionIdDisplay = document.getElementById("production_id_display");
-    const productionPlanId = document.getElementById("production_plan_id");
-    const customerName = document.getElementById("customer_name");
-    const dieRequisitionId = document.getElementById("die_requisition_id");
+    const dateOfProduction = document.getElementById("date_of_production");
+    const dieRequisition = document.getElementById("die_requisition");
     const dieNo = document.getElementById("die_no");
     const sectionNo = document.getElementById("section_no");
     const sectionName = document.getElementById("section_name");
-    const wtPerPiece = document.getElementById("wt_per_piece");
-    const pressNo = document.getElementById("press_no");
-    const dateOfProduction = document.getElementById("date_of_production");
+    const wtPerPieceGeneral = document.getElementById("wt_per_piece_general");
+    const noOfCavity = document.getElementById("no_of_cavity");
+    const cutLength = document.getElementById("cut_length");
+    const press = document.getElementById("press");
     const shift = document.getElementById("shift");
     const operator = document.getElementById("operator");
     const plannedQty = document.getElementById("planned_qty");
-    const dateField = document.getElementById("date");
-
-    // ---------------- Set today's date as default (for create mode) ----------------
-    if (!window.editMode && dateField && !dateField.value) {
-        const today = new Date().toISOString().split('T')[0];
-        dateField.value = today;
-    }
+    const billetSize = document.getElementById("billet_size");
+    const noOfBillet = document.getElementById("no_of_billet");
+    const wtPerPieceOutput = document.getElementById("wt_per_piece_output");
+    const noOfPieces = document.getElementById("no_of_pieces");
+    const totalOutput = document.getElementById("total_output");
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -42,11 +40,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---------------- Fetch Next Production ID ----------------
     async function fetchNextProductionId() {
         if (window.editMode) return;
-        
+
         try {
             const response = await fetch('/production/api/online-production-reports/?action=get_next_id');
             const data = await response.json();
-            
+
             if (data.success && data.next_production_id) {
                 if (productionIdDisplay) {
                     productionIdDisplay.value = data.next_production_id;
@@ -57,72 +55,130 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ---------------- Auto-populate Production Plan fields ----------------
-    if (productionPlanId) {
-        productionPlanId.addEventListener("change", async function () {
-            const planId = this.value;
+    // ---------------- Calculate Total Output ----------------
+    function calculateTotalOutput() {
+        const wtOutput = parseFloat(wtPerPieceOutput.value) || 0;
+        const pieces = parseInt(noOfPieces.value) || 0;
 
-            // Clear all auto-populated fields
-            customerName.value = '';
-            dieRequisitionId.value = '';
-            dieNo.value = '';
-            sectionNo.value = '';
-            sectionName.value = '';
-            wtPerPiece.value = '';
-            pressNo.value = '';
-            dateOfProduction.value = '';
-            shift.value = '';
-            operator.value = '';
-            plannedQty.value = '';
+        if (wtOutput > 0 && pieces > 0) {
+            const total = (wtOutput * pieces).toFixed(2);
+            totalOutput.value = total;
+        } else {
+            totalOutput.value = '';
+        }
+    }
 
-            if (!planId) return;
+    // Add event listeners for auto-calculation
+    if (wtPerPieceOutput) {
+        wtPerPieceOutput.addEventListener('input', calculateTotalOutput);
+    }
+    if (noOfPieces) {
+        noOfPieces.addEventListener('input', calculateTotalOutput);
+    }
+
+    // ---------------- Load Die Requisitions by Date of Production ----------------
+    if (dateOfProduction) {
+        dateOfProduction.addEventListener("change", async function () {
+            const date = this.value;
+
+            // Clear die requisition dropdown
+            dieRequisition.innerHTML = '<option value="">Select Die Requisition ID</option>';
+
+            // Clear all dependent fields
+            clearDependentFields();
+
+            if (!date) return;
 
             try {
-                const response = await fetch(`/production/api/online-production-reports/?action=get_production_plan_details&production_plan_id=${planId}`);
+                const response = await fetch(`/production/api/online-production-reports/?action=get_die_requisitions_by_date&date_of_production=${date}`);
                 const data = await response.json();
 
-                if (data.success && data.production_plan) {
-                    customerName.value = data.production_plan.customer_name || '';
-                    dieRequisitionId.value = data.production_plan.die_requisition_id || '';
-                    dieNo.value = data.production_plan.die_no || '';
-                    sectionNo.value = data.production_plan.section_no || '';
-                    sectionName.value = data.production_plan.section_name || '';
-                    wtPerPiece.value = data.production_plan.wt_per_piece || '';
-                    pressNo.value = data.production_plan.press || '';
-                    dateOfProduction.value = data.production_plan.date_of_production || '';
-                    shift.value = data.production_plan.shift || '';
-                    operator.value = data.production_plan.operator || '';
-                    plannedQty.value = data.production_plan.planned_qty || '';
+                if (data.success && data.die_requisitions.length > 0) {
+                    data.die_requisitions.forEach(req => {
+                        const option = document.createElement('option');
+                        option.value = req.id;
+                        option.textContent = req.die_requisition_id;
+                        dieRequisition.appendChild(option);
+                    });
                 } else {
-                    showMessage("error", "Error loading production plan details");
+                    showMessage("error", "No die requisitions found for this date");
                 }
             } catch (error) {
-                console.error('Error fetching production plan details:', error);
-                showMessage("error", "Error loading production plan details");
+                console.error('Error fetching die requisitions:', error);
+                showMessage("error", "Error loading die requisitions");
             }
         });
     }
 
+    // ---------------- Auto-populate Die Requisition fields ----------------
+    if (dieRequisition) {
+        dieRequisition.addEventListener("change", async function () {
+            const reqId = this.value;
+            const dateProd = dateOfProduction.value;
+
+            // Clear all fields
+            clearDependentFields();
+
+            if (!reqId || !dateProd) return;
+
+            try {
+                const response = await fetch(`/production/api/online-production-reports/?action=get_die_requisition_details&die_requisition_id=${reqId}&date_of_production=${dateProd}`);
+                const data = await response.json();
+
+                if (data.success && data.details) {
+                    const details = data.details;
+
+                    dieNo.value = details.die_no || '';
+                    sectionNo.value = details.section_no || '';
+                    sectionName.value = details.section_name || '';
+                    wtPerPieceGeneral.value = details.wt_per_piece || '';
+                    noOfCavity.value = details.no_of_cavity || '';
+                    cutLength.value = details.cut_length || '';
+                    press.value = details.press || '';
+                    shift.value = details.shift || '';
+                    operator.value = details.operator || '';
+                    plannedQty.value = details.planned_qty || '';
+                    billetSize.value = details.billet_size || '';
+                    noOfBillet.value = details.no_of_billet || '';
+                } else {
+                    showMessage("error", "Error loading die requisition details");
+                }
+            } catch (error) {
+                console.error('Error fetching die requisition details:', error);
+                showMessage("error", "Error loading die requisition details");
+            }
+        });
+    }
+
+    function clearDependentFields() {
+        dieNo.value = '';
+        sectionNo.value = '';
+        sectionName.value = '';
+        wtPerPieceGeneral.value = '';
+        noOfCavity.value = '';
+        cutLength.value = '';
+        press.value = '';
+        shift.value = '';
+        operator.value = '';
+        plannedQty.value = '';
+        billetSize.value = '';
+        noOfBillet.value = '';
+    }
+
     // ---------------- Custom Clock Picker Implementation ----------------
-    let currentTimePicker = null;
     let selectedHour = 12;
     let selectedMinute = 0;
     let selectedPeriod = 'AM';
 
     function convertTo12Hour(time24) {
         if (!time24) return { hour: 12, minute: 0, period: 'AM' };
-        
         const [hours, minutes] = time24.split(':').map(Number);
-        
-        // Just use the hour as stored, no conversion
         let hour = hours;
-        let period = 'AM'; // Default period
-        
+        let period = 'AM';
         return { hour, minute: minutes, period };
     }
 
     function convertTo24Hour(hour, minute, period) {
-        // Just store the hour as selected, no conversion
         let hour24 = parseInt(hour);
         return `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
     }
@@ -132,7 +188,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function createClockPicker(inputElement, hiddenInput) {
-        // Get existing time if any
         if (hiddenInput.value) {
             const time12 = convertTo12Hour(hiddenInput.value);
             selectedHour = time12.hour;
@@ -140,21 +195,17 @@ document.addEventListener("DOMContentLoaded", function () {
             selectedPeriod = time12.period;
         }
 
-        // Remove any existing picker
         const existingPicker = document.querySelector('.clock-picker-modal');
-        if (existingPicker) {
-            existingPicker.remove();
-        }
+        if (existingPicker) existingPicker.remove();
 
         const modal = document.createElement('div');
         modal.className = 'clock-picker-modal active';
-        
-        // Position the modal near the input field
+
         const rect = inputElement.getBoundingClientRect();
         modal.style.position = 'absolute';
         modal.style.left = rect.left + 'px';
         modal.style.top = (rect.bottom + 5) + 'px';
-        
+
         modal.innerHTML = `
             <div class="clock-picker-container">
                 <div class="clock-picker-header">
@@ -185,7 +236,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const clockDisplay = modal.querySelector('.clock-display');
         const minuteInput = modal.querySelector('#minuteInput');
 
-        // Create hour numbers
         for (let i = 1; i <= 12; i++) {
             const angle = (i * 30 - 90) * (Math.PI / 180);
             const x = 85 + 70 * Math.cos(angle);
@@ -199,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
             number.style.top = `${y - 15}px`;
             number.dataset.hour = i;
 
-            number.addEventListener('click', function() {
+            number.addEventListener('click', function () {
                 selectedHour = parseInt(this.dataset.hour);
                 modal.querySelectorAll('.clock-number').forEach(n => n.classList.remove('selected'));
                 this.classList.add('selected');
@@ -213,9 +263,8 @@ document.addEventListener("DOMContentLoaded", function () {
             clockDisplay.textContent = format12Hour(selectedHour, selectedMinute, selectedPeriod);
         }
 
-        // Period selector
         modal.querySelectorAll('.period-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 selectedPeriod = this.dataset.period;
                 modal.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
@@ -223,8 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        // Minute input
-        minuteInput.addEventListener('input', function() {
+        minuteInput.addEventListener('input', function () {
             let value = parseInt(this.value) || 0;
             if (value > 59) value = 59;
             if (value < 0) value = 0;
@@ -233,23 +281,18 @@ document.addEventListener("DOMContentLoaded", function () {
             updateDisplay();
         });
 
-        // Cancel button
-        modal.querySelector('.clock-cancel-btn').addEventListener('click', () => {
-            modal.remove();
-        });
+        modal.querySelector('.clock-cancel-btn').addEventListener('click', () => modal.remove());
 
-        // OK button
         modal.querySelector('.clock-ok-btn').addEventListener('click', () => {
             const time24 = convertTo24Hour(selectedHour, selectedMinute, selectedPeriod);
             const time12 = format12Hour(selectedHour, selectedMinute, selectedPeriod);
-            
+
             hiddenInput.value = time24;
             inputElement.value = time12;
-            
+
             modal.remove();
         });
 
-        // Close on click outside
         setTimeout(() => {
             document.addEventListener('click', function closeOnClickOutside(e) {
                 if (!modal.contains(e.target) && !inputElement.contains(e.target)) {
@@ -260,7 +303,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 100);
     }
 
-    // Replace time inputs with custom picker
     function setupTimeInput(timeInputId) {
         const originalInput = document.getElementById(timeInputId);
         if (!originalInput) return;
@@ -272,8 +314,7 @@ document.addEventListener("DOMContentLoaded", function () {
         displayInput.type = 'text';
         displayInput.placeholder = 'Select time';
         displayInput.readOnly = true;
-        
-        // Set initial value if exists
+
         if (originalInput.value) {
             const time12 = convertTo12Hour(originalInput.value);
             displayInput.value = format12Hour(time12.hour, time12.minute, time12.period);
@@ -294,17 +335,28 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Setup custom time pickers
     setupTimeInput('start_time');
     setupTimeInput('end_time');
 
     // ---------------- Validate Form ----------------
     function validateForm() {
-        const pressNoValue = document.getElementById("press_no").value;
+        const pressValue = document.getElementById("press").value;
         const status = document.getElementById("status").value;
+        const dateProdValue = document.getElementById("date_of_production").value;
+        const dieReqValue = document.getElementById("die_requisition").value;
 
-        if (!pressNoValue) {
-            showMessage("error", "Press No is required");
+        if (!dateProdValue) {
+            showMessage("error", "Date of Production is required");
+            return false;
+        }
+
+        if (!dieReqValue) {
+            showMessage("error", "Die Requisition ID is required");
+            return false;
+        }
+
+        if (!pressValue) {
+            showMessage("error", "Press is required");
             return false;
         }
 
@@ -327,22 +379,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let payload = {
                 date: formData.get("date") || null,
-                production_plan_id: formData.get("production_plan_id") || null,
-                customer_name: formData.get("customer_name") || "",
-                die_requisition_id: formData.get("die_requisition_id") || "",
+                date_of_production: formData.get("date_of_production") || null,
+                die_requisition: formData.get("die_requisition") || null,
                 die_no: formData.get("die_no") || "",
                 section_no: formData.get("section_no") || "",
                 section_name: formData.get("section_name") || "",
-                wt_per_piece: formData.get("wt_per_piece") || null,
-                press_no: formData.get("press_no"),
-                date_of_production: formData.get("date_of_production") || null,
+                wt_per_piece_general: formData.get("wt_per_piece_general") ? parseFloat(formData.get("wt_per_piece_general")) : null,
+                no_of_cavity: formData.get("no_of_cavity") || "",
+                cut_length: formData.get("cut_length") || "",
+                press: formData.get("press"),
                 shift: formData.get("shift") || null,
                 operator: formData.get("operator") || null,
-                planned_qty: formData.get("planned_qty") || null,
+                planned_qty: formData.get("planned_qty") ? parseInt(formData.get("planned_qty")) : null,
                 start_time: formData.get("start_time") || null,
                 end_time: formData.get("end_time") || null,
+                billet_size: formData.get("billet_size") || "",
+                no_of_billet: formData.get("no_of_billet") ? parseInt(formData.get("no_of_billet")) : null,
+                input_qty: formData.get("input_qty") ? parseFloat(formData.get("input_qty")) : null,
+                wt_per_piece_output: formData.get("wt_per_piece_output") ? parseFloat(formData.get("wt_per_piece_output")) : null,
+                no_of_pieces: formData.get("no_of_pieces") ? parseInt(formData.get("no_of_pieces")) : null,
                 status: formData.get("status")
             };
+
 
             console.log("Payload being sent:", payload);
 
@@ -422,9 +480,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---------------- Initial Load ----------------
     if (!window.editMode) {
         fetchNextProductionId();
-    } else {
-        if (productionPlanId && productionPlanId.value) {
-            productionPlanId.dispatchEvent(new Event('change'));
-        }
     }
+
 });

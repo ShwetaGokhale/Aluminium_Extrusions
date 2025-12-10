@@ -163,6 +163,18 @@ class ProductionPlan(models.Model):
         verbose_name="WT per Piece",
         default=0
     )
+    # NEW FIELDS
+    no_of_cavity = models.CharField(
+        max_length=10,
+        verbose_name="No of Cavity",
+        blank=True
+    )
+    cut_length = models.CharField(
+        max_length=10,
+        verbose_name="Cut Length",
+        blank=True
+    )
+    
     # Production Planning Details
     press = models.ForeignKey(
         'master.CompanyPress',
@@ -197,6 +209,20 @@ class ProductionPlan(models.Model):
         null=True,
         blank=True
     )
+    
+    # Billet Planning Details
+    billet_size = models.CharField(
+        max_length=50,
+        verbose_name="Billet Size (mm)",
+        blank=True
+    )
+    no_of_billet = models.IntegerField(
+        validators=[MinValueValidator(1)],
+        verbose_name="No of Billet",
+        null=True,
+        blank=True
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:

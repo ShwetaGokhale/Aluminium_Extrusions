@@ -549,7 +549,7 @@ class ProductionPlanAPI(View):
                     'message': 'Requisition not found'
                 })
         
-        # Get die requisition details
+        # Get die requisition details including no_of_cavity
         if request.GET.get('action') == 'get_die_requisition_details':
             die_req_id = request.GET.get('die_requisition_id')
             try:
@@ -560,13 +560,32 @@ class ProductionPlanAPI(View):
                         'die_no': die_req.die_no.die_no if die_req.die_no else '',
                         'section_no': die_req.section_no.section_no if die_req.section_no else '',
                         'section_name': die_req.section_name,
-                        'present_wt': str(die_req.present_wt)
+                        'present_wt': str(die_req.present_wt),
+                        'no_of_cavity': die_req.die_no.no_of_cavity if die_req.die_no else ''
                     }
                 })
             except DieRequisition.DoesNotExist:
                 return JsonResponse({
                     'success': False,
                     'message': 'Die Requisition not found'
+                })
+        
+        # Get cut length options for selected requisition
+        if request.GET.get('action') == 'get_cut_length_options':
+            requisition_id = request.GET.get('requisition_id')
+            try:
+                from order_management.models import RequisitionOrder
+                cut_lengths = RequisitionOrder.objects.filter(
+                    requisition_id=requisition_id
+                ).values_list('cut_length', flat=True).distinct()
+                return JsonResponse({
+                    'success': True,
+                    'cut_lengths': list(cut_lengths)
+                })
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': str(e)
                 })
 
         # Otherwise return all plans
@@ -615,11 +634,15 @@ class ProductionPlanAPI(View):
                 section_no=data.get('section_no', ''),
                 section_name=data.get('section_name', ''),
                 wt_per_piece=data.get('wt_per_piece', 0),
+                no_of_cavity=data.get('no_of_cavity', ''),
+                cut_length=data.get('cut_length', ''),
                 press_id=data.get('press') or None,
                 date_of_production=data.get('date_of_production') or None,
                 shift_id=data.get('shift') or None,
                 operator_id=data.get('operator') or None,
                 planned_qty=data.get('planned_qty') or None,
+                billet_size=data.get('billet_size', ''),
+                no_of_billet=data.get('no_of_billet') or None,
             )
             
             return JsonResponse(
@@ -660,11 +683,15 @@ class ProductionPlanDetailAPI(View):
                         "section_no": plan.section_no,
                         "section_name": plan.section_name,
                         "wt_per_piece": str(plan.wt_per_piece),
+                        "no_of_cavity": plan.no_of_cavity,
+                        "cut_length": plan.cut_length,
                         "press": plan.press.id if plan.press else None,
                         "date_of_production": plan.date_of_production.strftime("%Y-%m-%d") if plan.date_of_production else '',
                         "shift": plan.shift.id if plan.shift else None,
                         "operator": plan.operator.id if plan.operator else None,
                         "planned_qty": plan.planned_qty,
+                        "billet_size": plan.billet_size,
+                        "no_of_billet": plan.no_of_billet,
                     },
                 }
             )
@@ -686,11 +713,15 @@ class ProductionPlanDetailAPI(View):
             plan.section_no = data.get('section_no', plan.section_no)
             plan.section_name = data.get('section_name', plan.section_name)
             plan.wt_per_piece = data.get('wt_per_piece', plan.wt_per_piece)
+            plan.no_of_cavity = data.get('no_of_cavity', plan.no_of_cavity)
+            plan.cut_length = data.get('cut_length', plan.cut_length)
             plan.press_id = data.get('press') or None
             plan.date_of_production = data.get('date_of_production') or None
             plan.shift_id = data.get('shift') or None
             plan.operator_id = data.get('operator') or None
             plan.planned_qty = data.get('planned_qty') or None
+            plan.billet_size = data.get('billet_size', plan.billet_size)
+            plan.no_of_billet = data.get('no_of_billet') or None
 
             plan.save()
             

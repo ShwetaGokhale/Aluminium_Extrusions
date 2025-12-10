@@ -95,12 +95,30 @@
                 style="background-color: #f0f0f0; cursor: not-allowed;">
         </div>
 
-        <!-- WT per Piece (Auto-retrieve) -->
+        <!-- WT per Piece (Editable) -->
         <div>
             <label for="wt_per_piece">WT per Piece</label>
-            <input type="number" step="0.01" name="wt_per_piece" id="wt_per_piece" readonly
-                value="{% if edit_mode %}{{ plan.wt_per_piece }}{% endif %}"
+            <input type="number" step="0.01" name="wt_per_piece" id="wt_per_piece"
+                value="{% if edit_mode %}{{ plan.wt_per_piece }}{% endif %}">
+        </div>
+
+        <!-- No of Cavity (Auto-retrieve from Die) -->
+        <div>
+            <label for="no_of_cavity">No of Cavity</label>
+            <input type="text" name="no_of_cavity" id="no_of_cavity" readonly
+                value="{% if edit_mode %}{{ plan.no_of_cavity }}{% endif %}"
                 style="background-color: #f0f0f0; cursor: not-allowed;">
+        </div>
+
+        <!-- Cut Length (Dropdown from RequisitionOrder) -->
+        <div>
+            <label for="cut_length">Cut Length</label>
+            <select name="cut_length" id="cut_length">
+                <option value="">Select Cut Length</option>
+                {% if edit_mode and plan.cut_length %}
+                <option value="{{ plan.cut_length }}" selected>{{ plan.cut_length }}</option>
+                {% endif %}
+            </select>
         </div>
 
         <!-- Spacer to push next field to new row -->
@@ -162,6 +180,28 @@
             <label for="planned_qty">Planned QTY</label>
             <input type="number" name="planned_qty" id="planned_qty" min="1"
                 value="{% if edit_mode %}{{ plan.planned_qty }}{% endif %}">
+        </div>
+
+        <!-- Spacer to push next field to new row -->
+        <div style="grid-column: 1 / 3; height: 0;"></div>
+
+        <!-- Billet Planning Details Heading -->
+        <div class="section-heading">
+            <h4>Billet Planning Details</h4>
+        </div>
+
+        <!-- Billet Size (mm) -->
+        <div>
+            <label for="billet_size">Billet Size (mm)</label>
+            <input type="text" name="billet_size" id="billet_size"
+                value="{% if edit_mode %}{{ plan.billet_size }}{% endif %}">
+        </div>
+
+        <!-- No of Billet -->
+        <div>
+            <label for="no_of_billet">No of Billet</label>
+            <input type="number" name="no_of_billet" id="no_of_billet" min="1"
+                value="{% if edit_mode %}{{ plan.no_of_billet }}{% endif %}">
         </div>
 
         <!-- Submit Button -->

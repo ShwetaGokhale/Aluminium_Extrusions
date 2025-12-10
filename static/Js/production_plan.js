@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const sectionNo = document.getElementById("section_no");
     const sectionName = document.getElementById("section_name");
     const wtPerPiece = document.getElementById("wt_per_piece");
+    const noOfCavity = document.getElementById("no_of_cavity");
+    const cutLength = document.getElementById("cut_length");
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -31,11 +33,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---------------- Fetch Next Production Plan ID ----------------
     async function fetchNextProductionPlanId() {
         if (window.editMode) return;
-        
+
         try {
             const response = await fetch('/planning/api/production-plans/?action=get_next_id');
             const data = await response.json();
-            
+
             if (data.success && data.next_production_plan_id) {
                 if (productionPlanIdDisplay) {
                     productionPlanIdDisplay.value = data.next_production_plan_id;
@@ -52,10 +54,15 @@ document.addEventListener("DOMContentLoaded", function () {
             const requisitionId = this.value;
 
             customerName.value = '';
+            // DO NOT RESET cut length in edit mode
+            if (!window.editMode) {
+                cutLength.innerHTML = '<option value="">Select Cut Length</option>';
+            }
 
             if (!requisitionId) return;
 
             try {
+                // Fetch customer name
                 const response = await fetch(`/planning/api/production-plans/?action=get_customer_name&requisition_id=${requisitionId}`);
                 const data = await response.json();
 
@@ -64,9 +71,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     showMessage("error", "Error loading customer name");
                 }
+
+                // Fetch cut length options
+                const cutLengthResponse = await fetch(`/planning/api/production-plans/?action=get_cut_length_options&requisition_id=${requisitionId}`);
+                const cutLengthData = await cutLengthResponse.json();
+
+                if (cutLengthData.success && cutLengthData.cut_lengths) {
+                    cutLengthData.cut_lengths.forEach(length => {
+                        const option = document.createElement('option');
+                        option.value = length;
+                        option.textContent = length;
+                        cutLength.appendChild(option);
+                    });
+                }
             } catch (error) {
-                console.error('Error fetching customer name:', error);
-                showMessage("error", "Error loading customer name");
+                console.error('Error fetching customer details:', error);
+                showMessage("error", "Error loading customer details");
             }
         });
     }
@@ -81,6 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
             sectionNo.value = '';
             sectionName.value = '';
             wtPerPiece.value = '';
+            noOfCavity.value = '';
 
             if (!dieReqId) return;
 
@@ -93,6 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     sectionNo.value = data.die_requisition.section_no || '';
                     sectionName.value = data.die_requisition.section_name || '';
                     wtPerPiece.value = data.die_requisition.present_wt || '';
+                    noOfCavity.value = data.die_requisition.no_of_cavity || '';
                 } else {
                     showMessage("error", "Error loading die requisition details");
                 }
@@ -119,11 +141,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 section_no: formData.get("section_no") || "",
                 section_name: formData.get("section_name") || "",
                 wt_per_piece: formData.get("wt_per_piece") || "0",
+                no_of_cavity: formData.get("no_of_cavity") || "",
+                cut_length: formData.get("cut_length") || "",
                 press: formData.get("press") || "",
                 date_of_production: formData.get("date_of_production") || "",
                 shift: formData.get("shift") || "",
                 operator: formData.get("operator") || "",
-                planned_qty: formData.get("planned_qty") || ""
+                planned_qty: formData.get("planned_qty") || "",
+                billet_size: formData.get("billet_size") || "",
+                no_of_billet: formData.get("no_of_billet") || ""
             };
 
             console.log("Payload being sent:", payload);
@@ -203,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---------------- Set Default Date (Non-editable) ----------------
     const today = new Date().toISOString().split('T')[0];
-    
+
     if (dateField) {
         if (!window.editMode || !dateField.value) {
             dateField.value = today;

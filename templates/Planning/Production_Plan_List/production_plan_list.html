@@ -167,11 +167,11 @@
                             <th style="text-align: center;">#</th>
                             <th style="text-align: center;">ID</th>
                             <th style="text-align: center;">Date of Production</th>
-                            <th style="text-align: center;">Shift</th>
-                            <th style="text-align: center;">Order ID</th>
+                            <th style="text-align: center;">Press</th>
                             <th style="text-align: center;">Die No</th>
-                            <th style="text-align: center;">Weight</th>
-                            <th style="text-align: center;">Planned Qty</th>
+                            <th style="text-align: center;">Cut Length</th>
+                            <th style="text-align: center;">Operator</th>
+                            <th style="text-align: center;">Plan Qty(kg)</th>
                             <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
@@ -181,10 +181,10 @@
                             <td style="text-align: center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                             <td style="text-align: center;">{{ plan.production_plan_id }}</td>
                             <td style="text-align: center;">{{ plan.date_of_production|date:"Y-m-d" }}</td>
-                            <td style="text-align: center;">{{ plan.shift.name }}</td>
-                            <td style="text-align: center;">{{ plan.cust_requisition_id.requisition_id }}</td>
+                            <td style="text-align: center;">{{ plan.press.name }}</td>
                             <td style="text-align: center;">{{ plan.die_no|default:"-" }}</td>
-                            <td style="text-align: center;">{{ plan.wt_per_piece|default:"-" }}</td>
+                            <td style="text-align: center;">{{ plan.cut_length }}</td>
+                            <td style="text-align: center;">{{ plan.operator.get_full_name }}</td>
                             <td style="text-align: center;">{{ plan.planned_qty }}</td>
                             <td style="white-space: nowrap; text-align: center;">
                                 <a href="{% url 'production_plan_edit' plan.id %}" class="action-btn edit-btn"

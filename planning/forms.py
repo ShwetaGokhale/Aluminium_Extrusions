@@ -89,8 +89,9 @@ class ProductionPlanForm(forms.ModelForm):
         fields = [
             'date', 'cust_requisition_id', 'customer_name', 
             'die_requisition', 'die_no', 'section_no', 'section_name',
-            'wt_per_piece', 'press', 'date_of_production', 'shift', 
-            'operator', 'planned_qty'
+            'wt_per_piece', 'no_of_cavity', 'cut_length',
+            'press', 'date_of_production', 'shift', 
+            'operator', 'planned_qty', 'billet_size', 'no_of_billet'
         ]
         widgets = {
             'date': forms.DateInput(attrs={
@@ -134,9 +135,17 @@ class ProductionPlanForm(forms.ModelForm):
             'wt_per_piece': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'id': 'wt_per_piece',
-                'readonly': 'readonly',
-                'style': 'background-color: #f0f0f0; cursor: not-allowed;',
                 'step': '0.01'
+            }),
+            'no_of_cavity': forms.TextInput(attrs={
+                'class': 'form-control',
+                'id': 'no_of_cavity',
+                'readonly': 'readonly',
+                'style': 'background-color: #f0f0f0; cursor: not-allowed;'
+            }),
+            'cut_length': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'cut_length'
             }),
             'press': forms.Select(attrs={
                 'class': 'form-control',
@@ -158,6 +167,16 @@ class ProductionPlanForm(forms.ModelForm):
             'planned_qty': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'id': 'planned_qty',
+                'min': '1'
+            }),
+            'billet_size': forms.TextInput(attrs={
+                'class': 'form-control',
+                'id': 'billet_size',
+                'placeholder': 'e.g., 100x50'
+            }),
+            'no_of_billet': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'id': 'no_of_billet',
                 'min': '1'
             }),
         }

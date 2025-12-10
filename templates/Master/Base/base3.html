@@ -1,0 +1,324 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Aluminium Extrusions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{% static 'css/Base.css' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+    <style>
+        /* Sidebar Collapse Behavior */
+        .main-header {
+            width: 250px;
+            transition: 0.3s;
+        }
+
+        .main-header.collapsed {
+            width: 60px;
+        }
+
+        .content-wrapper {
+            margin-left: 250px;
+            transition: 0.3s;
+        }
+
+        .content-wrapper.expanded {
+            margin-left: 60px;
+        }
+
+        /* Sidebar Toggle Button */
+        #sidebarToggle {
+            position: fixed;
+            top: 18px;
+            left: 20px;
+            font-size: 26px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 2000;
+        }
+
+        /* Logout Modal Styles (Updated UI like reference image) */
+        #logoutModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.55);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #logoutModalContent {
+            background: #ffffff;
+            width: 90%;
+            max-width: 420px;
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 16px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.28);
+            animation: modalDrop 0.3s ease;
+        }
+
+        @keyframes modalDrop {
+            from {
+                transform: translateY(-40px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Icon Circle */
+        .logout-icon-box {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 15px;
+            background: #ffe8e8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-icon-box i {
+            font-size: 32px;
+            color: #e53935;
+        }
+
+        /* Title */
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Text */
+        .modal-text {
+            font-size: 15px;
+            color: #666;
+            margin: 10px 0 25px;
+        }
+
+        /* Buttons container */
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .modal-btn {
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+            min-width: 120px;
+        }
+
+        /* Cancel Button */
+        .modal-btn-cancel {
+            background: #f1f1f5;
+            color: #333;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #e3e3e8;
+        }
+
+        /* Logout Button */
+        .modal-btn-logout {
+            background: #e53935;
+            color: white;
+        }
+
+        .modal-btn-logout:hover {
+            background: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar Header -->
+    <header class="main-header">
+        <div class="sidebar-logo">
+            <i class="fa-solid fa-bars" id="sidebarToggle"></i>
+            <img src="{% static 'images/extruedge1.jpeg' %}" alt="Company Logo">
+        </div>
+
+
+
+        <nav class="main-nav">
+
+            <a href="{% url 'dashboard' %}"><i class="fa-solid fa-home"></i> <span>Dashboard</span></a>
+
+            <div class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">
+                    <i class="fa-solid fa-tv"></i> <span>Over Head Screen</span>
+                    <span class="dropdown-icon">&#9662;</span>
+                </a>
+                <div class="dropdown-content">
+                    <a href="{% url 'dashboard_new' %}">Order Status</a>
+                    <a href="{% url 'current_production' %}">Current Production</a>
+                </div>
+            </div>
+
+            <!-- Master -->
+            <div class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">
+                    <i class="fa-solid fa-layer-group"></i> <span>Master</span>
+                    <span class="dropdown-icon">&#9662;</span>
+                </a>
+                <div class="dropdown-content">
+                    <a href="{% url 'die_list' %}">Die</a>
+                    <a href="{% url 'alloy_list' %}">Alloy</a>
+                    <a href="{% url 'customer_list' %}">Customer</a>
+                    <a href="{% url 'company_list' %}">Company</a>
+                    <a href="{% url 'supplier_list' %}">Supplier</a>
+                    <a href="{% url 'staff_list' %}">Staff</a>
+                    <a href="{% url 'section_list' %}">Section</a>
+                </div>
+            </div>
+
+            <!-- Order -->
+            <div class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">
+                    <i class="fa fa-box"></i> <span>Order Management</span>
+                    <span class="dropdown-icon">&#9662;</span>
+                </a>
+                <div class="dropdown-content">
+                    <a href="{% url 'requisition_list' %}">Order</a>
+                </div>
+            </div>
+
+            <!-- Planning -->
+            <div class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">
+                    <i class="fa fa-tasks"></i> <span>Planning</span>
+                    <span class="dropdown-icon">&#9662;</span>
+                </a>
+                <div class="dropdown-content">
+                    <a href="{% url 'die_requisition_list' %}">Die Requisition</a>
+                    <a href="{% url 'production_plan_list' %}">Production Planning</a>
+                </div>
+            </div>
+
+            <!-- Production -->
+            <div class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">
+                    <i class="fa fa-industry"></i> <span>Production</span>
+                    <span class="dropdown-icon">&#9662;</span>
+                </a>
+                <div class="dropdown-content">
+                    <a href="{% url 'online_production_report_list' %}">Production Status</a>
+                    <a href="{% url 'total_production_report' %}">Total Production Report</a>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <button onclick="showLogoutModal()" class="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </button>
+
+
+        </nav>
+    </header>
+
+
+
+    <!-- Main Page Content -->
+    <main class="content-wrapper">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal">
+        <div id="logoutModalContent">
+
+            <div class="logout-icon-box">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
+
+            <h3 class="modal-title">Logout Confirmation</h3>
+
+            <p class="modal-text">Are you sure you want to logout from your account?</p>
+
+            <div class="modal-actions">
+                <button onclick="closeLogoutModal()" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button onclick="confirmLogout()" class="modal-btn modal-btn-logout">Yes, Logout</button>
+            </div>
+
+        </div>
+    </div>
+    <script src="{% static 'js/login_script.js' %}"></script>
+    <script>
+        const sidebar = document.querySelector('.main-header');
+        const content = document.querySelector('.content-wrapper');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const dropdowns = document.querySelectorAll('.dropdown');
+
+        // ========== Toggle Manually ==========
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+        });
+
+        // ========== Auto Open When Clicking the Collapsed Sidebar ==========
+        sidebar.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('collapsed') && e.target !== toggleBtn) {
+                sidebar.classList.remove('collapsed');
+                content.classList.remove('expanded');
+            }
+        });
+
+        // ========== Dropdown Feature ==========
+        dropdowns.forEach((menu) => {
+            const button = menu.querySelector('.dropbtn');
+
+            button.addEventListener('click', (e) => {
+
+                // 🚫 Block dropdown opening if sidebar collapsed
+                if (sidebar.classList.contains('collapsed')) {
+                    // Just open sidebar, do **not** open dropdown
+                    sidebar.classList.remove('collapsed');
+                    content.classList.remove('expanded');
+                    return; // Stop here ❌
+                }
+
+                // Normal dropdown toggle when expanded
+                dropdowns.forEach(d => {
+                    if (d !== menu) d.classList.remove('active');
+                });
+                menu.classList.toggle('active');
+            });
+        });
+
+        // ========== Logout Modal ==========
+        function showLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; }
+        function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
+        function confirmLogout() { window.location.href = "{% url 'logout' %}"; }
+    </script>
+
+
+<!-- Footer -->
+<footer class="app-footer">
+    Powered by <strong>Extrudge</strong>
+</footer>
+</body>
+
+</html>

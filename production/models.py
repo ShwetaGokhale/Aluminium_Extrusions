@@ -2,6 +2,7 @@ from django.db import models, transaction
 from django.core.validators import MinValueValidator
 from master.models import CompanyPress, CompanyShift
 from planning.models import ProductionPlan
+from django.utils import timezone
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Model for Online Production Report functionality
@@ -16,6 +17,7 @@ class OnlineProductionReport(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
+    # ============ General Section ============
     production_id = models.CharField(
         max_length=20,
         unique=True,
@@ -24,25 +26,19 @@ class OnlineProductionReport(models.Model):
     )
     date = models.DateField(
         verbose_name="Date",
+        default=timezone.now
+    )
+    date_of_production = models.DateField(
+        verbose_name="Date of Production",
         null=True,
         blank=True
     )
-    production_plan_id = models.ForeignKey(
-        'planning.ProductionPlan',
+    die_requisition = models.ForeignKey(
+        'planning.DieRequisition',
         on_delete=models.CASCADE,
         related_name='production_reports',
-        verbose_name="Production Plan ID",
-        null=True,
-        blank=True
-    )
-    customer_name = models.CharField(
-        max_length=200,
-        verbose_name="Customer Name",
-        blank=True
-    )
-    die_requisition_id = models.CharField(
-        max_length=100,
         verbose_name="Die Requisition ID",
+        null=True,
         blank=True
     )
     die_no = models.CharField(
@@ -60,22 +56,29 @@ class OnlineProductionReport(models.Model):
         verbose_name="Section Name",
         blank=True
     )
-    wt_per_piece = models.DecimalField(
+    wt_per_piece_general = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        verbose_name="WT Per Piece",
+        verbose_name="WT Per Piece (General)",
         null=True,
         blank=True
     )
-    press_no = models.ForeignKey(
+    no_of_cavity = models.CharField(
+        max_length=10,
+        verbose_name="No of Cavity",
+        blank=True
+    )
+    cut_length = models.CharField(
+        max_length=10,
+        verbose_name="Cut Length",
+        blank=True
+    )
+    press = models.ForeignKey(
         'master.CompanyPress',
         on_delete=models.CASCADE,
         related_name='production_reports',
-        verbose_name="Press No"
-    )
-    date_of_production = models.DateField(
-        verbose_name="Date of Production",
+        verbose_name="Press",
         null=True,
         blank=True
     )
@@ -101,6 +104,8 @@ class OnlineProductionReport(models.Model):
         null=True,
         blank=True
     )
+    
+    # ============ Production Time Details ============
     start_time = models.TimeField(
         verbose_name="Start Time",
         null=True,
@@ -111,12 +116,61 @@ class OnlineProductionReport(models.Model):
         null=True,
         blank=True
     )
+    
+    # ============ Production Input Details ============
+    billet_size = models.CharField(
+        max_length=50,
+        verbose_name="Billet Size (mm)",
+        blank=True
+    )
+    no_of_billet = models.IntegerField(
+        validators=[MinValueValidator(1)],
+        verbose_name="No of Billet",
+        null=True,
+        blank=True
+    )
+    input_qty = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        verbose_name="Input",
+        null=True,
+        blank=True
+    )
+    
+    # ============ Production Output Details ============
+    wt_per_piece_output = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        verbose_name="WT per Piece (Output)",
+        null=True,
+        blank=True
+    )
+    no_of_pieces = models.IntegerField(
+        validators=[MinValueValidator(1)],
+        verbose_name="No of Pieces",
+        null=True,
+        blank=True
+    )
+    total_output = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        verbose_name="Total Output",
+        null=True,
+        blank=True,
+        editable=False  # This will be calculated
+    )
+    
+    # ============ Status ============
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default='in_progress',
         verbose_name="Status"
     )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -141,13 +195,23 @@ class OnlineProductionReport(models.Model):
                 new_number = 1
             return f'PRD{str(new_number).zfill(4)}'
     
+    def calculate_total_output(self):
+        """Calculate total output based on wt_per_piece_output and no_of_pieces"""
+        if self.wt_per_piece_output and self.no_of_pieces:
+            return self.wt_per_piece_output * self.no_of_pieces
+        return None
+    
     def save(self, *args, **kwargs):
         if not self.production_id:
             self.production_id = OnlineProductionReport.generate_production_id()
+        
+        # Auto-calculate total output
+        self.total_output = self.calculate_total_output()
+        
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"{self.production_id} - {self.press_no.name if self.press_no else 'N/A'}"    
+        return f"{self.production_id} - {self.press.name if self.press else 'N/A'}"   
 
 
 # ─────────────────────────────────────────────────────────────────────────────

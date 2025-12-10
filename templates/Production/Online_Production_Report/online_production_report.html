@@ -27,115 +27,111 @@
         </div>
     </div>
 
-    <form id="productionReportForm" method="post"
-        action="{% if edit_mode %}{% url 'online_production_report_edit' report.id %}{% else %}{% url 'online_production_report' %}{% endif %}">
+    <form id="productionReportForm" method="post">
         {% csrf_token %}
-
         {% if edit_mode %}
         <input type="hidden" name="report_id" value="{{ report.id }}">
         {% endif %}
 
-        <!-- Production ID (Auto-generated, Read-only) -->
+        <!-- ============ GENERAL SECTION ============ -->
+        <div class="section-heading">
+            <h4>General Details</h4>
+        </div>
+
+        <!-- Production ID -->
         <div>
             <label for="production_id_display">Production ID <span class="auto-gen-label">(Auto-generated)</span> <span style="color: red;">*</span></label>
             <input type="text" id="production_id_display"
                 value="{% if edit_mode %}{{ report.production_id }}{% else %}{{ next_production_id }}{% endif %}"
-                readonly style="background-color: #f0f0f0; cursor: not-allowed; font-weight: 600; color: #4a5568;">
+                readonly>
         </div>
 
         <!-- Date -->
         <div>
-            <label for="date">Date</label>
-            <input type="date" name="date" id="date"
+            <label for="date">Date <span style="color: red;">*</span></label>
+            <input type="date" name="date" id="date" required
                 value="{% if edit_mode %}{{ report.date|date:'Y-m-d' }}{% endif %}">
         </div>
 
-        <!-- Production Plan ID -->
+        <!-- Date of Production -->
         <div>
-            <label for="production_plan_id">Production Plan ID</label>
-            <select name="production_plan_id" id="production_plan_id">
-                <option value="">Select Production Plan</option>
-                {% for plan in production_plans %}
-                <option value="{{ plan.id }}" {% if edit_mode and report.production_plan_id and report.production_plan_id.id == plan.id %}selected{% endif %}>
-                    {{ plan.production_plan_id }}
+            <label for="date_of_production">Date of Production <span style="color: red;">*</span></label>
+            <input type="date" name="date_of_production" id="date_of_production" required
+                value="{% if edit_mode and report.date_of_production %}{{ report.date_of_production|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Die Requisition ID -->
+        <div>
+            <label for="die_requisition">Die Requisition ID <span style="color: red;">*</span></label>
+            <select name="die_requisition" id="die_requisition" required>
+                <option value="">Select Date of Production First</option>
+                {% if edit_mode and report.die_requisition %}
+                <option value="{{ report.die_requisition.id }}" selected>
+                    {{ report.die_requisition.die_requisition_id }}
                 </option>
-                {% endfor %}
+                {% endif %}
             </select>
         </div>
 
-        <!-- Customer Name (Auto-retrieve) -->
-        <div>
-            <label for="customer_name">Customer Name</label>
-            <input type="text" name="customer_name" id="customer_name" readonly
-                value="{% if edit_mode %}{{ report.customer_name }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
-        </div>
-
-        <!-- Die Requisition ID (Auto-retrieve) -->
-        <div>
-            <label for="die_requisition_id">Die Requisition ID</label>
-            <input type="text" name="die_requisition_id" id="die_requisition_id" readonly
-                value="{% if edit_mode %}{{ report.die_requisition_id }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
-        </div>
-
-        <!-- Die No (Auto-retrieve) -->
+        <!-- Die No -->
         <div>
             <label for="die_no">Die No</label>
-            <input type="text" name="die_no" id="die_no" readonly
-                value="{% if edit_mode %}{{ report.die_no }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
+            <input type="text" name="die_no" id="die_no"
+                value="{% if edit_mode %}{{ report.die_no }}{% endif %}">
         </div>
 
-        <!-- Section No (Auto-retrieve) -->
+        <!-- Section No -->
         <div>
             <label for="section_no">Section No</label>
-            <input type="text" name="section_no" id="section_no" readonly
-                value="{% if edit_mode %}{{ report.section_no }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
+            <input type="text" name="section_no" id="section_no"
+                value="{% if edit_mode %}{{ report.section_no }}{% endif %}">
         </div>
 
-        <!-- Section Name (Auto-retrieve) -->
+        <!-- Section Name -->
         <div>
             <label for="section_name">Section Name</label>
-            <input type="text" name="section_name" id="section_name" readonly
-                value="{% if edit_mode %}{{ report.section_name }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
+            <input type="text" name="section_name" id="section_name"
+                value="{% if edit_mode %}{{ report.section_name }}{% endif %}">
         </div>
 
-        <!-- WT Per Piece (Auto-retrieve) -->
+        <!-- WT Per Piece -->
         <div>
-            <label for="wt_per_piece">WT Per Piece</label>
-            <input type="number" step="0.01" name="wt_per_piece" id="wt_per_piece" readonly
-                value="{% if edit_mode and report.wt_per_piece %}{{ report.wt_per_piece }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
+            <label for="wt_per_piece_general">WT per Piece</label>
+            <input type="number" step="0.01" name="wt_per_piece_general" id="wt_per_piece_general"
+                value="{% if edit_mode and report.wt_per_piece_general %}{{ report.wt_per_piece_general }}{% endif %}">
         </div>
 
-        <!-- Press (Auto-retrieve) -->
+        <!-- No of Cavity -->
         <div>
-            <label for="press_no">Press <span style="color: red;">*</span></label>
-            <select name="press_no" id="press_no" required style="background-color: #f0f0f0;">
+            <label for="no_of_cavity">No of Cavity</label>
+            <input type="text" name="no_of_cavity" id="no_of_cavity"
+                value="{% if edit_mode %}{{ report.no_of_cavity }}{% endif %}">
+        </div>
+
+        <!-- Cut Length -->
+        <div>
+            <label for="cut_length">Cut Length</label>
+            <input type="text" name="cut_length" id="cut_length"
+                value="{% if edit_mode %}{{ report.cut_length }}{% endif %}">
+        </div>
+
+        <!-- Press -->
+        <div>
+            <label for="press">Press <span style="color: red;">*</span></label>
+            <select name="press" id="press" required>
                 <option value="">Select Press</option>
-                {% for press in presses %}
-                <option value="{{ press.id }}" {% if edit_mode and report.press_no.id == press.id %}selected{% endif %}>
-                    {{ press.name }}
+                {% for p in presses %}
+                <option value="{{ p.id }}" {% if edit_mode and report.press.id == p.id %}selected{% endif %}>
+                    {{ p.name }}
                 </option>
                 {% endfor %}
             </select>
         </div>
 
-        <!-- Date of Production (Auto-retrieve) -->
-        <div>
-            <label for="date_of_production">Date of Production</label>
-            <input type="date" name="date_of_production" id="date_of_production" readonly
-                value="{% if edit_mode and report.date_of_production %}{{ report.date_of_production|date:'Y-m-d' }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
-        </div>
-
-        <!-- Shift (Auto-retrieve) -->
+        <!-- Shift -->
         <div>
             <label for="shift">Shift</label>
-            <select name="shift" id="shift" style="background-color: #f0f0f0;">
+            <select name="shift" id="shift">
                 <option value="">Select Shift</option>
                 {% for s in shifts %}
                 <option value="{{ s.id }}" {% if edit_mode and report.shift and report.shift.id == s.id %}selected{% endif %}>
@@ -145,25 +141,29 @@
             </select>
         </div>
 
-        <!-- Operator (Auto-retrieve) -->
+        <!-- Operator -->
         <div>
             <label for="operator">Operator</label>
-            <select name="operator" id="operator" style="background-color: #f0f0f0;">
+            <select name="operator" id="operator">
                 <option value="">Select Operator</option>
-                {% for s in staff %}
-                <option value="{{ s.id }}" {% if edit_mode and report.operator and report.operator.id == s.id %}selected{% endif %}>
-                    {{ s.first_name }} {{ s.last_name }}
+                {% for st in staff %}
+                <option value="{{ st.id }}" {% if edit_mode and report.operator and report.operator.id == st.id %}selected{% endif %}>
+                    {{ st.first_name }} {{ st.last_name }}
                 </option>
                 {% endfor %}
             </select>
         </div>
 
-        <!-- Planned QTY (Auto-retrieve) -->
+        <!-- Planned QTY -->
         <div>
             <label for="planned_qty">Planned QTY</label>
-            <input type="number" name="planned_qty" id="planned_qty" min="1" readonly
-                value="{% if edit_mode and report.planned_qty %}{{ report.planned_qty }}{% endif %}"
-                style="background-color: #f0f0f0; cursor: not-allowed;">
+            <input type="number" name="planned_qty" id="planned_qty" min="1"
+                value="{% if edit_mode and report.planned_qty %}{{ report.planned_qty }}{% endif %}">
+        </div>
+
+        <!-- ============ PRODUCTION TIME DETAILS ============ -->
+        <div class="section-heading">
+            <h4>Production Time Details</h4>
         </div>
 
         <!-- Start Time -->
@@ -180,6 +180,59 @@
                 value="{% if edit_mode and report.end_time %}{{ report.end_time|time:'H:i' }}{% endif %}">
         </div>
 
+        <!-- ============ PRODUCTION INPUT DETAILS ============ -->
+        <div class="section-heading">
+            <h4>Production Input Details</h4>
+        </div>
+
+        <!-- Billet Size -->
+        <div>
+            <label for="billet_size">Billet Size (mm)</label>
+            <input type="text" name="billet_size" id="billet_size"
+                value="{% if edit_mode %}{{ report.billet_size }}{% endif %}">
+        </div>
+
+        <!-- No of Billet -->
+        <div>
+            <label for="no_of_billet">No of Billet</label>
+            <input type="number" name="no_of_billet" id="no_of_billet" min="1"
+                value="{% if edit_mode and report.no_of_billet %}{{ report.no_of_billet }}{% endif %}">
+        </div>
+
+        <!-- Input -->
+        <div>
+            <label for="input_qty">Input</label>
+            <input type="number" step="0.01" name="input_qty" id="input_qty"
+                value="{% if edit_mode and report.input_qty %}{{ report.input_qty }}{% endif %}">
+        </div>
+
+        <!-- ============ PRODUCTION OUTPUT DETAILS ============ -->
+        <div class="section-heading">
+            <h4>Production Output Details</h4>
+        </div>
+
+        <!-- WT per Piece (Output) -->
+        <div>
+            <label for="wt_per_piece_output">WT per Piece</label>
+            <input type="number" step="0.01" name="wt_per_piece_output" id="wt_per_piece_output"
+                value="{% if edit_mode and report.wt_per_piece_output %}{{ report.wt_per_piece_output }}{% endif %}">
+        </div>
+
+        <!-- No of Pieces -->
+        <div>
+            <label for="no_of_pieces">No of Pieces</label>
+            <input type="number" name="no_of_pieces" id="no_of_pieces" min="1"
+                value="{% if edit_mode and report.no_of_pieces %}{{ report.no_of_pieces }}{% endif %}">
+        </div>
+
+        <!-- Total Output (Calculated) -->
+        <div>
+            <label for="total_output">Total Output <span class="auto-gen-label">(Auto-calculated)</span></label>
+            <input type="text" id="total_output"
+                value="{% if edit_mode and report.total_output %}{{ report.total_output }}{% endif %}"
+                readonly>
+        </div>
+
         <!-- Submit Button -->
         <button type="submit">
             {% if edit_mode %}Update Production Report{% else %}Save Production Report{% endif %}
@@ -192,33 +245,14 @@
 <script>
     window.editMode = true;
     window.reportId = {{ report.id }};
-    window.currentProductionId = "{{ report.production_id }}";
 </script>
 {% else %}
 <script>
     window.editMode = false;
-    window.nextProductionId = "{{ next_production_id }}";
-    // Set today's date as default
-    document.addEventListener('DOMContentLoaded', function() {
-        const dateField = document.getElementById('date');
-        if (dateField && !dateField.value) {
-            const today = new Date().toISOString().split('T')[0];
-            dateField.value = today;
-        }
-    });
 </script>
 {% endif %}
 
 <!-- JavaScript -->
 <script src="{% static 'js/online_production_report.js' %}"></script>
-
-<style>
-    .auto-gen-label {
-        font-size: 0.75rem;
-        color: #718096;
-        font-style: italic;
-        font-weight: normal;
-    }
-</style>
 
 {% endblock %}
