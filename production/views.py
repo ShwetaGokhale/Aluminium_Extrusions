@@ -19,6 +19,21 @@ from django.db.models import Q
 # ─────────────────────────────────────────────────────────────────────────────
 # Views for Online Production Report functionality
 # ─────────────────────────────────────────────────────────────────────────────
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views import View
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from datetime import datetime
+import json
+
+from .models import OnlineProductionReport
+from master.models import CompanyPress, CompanyShift, Staff
+from planning.models import DieRequisition, ProductionPlan
+
+
 class OnlineProductionReportListView(View):
     """Render the online production report list page"""
     
@@ -74,6 +89,7 @@ class OnlineProductionReportListView(View):
                     'end_time': report.end_time.strftime("%H:%M") if report.end_time else '',
                     'billet_size': report.billet_size,
                     'no_of_billet': report.no_of_billet,
+                    'weight': str(report.weight) if report.weight else '',
                     'input_qty': str(report.input_qty) if report.input_qty else '',
                     'wt_per_piece_output': str(report.wt_per_piece_output) if report.wt_per_piece_output else '',
                     'no_of_pieces': report.no_of_pieces,
@@ -300,6 +316,7 @@ class OnlineProductionReportAPI(View):
                 "end_time": report.end_time.strftime("%H:%M") if report.end_time else '',
                 "billet_size": report.billet_size,
                 "no_of_billet": report.no_of_billet,
+                "weight": str(report.weight) if report.weight else '',
                 "input_qty": str(report.input_qty) if report.input_qty else '',
                 "wt_per_piece_output": str(report.wt_per_piece_output) if report.wt_per_piece_output else '',
                 "no_of_pieces": report.no_of_pieces,
@@ -358,6 +375,7 @@ class OnlineProductionReportAPI(View):
                 end_time=data.get('end_time') or None,
                 billet_size=data.get('billet_size', ''),
                 no_of_billet=data.get('no_of_billet') or None,
+                weight=data.get('weight') or None,
                 input_qty=data.get('input_qty') or None,
                 wt_per_piece_output=data.get('wt_per_piece_output') or None,
                 no_of_pieces=data.get('no_of_pieces') or None,
@@ -415,6 +433,7 @@ class OnlineProductionReportDetailAPI(View):
                 "end_time": report.end_time.strftime("%H:%M") if report.end_time else '',
                 "billet_size": report.billet_size,
                 "no_of_billet": report.no_of_billet,
+                "weight": str(report.weight) if report.weight else '',
                 "input_qty": str(report.input_qty) if report.input_qty else '',
                 "wt_per_piece_output": str(report.wt_per_piece_output) if report.wt_per_piece_output else '',
                 "no_of_pieces": report.no_of_pieces,
@@ -480,6 +499,7 @@ class OnlineProductionReportDetailAPI(View):
             report.end_time = data.get('end_time') or report.end_time
             report.billet_size = data.get('billet_size', report.billet_size)
             report.no_of_billet = data.get('no_of_billet') or report.no_of_billet
+            report.weight = data.get('weight') or report.weight
             report.input_qty = data.get('input_qty') or report.input_qty
             report.wt_per_piece_output = data.get('wt_per_piece_output') or report.wt_per_piece_output
             report.no_of_pieces = data.get('no_of_pieces') or report.no_of_pieces

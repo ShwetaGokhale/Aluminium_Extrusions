@@ -129,6 +129,14 @@ class OnlineProductionReport(models.Model):
         null=True,
         blank=True
     )
+    weight = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        verbose_name="Weight",
+        null=True,
+        blank=True
+    )
     input_qty = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -160,7 +168,7 @@ class OnlineProductionReport(models.Model):
         verbose_name="Total Output",
         null=True,
         blank=True,
-        editable=False  # This will be calculated
+        editable=False
     )
     
     # ============ Status ============
@@ -211,8 +219,7 @@ class OnlineProductionReport(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"{self.production_id} - {self.press.name if self.press else 'N/A'}"   
-
+        return f"{self.production_id} - {self.press.name if self.press else 'N/A'}"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Model for Total Production Report functionality

@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const plannedQty = document.getElementById("planned_qty");
     const billetSize = document.getElementById("billet_size");
     const noOfBillet = document.getElementById("no_of_billet");
+    const weight = document.getElementById("weight");
     const wtPerPieceOutput = document.getElementById("wt_per_piece_output");
     const noOfPieces = document.getElementById("no_of_pieces");
     const totalOutput = document.getElementById("total_output");
@@ -395,6 +396,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 end_time: formData.get("end_time") || null,
                 billet_size: formData.get("billet_size") || "",
                 no_of_billet: formData.get("no_of_billet") ? parseInt(formData.get("no_of_billet")) : null,
+                weight: formData.get("weight") ? parseFloat(formData.get("weight")) : null,
                 input_qty: formData.get("input_qty") ? parseFloat(formData.get("input_qty")) : null,
                 wt_per_piece_output: formData.get("wt_per_piece_output") ? parseFloat(formData.get("wt_per_piece_output")) : null,
                 no_of_pieces: formData.get("no_of_pieces") ? parseInt(formData.get("no_of_pieces")) : null,

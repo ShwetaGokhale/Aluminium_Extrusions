@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #e9ecef;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #dee2e6;
+            color: #343a40;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 1px solid #ced4da;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            background: #dee2e6;
+            border-color: #adb5bd;
+        }
+
+        .filter-btn.active {
+            background: #adb5bd;
+            color: #212529;
+            font-weight: 600;
+            border-color: #868e96;
+        }
+
+        .main-container {
+            padding: 20px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #dee2e6;
+        }
+
+        .stat-content h4 {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .stat-value.total {
+            color: #495057;
+        }
+
+        .stat-value.input {
+            color: #6c757d;
+        }
+
+        .stat-value.output {
+            color: #343a40;
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-icon.total {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .stat-icon.input {
+            background: #dee2e6;
+            color: #6c757d;
+        }
+
+        .stat-icon.output {
+            background: #ced4da;
+            color: #343a40;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+
+        .table-wrapper {
+            max-height: 290px;
+            overflow-y: auto;
+        }
+
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f8f9fa;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #ced4da;
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #adb5bd;
+        }
+
+        .table-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .table-header h3 {
+            font-size: 16px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #868e96;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #f8f9fa;
+        }
+
+        td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.running {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .status-badge.maintenance {
+            background: #f1f3f5;
+            color: #6c757d;
+        }
+
+        .status-badge.idle {
+            background: #f8f9fa;
+            color: #adb5bd;
+        }
+
+        .status-badge.in-progress {
+            background: #dee2e6;
+            color: #495057;
+        }
+
+        .status-badge.completed {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .status-badge.pending {
+            background: #f1f3f5;
+            color: #6c757d;
+        }
+
+        .recovery-percent {
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .graph-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .graph-header {
+            margin-bottom: 20px;
+        }
+
+        .graph-header h3 {
+            font-size: 16px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+
+        .bars-wrapper {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 350px;
+            border-left: 2px solid #dee2e6;
+            border-bottom: 2px solid #dee2e6;
+            padding: 20px 10px 50px 50px;
+            position: relative;
+            background: #f8f9fa;
+        }
+
+        .y-axis-labels {
+            position: absolute;
+            left: 0;
+            top: 20px;
+            bottom: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 40px;
+        }
+
+        .y-axis-label {
+            font-size: 11px;
+            color: #868e96;
+            text-align: right;
+            padding-right: 8px;
+        }
+
+        .bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            max-width: 100px;
+        }
+
+        .bar-container {
+            width: 70px;
+            height: 280px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .bar {
+            width: 55px;
+            background: linear-gradient(135deg, #adb5bd 0%, #868e96 100%);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(134, 142, 150, 0.2);
+            min-height: 20px;
+        }
+
+        .bar:hover {
+            opacity: 0.85;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(134, 142, 150, 0.3);
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: 700;
+            color: #495057;
+            white-space: nowrap;
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .bar-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #868e96;
+            text-align: center;
+        }
+
+        .grid-lines {
+            position: absolute;
+            left: 50px;
+            right: 10px;
+            top: 20px;
+            bottom: 50px;
+            pointer-events: none;
+        }
+
+        .grid-line {
+            position: absolute;
+            width: 100%;
+            border-top: 1px dashed #dee2e6;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .main-container {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bar {
+            animation: growBar 0.8s ease-out;
+        }
+
+        @keyframes growBar {
+            from {
+                height: 0;
+            }
+        }
+
+        /* Calendar Styles */
+        .calendar-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .calendar-popup.active {
+            display: flex;
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            width: 350px;
+            max-width: 90%;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header h3 {
+            font-size: 18px;
+            color: #343a40;
+            font-weight: 600;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-nav button {
+            background: #e9ecef;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .calendar-nav button:hover {
+            background: #dee2e6;
+        }
+
+        .calendar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e9ecef;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #495057;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .calendar-close:hover {
+            background: #dee2e6;
+        }
+
+        .calendar-month-year {
+            font-size: 16px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6c757d;
+            padding: 8px 0;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .calendar-day:hover {
+            background: #e9ecef;
+        }
+
+        .calendar-day.today {
+            background: #adb5bd;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected {
+            background: #6c757d;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.other-month {
+            color: #ced4da;
+        }
+
+        .calendar-day.disabled {
+            color: #dee2e6;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.disabled:hover {
+            background: transparent;
+        }
+
+        .stat-footer {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #868e96;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i> Production Dashboard
+        </div>
+        <div class="header-right">
+            <i class="fas fa-calendar-alt" style="font-size: 18px; cursor: pointer;" onclick="toggleCalendar()"></i>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="setFilter('today')">Today</button>
+                <button class="filter-btn" onclick="setFilter('weekly')">Weekly</button>
+                <button class="filter-btn" onclick="setFilter('monthly')">Monthly</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Popup -->
+    <div class="calendar-popup" id="calendarPopup" onclick="closeCalendarOnOutsideClick(event)">
+        <div class="calendar-container" onclick="event.stopPropagation()">
+            <button class="calendar-close" onclick="toggleCalendar()">×</button>
+            <div class="calendar-header">
+                <div class="calendar-month-year" id="monthYear"></div>
+                <div class="calendar-nav">
+                    <button onclick="changeMonth(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button onclick="changeMonth(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="calendar-grid">
+                <div class="calendar-day-header">Sun</div>
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+            </div>
+            <div class="calendar-grid" id="calendarDays"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h4>Total Recovery</h4>
+                    <div class="stat-value total" id="totalValue">88.75%</div>
+                    <!-- NEW FOOTER LINE -->
+                    <div class="stat-footer">Prev: <span id="prevRecovery">87.20%</span></div>
+                </div>
+                <div class="stat-icon total">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h4>Input</h4>
+                    <div class="stat-value input" id="inputValue">8,200</div>
+                    <!-- NEW FOOTER LINE -->
+                    <div class="stat-footer">Prev: <span id="prevInput">7,950</span></div>
+                </div>
+                <div class="stat-icon input">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h4>Output</h4>
+                    <div class="stat-value output" id="outputValue">4,300</div>
+                    <!-- NEW FOOTER LINE -->
+                    <div class="stat-footer">Prev: <span id="prevOutput">4,120</span></div>
+                </div>
+                <div class="stat-icon output">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <h3><i class="fas fa-table"></i> Recovery Table</h3>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Die No</th>
+                            <th>Cavity</th>
+                            <th>Press</th>
+                            <th>Input</th>
+                            <th>Output</th>
+                            <th>Recovery</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>D-001</strong></td>
+                            <td>4</td>
+                            <td>P-101</td>
+                            <td>1,000</td>
+                            <td>100</td>
+                            <td><span class="recovery-percent">10%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-002</strong></td>
+                            <td>8</td>
+                            <td>P-102</td>
+                            <td>1,500</td>
+                            <td>1,425</td>
+                            <td><span class="recovery-percent">95%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-003</strong></td>
+                            <td>2</td>
+                            <td>P-103</td>
+                            <td>800</td>
+                            <td>752</td>
+                            <td><span class="recovery-percent">94%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-004</strong></td>
+                            <td>6</td>
+                            <td>P-104</td>
+                            <td>1,200</td>
+                            <td>1,140</td>
+                            <td><span class="recovery-percent">95%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-005</strong></td>
+                            <td>4</td>
+                            <td>P-105</td>
+                            <td>900</td>
+                            <td>846</td>
+                            <td><span class="recovery-percent">94%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-006</strong></td>
+                            <td>4</td>
+                            <td>P-106</td>
+                            <td>1,100</td>
+                            <td>1,045</td>
+                            <td><span class="recovery-percent">95%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-007</strong></td>
+                            <td>6</td>
+                            <td>P-107</td>
+                            <td>950</td>
+                            <td>893</td>
+                            <td><span class="recovery-percent">94%</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-008</strong></td>
+                            <td>8</td>
+                            <td>P-108</td>
+                            <td>1,300</td>
+                            <td>1,235</td>
+                            <td><span class="recovery-percent">95%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <h3><i class="fas fa-cogs"></i> Production Status</h3>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Die No</th>
+                            <th>C/L</th>
+                            <th>Operator</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>D-001</strong></td>
+                            <td>CL-A</td>
+                            <td>Rajesh Kumar</td>
+                            <td><span class="status-badge running">Running</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-002</strong></td>
+                            <td>CL-B</td>
+                            <td>Amit Singh</td>
+                            <td><span class="status-badge running">Running</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-003</strong></td>
+                            <td>CL-A</td>
+                            <td>Priya Sharma</td>
+                            <td><span class="status-badge maintenance">Maintenance</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-004</strong></td>
+                            <td>CL-C</td>
+                            <td>Suresh Patil</td>
+                            <td><span class="status-badge idle">Idle</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-005</strong></td>
+                            <td>CL-B</td>
+                            <td>Vijay Desai</td>
+                            <td><span class="status-badge running">Running</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-006</strong></td>
+                            <td>CL-A</td>
+                            <td>Sanjay Mehta</td>
+                            <td><span class="status-badge running">Running</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-007</strong></td>
+                            <td>CL-C</td>
+                            <td>Anita Rao</td>
+                            <td><span class="status-badge idle">Idle</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-008</strong></td>
+                            <td>CL-B</td>
+                            <td>Kiran Joshi</td>
+                            <td><span class="status-badge running">Running</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <h3><i class="fas fa-shopping-cart"></i> Order Status</h3>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order No</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ORD-2024-001</strong></td>
+                            <td><span class="status-badge in-progress">In Progress</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORD-2024-002</strong></td>
+                            <td><span class="status-badge completed">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORD-2024-003</strong></td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORD-2024-004</strong></td>
+                            <td><span class="status-badge in-progress">In Progress</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORD-2024-005</strong></td>
+                            <td><span class="status-badge completed">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORD-2024-006</strong></td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORD-2024-007</strong></td>
+                            <td><span class="status-badge in-progress">In Progress</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORD-2024-008</strong></td>
+                            <td><span class="status-badge completed">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORD-2024-009</strong></td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="graph-section">
+            <div class="graph-header">
+                <h3><i class="fas fa-chart-bar"></i> Die Wise Production Graph (Recovery %)</h3>
+            </div>
+            <div class="chart-container">
+                <div class="bars-wrapper">
+                    <div class="y-axis-labels">
+                        <div class="y-axis-label">100%</div>
+                        <div class="y-axis-label">75%</div>
+                        <div class="y-axis-label">50%</div>
+                        <div class="y-axis-label">25%</div>
+                        <div class="y-axis-label">0%</div>
+                    </div>
+
+                    <div class="grid-lines">
+                        <div class="grid-line" style="top: 0%;"></div>
+                        <div class="grid-line" style="top: 25%;"></div>
+                        <div class="grid-line" style="top: 50%;"></div>
+                        <div class="grid-line" style="top: 75%;"></div>
+                        <div class="grid-line" style="top: 100%;"></div>
+                    </div>
+
+                    <div class="bar-group">
+                        <div class="bar-container">
+                            <div class="bar" style="height: 10%;" title="D-001: 10%">
+                                <div class="bar-value">10%</div>
+                            </div>
+                        </div>
+                        <div class="bar-label">D-001</div>
+                    </div>
+
+                    <div class="bar-group">
+                        <div class="bar-container">
+                            <div class="bar" style="height: 95%;" title="D-002: 95%">
+                                <div class="bar-value">95%</div>
+                            </div>
+                        </div>
+                        <div class="bar-label">D-002</div>
+                    </div>
+
+                    <div class="bar-group">
+                        <div class="bar-container">
+                            <div class="bar" style="height: 94%;" title="D-003: 94%">
+                                <div class="bar-value">94%</div>
+                            </div>
+                        </div>
+                        <div class="bar-label">D-003</div>
+                    </div>
+
+                    <div class="bar-group">
+                        <div class="bar-container">
+                            <div class="bar" style="height: 95%;" title="D-004: 95%">
+                                <div class="bar-value">95%</div>
+                            </div>
+                        </div>
+                        <div class="bar-label">D-004</div>
+                    </div>
+
+                    <div class="bar-group">
+                        <div class="bar-container">
+                            <div class="bar" style="height: 94%;" title="D-005: 94%">
+                                <div class="bar-value">94%</div>
+                            </div>
+                        </div>
+                        <div class="bar-label">D-005</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = new Date();
+
+        function toggleCalendar() {
+            const popup = document.getElementById('calendarPopup');
+            popup.classList.toggle('active');
+            if (popup.classList.contains('active')) {
+                renderCalendar();
+            }
+        }
+
+        function closeCalendarOnOutsideClick(event) {
+            if (event.target.id === 'calendarPopup') {
+                toggleCalendar();
+            }
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            // Update month/year display
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
+
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+
+            const today = new Date();
+            const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.textContent = day;
+                calendarDays.appendChild(dayDiv);
+            }
+
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                dayDiv.textContent = day;
+
+                if (isCurrentMonth && day === today.getDate()) {
+                    dayDiv.classList.add('today');
+                }
+
+                if (selectedDate.getDate() === day &&
+                    selectedDate.getMonth() === month &&
+                    selectedDate.getFullYear() === year) {
+                    dayDiv.classList.add('selected');
+                }
+
+                dayDiv.onclick = () => selectDate(year, month, day);
+                calendarDays.appendChild(dayDiv);
+            }
+
+            // Next month days
+            const totalCells = calendarDays.children.length;
+            const remainingCells = 42 - totalCells; // 6 rows * 7 days
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.textContent = day;
+                calendarDays.appendChild(dayDiv);
+            }
+        }
+
+        function selectDate(year, month, day) {
+            selectedDate = new Date(year, month, day);
+            renderCalendar();
+
+            // Update dashboard based on selected date
+            const dateStr = selectedDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            console.log('Selected date:', dateStr);
+
+            // Close calendar after selection
+            setTimeout(() => {
+                toggleCalendar();
+            }, 300);
+        }
+
+        function setFilter(filter) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            event.target.classList.add('active');
+            updateDashboard(filter);
+        }
+
+        function updateDashboard(filter) {
+            // Calculate average recovery from Recovery Table data
+            // Calculates recovery % for each: (Output / Input) × 100
+            const recoveryData = [
+                { input: 1000, output: 100 },   // 10%
+                { input: 1500, output: 1425 },  // 95%
+                { input: 800, output: 752 },    // 94%
+                { input: 1200, output: 1140 },  // 95%
+                { input: 900, output: 846 },    // 94%
+                { input: 1100, output: 1045 },  // 95%
+                { input: 950, output: 893 },    // 94%
+                { input: 1300, output: 1235 }   // 95%
+            ];
+
+            // Calculate average recovery percentage
+            // Averages all percentages: (10% + 95% + 94% + 95% + 94% + 95% + 94% + 95%) ÷ 8
+            const totalRecovery = recoveryData.reduce((sum, item) => {
+                return sum + (item.output / item.input * 100);
+            }, 0);
+            const averageRecovery = (totalRecovery / recoveryData.length).toFixed(2);
+
+            const data = {
+                today: { total: averageRecovery + '%', input: 8200, output: 4300 },
+                weekly: { total: averageRecovery + '%', input: 57400, output: 30100 },
+                monthly: { total: averageRecovery + '%', input: 246000, output: 129000 }
+            };
+
+            const selectedData = data[filter];
+            document.getElementById('totalValue').textContent = selectedData.total;
+            document.getElementById('inputValue').textContent = selectedData.input.toLocaleString();
+            document.getElementById('outputValue').textContent = selectedData.output.toLocaleString();
+
+            // Previous values example (replace with real data)
+            const prevData = {
+                today: { recovery: "87.20%", input: 7950, output: 4120 },
+                weekly: { recovery: "86.10%", input: 55000, output: 28900 },
+                monthly: { recovery: "85.40%", input: 230000, output: 121000 }
+            };
+
+            // Update previous footer values
+            document.getElementById("prevRecovery").textContent = prevData[filter].recovery;
+            document.getElementById("prevInput").textContent = prevData[filter].input.toLocaleString();
+            document.getElementById("prevOutput").textContent = prevData[filter].output.toLocaleString();
+
+        }
+
+        // Calculate and display initial average recovery on page load
+        window.addEventListener('DOMContentLoaded', function () {
+            updateDashboard('today');
+        });
+    </script>
+</body>
+
+</html>

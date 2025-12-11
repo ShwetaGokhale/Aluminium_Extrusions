@@ -30,6 +30,7 @@ class OnlineProductionReportForm(forms.ModelForm):
             'end_time',
             'billet_size',
             'no_of_billet',
+            'weight',
             'input_qty',
             'wt_per_piece_output',
             'no_of_pieces',
@@ -151,6 +152,14 @@ class OnlineProductionReportForm(forms.ModelForm):
                     'placeholder': 'No of Billet'
                 }
             ),
+            'weight': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'step': '0.01',
+                    'min': '0',
+                    'placeholder': 'Weight'
+                }
+            ),
             'input_qty': forms.NumberInput(
                 attrs={
                     'class': 'form-control',
@@ -200,6 +209,7 @@ class OnlineProductionReportForm(forms.ModelForm):
             'end_time': 'End Time',
             'billet_size': 'Billet Size (mm)',
             'no_of_billet': 'No of Billet',
+            'weight': 'Weight',
             'input_qty': 'Input',
             'wt_per_piece_output': 'WT per Piece',
             'no_of_pieces': 'No of Pieces',
@@ -236,6 +246,7 @@ class OnlineProductionReportForm(forms.ModelForm):
         self.fields['end_time'].required = False
         self.fields['billet_size'].required = False
         self.fields['no_of_billet'].required = False
+        self.fields['weight'].required = False
         self.fields['input_qty'].required = False
         self.fields['wt_per_piece_output'].required = False
         self.fields['no_of_pieces'].required = False
