@@ -479,7 +479,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ---------------- Initial Load ----------------
+    // ---------------- Initial Load -----------------
     if (!window.editMode) {
         fetchNextProductionId();
     }
