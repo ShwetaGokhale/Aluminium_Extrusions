@@ -1,312 +1,446 @@
-// Die details functionality
-function showDieDetails(dieNo) {
-    const modal = document.getElementById('dieDetailsModal');
-    const modalDieName = document.getElementById('modalDieName');
-    const tableBody = document.getElementById('dieDetailsTableBody');
-    const loading = document.getElementById('dieDetailsLoading');
-    const noData = document.getElementById('dieDetailsNoData');
-    const content = document.getElementById('dieDetailsContent');
+// ==================== DASHBOARD JAVASCRIPT ====================
 
-    // Show modal and reset states
-    modal.classList.remove('hidden');
-    modalDieName.textContent = `Die: ${dieNo}`;
-    loading.classList.remove('hidden');
-    noData.classList.add('hidden');
-    content.classList.add('hidden');
-    tableBody.innerHTML = '';
+// ▶ Auto color recovery %
+document.querySelectorAll('.stat-item .stat-value').forEach(item => {
+    let text = item.innerText.trim();
 
-    // Fetch die details
-    fetch(`/dashboard/die/${encodeURIComponent(dieNo)}/production/`)
-        .then(response => response.json())
-        .then(data => {
-            loading.classList.add('hidden');
+    // check if it ends with %
+    if (text.endsWith("%")) {
+        let num = parseFloat(text.replace("%", ""));
 
-            if (data.success && data.production_data && data.production_data.length > 0) {
-                content.classList.remove('hidden');
-                displayDieProduction(data.production_data);
-            } else {
-                noData.classList.remove('hidden');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            loading.classList.add('hidden');
-            noData.classList.remove('hidden');
-        });
-}
-
-function displayDieProduction(productionData) {
-    const tableBody = document.getElementById('dieDetailsTableBody');
-
-    const statusBadges = {
-        'planned': '<span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">Planned</span>',
-        'running': '<span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">Running</span>',
-        'completed': '<span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">Completed</span>',
-        'discard': '<span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">Discard</span>'
-    };
-
-    tableBody.innerHTML = productionData.map((plan, index) => `
-        <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors">
-            <td class="px-4 py-3 text-gray-700 font-medium">${plan.order_no}</td>
-            <td class="px-4 py-3 text-blue-600 font-semibold">${plan.press_name}</td>
-            <td class="px-4 py-3 text-center text-gray-700">${plan.cut_length}</td>
-            <td class="px-4 py-3 text-center text-green-600 font-bold">${plan.planned_qty}</td>
-            <td class="px-4 py-3 text-center">${statusBadges[plan.status] || statusBadges['planned']}</td>
-        </tr>
-    `).join('');
-}
-
-function closeDieDetails() {
-    document.getElementById('dieDetailsModal').classList.add('hidden');
-}
-
-// Close modal on escape key
-document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-        closeDieDetails();
+        if (num >= 80) {
+            item.classList.add("recovery-good");
+        } else {
+            item.classList.add("recovery-bad");
+        }
     }
 });
 
+// ▶ Auto color recovery percentage in side card
+const recoveryPercentageEl = document.querySelector('.recovery-percentage');
+if (recoveryPercentageEl) {
+    let text = recoveryPercentageEl.innerText.trim();
+    let num = parseFloat(text.replace("%", ""));
 
-// Dashboard animation on load
-document.addEventListener("DOMContentLoaded", function () {
-    const dashboard = document.querySelector(".dashboard-animate");
-    if (dashboard) {
-        setTimeout(() => {
-            dashboard.classList.add("show");
-        }, 100);
+    if (num >= 80) {
+        recoveryPercentageEl.classList.add("recovery-good");
+    } else {
+        recoveryPercentageEl.classList.add("recovery-bad");
     }
+}
 
-    // Add die-card class to cards for animations
-    const dieCards = document.querySelectorAll('.grid > div[onclick]');
-    dieCards.forEach(card => {
-        card.classList.add('die-card');
-    });
+// ▶ Auto color ORDER summary (Orders / Completed / Pending / Cancelled)
+document.querySelectorAll('.stat-card .stat-content .stat-item').forEach(item => {
+    let label = item.querySelector('.stat-label')?.innerText.trim().toLowerCase();
+    let valueSpan = item.querySelector('.stat-value');
 
-    // Initialize production chart
-    initializeProductionChart();
+    if (!label || !valueSpan) return;
 
-    // ✅ Setup navigation
-    setupNavigation();
+    if (label === "orders") {
+        valueSpan.classList.add("order-blue");
+    }
+    else if (label === "completed") {
+        valueSpan.classList.add("order-green");
+    }
+    else if (label === "in progress") {
+        valueSpan.classList.add("order-yellow");
+    }
+    else if (label === "cancelled") {
+        valueSpan.classList.add("order-red");
+    }
 });
 
-// ✅ UPDATED: Navigation setup function with Daily/Weekly/Monthly filtering
-function setupNavigation() {
-    // Get current filter from URL
+// ▶ Get current selected date from URL or use empty
+function getSelectedDate() {
     const urlParams = new URLSearchParams(window.location.search);
-    const currentFilter = urlParams.get('filter') || 'daily';
+    return urlParams.get('date') || '';
+}
 
-    // Handle back arrow click - go to Production Plan List
-    const backButton = document.querySelector('.nav-item:first-child');
-    if (backButton) {
-        backButton.style.cursor = 'pointer';
-        backButton.addEventListener('click', function () {
-            window.location.href = '/planning/production-plan/';
-        });
+// ▶ Load Recovery Table Data
+async function loadRecoveryTableData() {
+    const filter = window.currentFilter || 'today';
+    const selectedDate = getSelectedDate();
+
+    // Build URL with date parameter if it exists
+    let url = `/dashboard/api/dashboard-recovery-table/?filter=${filter}`;
+    if (selectedDate) {
+        url += `&date=${selectedDate}`;
     }
 
-    // Get all navigation items
-    const navItems = document.querySelectorAll('.nav-item');
+    console.log('🔍 Fetching URL:', url);
 
-    // Remove active class from all items first
-    navItems.forEach(item => {
-        item.classList.remove('active');
-    });
+    try {
+        const response = await fetch(url);
+        console.log('📡 Response Status:', response.status);
+        console.log('📡 Response OK:', response.ok);
 
-    // Handle HOME button click
-    const homeButton = navItems[1]; // Second nav-item (HOME)
-    if (homeButton) {
-        homeButton.style.cursor = 'pointer';
-        homeButton.addEventListener('click', function () {
-            window.location.href = '/dashboard/dashboard/';
-        });
-
-        // Set active if no filter or on home
-        if (!urlParams.has('filter')) {
-            homeButton.classList.add('active');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    }
 
-    // Handle DAILY button click
-    const dailyButton = navItems[3]; // Fourth nav-item (DAILY)
-    if (dailyButton) {
-        dailyButton.style.cursor = 'pointer';
-        dailyButton.addEventListener('click', function () {
-            window.location.href = '/dashboard/dashboard/?filter=daily';
-        });
+        const data = await response.json();
+        console.log('📦 Response Data:', data);
 
-        // Set active if filter is daily
-        if (currentFilter === 'daily') {
-            dailyButton.classList.add('active');
+        const tbody = document.getElementById('recoveryTableBody');
+
+        if (data.success && data.reports && data.reports.length > 0) {
+            console.log('✅ Found', data.reports.length, 'reports');
+            tbody.innerHTML = '';
+
+            data.reports.forEach((report, index) => {
+                console.log(`Report ${index}:`, report);
+                const row = document.createElement('tr');
+
+                // Calculate recovery: (input / output) * 100
+                let recovery = 0;
+                if (report.total_output > 0) {
+                    recovery = Math.round((report.input_qty / report.total_output) * 100);
+                }
+
+                row.innerHTML = `
+                    <td>${report.die_no || '-'}</td>
+                    <td>${report.no_of_cavity || '-'}</td>
+                    <td>${report.press || '-'}</td>
+                    <td>${report.input_qty || 0}kg</td>
+                    <td>${report.total_output || 0}kg</td>
+                    <td>${recovery}%</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        } else {
+            console.log('⚠️ No reports found');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No data available</td></tr>';
         }
-    }
-
-    // Handle WEEKLY button click
-    const weeklyButton = navItems[4]; // Fifth nav-item (WEEKLY)
-    if (weeklyButton) {
-        weeklyButton.style.cursor = 'pointer';
-        weeklyButton.addEventListener('click', function () {
-            window.location.href = '/dashboard/dashboard/?filter=weekly';
-        });
-
-        // Set active if filter is weekly
-        if (currentFilter === 'weekly') {
-            weeklyButton.classList.add('active');
-        }
-    }
-
-    // Handle MONTHLY button click
-    const monthlyButton = navItems[5]; // Sixth nav-item (MONTHLY)
-    if (monthlyButton) {
-        monthlyButton.style.cursor = 'pointer';
-        monthlyButton.addEventListener('click', function () {
-            window.location.href = '/dashboard/dashboard/?filter=monthly';
-        });
-
-        // Set active if filter is monthly
-        if (currentFilter === 'monthly') {
-            monthlyButton.classList.add('active');
-        }
+    } catch (error) {
+        console.error('❌ Error Details:', error);
+        console.error('❌ Error Message:', error.message);
+        document.getElementById('recoveryTableBody').innerHTML =
+            `<tr><td colspan="6" class="text-center">Error: ${error.message}</td></tr>`;
     }
 }
 
-// Production Chart initialization
-function initializeProductionChart() {
-    const chartCanvas = document.getElementById('productionChart');
-    if (!chartCanvas) return;
+// ▶ Load Production Table Data
+async function loadProductionTableData() {
+    const filter = window.currentFilter || 'today';
+    const selectedDate = getSelectedDate();
 
-    const ctx = chartCanvas.getContext('2d');
-    const productionChart = new Chart(ctx, {
-        type: 'line',
+    // Build URL with date parameter if it exists
+    let url = `/dashboard/api/dashboard-production-table/?filter=${filter}`;
+    if (selectedDate) {
+        url += `&date=${selectedDate}`;
+    }
+
+    console.log('🔍 Fetching Production URL:', url);
+
+    try {
+        const response = await fetch(url);
+        console.log('📡 Production Response Status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('📦 Production Response Data:', data);
+
+        const tbody = document.getElementById('productionTableBody');
+
+        if (data.success && data.reports && data.reports.length > 0) {
+            console.log('✅ Found', data.reports.length, 'production reports');
+            tbody.innerHTML = '';
+
+            data.reports.forEach((report, index) => {
+                console.log(`Production Report ${index}:`, report);
+                const row = document.createElement('tr');
+
+                // Determine status badge
+                let statusBadge = '';
+                if (report.status === 'completed') {
+                    statusBadge = '<span class="status-badge completed">Completed</span>';
+                } else if (report.status === 'in_progress') {
+                    statusBadge = '<span class="status-badge in-progress">In Progress</span>';
+                } else if (report.status === 'on_hold') {
+                    statusBadge = '<span class="status-badge on-hold">On Hold</span>';
+                } else if (report.status === 'cancelled') {
+                    statusBadge = '<span class="status-badge cancelled">Cancelled</span>';
+                } else {
+                    statusBadge = '<span class="status-badge idle">-</span>';
+                }
+
+                row.innerHTML = `
+                    <td>${report.die_no || '-'}</td>
+                    <td>${report.cut_length || '-'}</td>
+                    <td>${report.operator || '-'}</td>
+                    <td>${statusBadge}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        } else {
+            console.log('⚠️ No production reports found');
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">No data available</td></tr>';
+        }
+    } catch (error) {
+        console.error('❌ Production Error Details:', error);
+        console.error('❌ Production Error Message:', error.message);
+        document.getElementById('productionTableBody').innerHTML =
+            `<tr><td colspan="4" class="text-center">Error: ${error.message}</td></tr>`;
+    }
+}
+
+// ▶ Load Order Table Data
+async function loadOrderTableData() {
+    const filter = window.currentFilter || 'today';
+    const selectedDate = getSelectedDate();
+
+    // Build URL with date parameter if it exists
+    let url = `/dashboard/api/dashboard-order-table/?filter=${filter}`;
+    if (selectedDate) {
+        url += `&date=${selectedDate}`;
+    }
+
+    console.log('🔍 Fetching Order URL:', url);
+
+    try {
+        const response = await fetch(url);
+        console.log('📡 Order Response Status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('📦 Order Response Data:', data);
+
+        const tbody = document.getElementById('orderTableBody');
+
+        if (data.success && data.orders && data.orders.length > 0) {
+            console.log('✅ Found', data.orders.length, 'orders');
+            tbody.innerHTML = '';
+
+            data.orders.forEach((order, index) => {
+                console.log(`Order ${index}:`, order);
+                const row = document.createElement('tr');
+
+                // Determine status badge
+                let statusBadge = '';
+                if (order.status === 'completed') {
+                    statusBadge = '<span class="status-badge completed">Completed</span>';
+                } else if (order.status === 'in_production') {
+                    statusBadge = '<span class="status-badge in-progress">In Production</span>';
+                } else if (order.status === 'in_planning') {
+                    statusBadge = '<span class="status-badge pending">In Planning</span>';
+                } else if (order.status === 'rejected') {
+                    statusBadge = '<span class="status-badge cancelled">Rejected</span>';
+                } else if (order.status === 'created') {
+                    statusBadge = '<span class="status-badge created">Created</span>';
+                } else {
+                    statusBadge = '<span class="status-badge pending">-</span>';
+                }
+
+                row.innerHTML = `
+                    <td>${order.requisition_id || '-'}</td>
+                    <td>${statusBadge}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        } else {
+            console.log('⚠️ No orders found');
+            tbody.innerHTML = '<tr><td colspan="2" class="text-center">No data available</td></tr>';
+        }
+    } catch (error) {
+        console.error('❌ Order Error Details:', error);
+        console.error('❌ Order Error Message:', error.message);
+        document.getElementById('orderTableBody').innerHTML =
+            `<tr><td colspan="2" class="text-center">Error: ${error.message}</td></tr>`;
+    }
+}
+
+// Load tables on page load
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('🚀 Dashboard loaded, initializing tables...');
+    console.log('📅 Current Filter:', window.currentFilter);
+    console.log('📅 Selected Date:', getSelectedDate());
+
+    loadRecoveryTableData();
+    loadProductionTableData();
+    loadOrderTableData();
+});
+
+// Filter functionality
+function setFilter(filter) {
+    console.log('🔄 Setting filter to:', filter);
+    // Redirect to same page with filter parameter (remove date parameter)
+    window.location.href = `?filter=${filter}`;
+}
+
+let currentDate = new Date();
+let selectedDate = new Date();
+
+// Calendar Functions
+function toggleCalendar() {
+    const popup = document.getElementById('calendarPopup');
+    popup.classList.toggle('active');
+
+    if (popup.classList.contains('active')) {
+        renderCalendar();
+    }
+}
+
+// Close calendar when clicking outside
+function closeCalendarOnOutsideClick(event) {
+    if (event.target.id === 'calendarPopup') {
+        toggleCalendar();
+    }
+}
+
+// Change month
+function changeMonth(delta) {
+    currentDate.setMonth(currentDate.getMonth() + delta);
+    renderCalendar();
+}
+
+// Render calendar
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    document.getElementById('monthYear').textContent =
+        `${monthNames[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const container = document.getElementById('calendarDays');
+    container.innerHTML = "";
+
+    const today = new Date();
+
+    // Previous month
+    for (let i = firstDay - 1; i >= 0; i--) {
+        let d = daysInPrevMonth - i;
+        let div = document.createElement("div");
+        div.className = "calendar-day other-month";
+        div.textContent = d;
+        container.appendChild(div);
+    }
+
+    // Current month
+    for (let d = 1; d <= daysInMonth; d++) {
+        let div = document.createElement("div");
+        div.className = "calendar-day";
+        div.textContent = d;
+
+        if (
+            d === today.getDate() &&
+            year === today.getFullYear() &&
+            month === today.getMonth()
+        ) {
+            div.classList.add("today");
+        }
+
+        div.onclick = () => selectDate(year, month, d);
+        container.appendChild(div);
+    }
+
+    // Next month filler
+    const cells = container.children.length;
+    const remain = 42 - cells;
+
+    for (let i = 1; i <= remain; i++) {
+        let div = document.createElement("div");
+        div.className = "calendar-day other-month";
+        div.textContent = i;
+        container.appendChild(div);
+    }
+}
+
+// Select date
+function selectDate(year, month, day) {
+    selectedDate = new Date(year, month, day);
+
+    console.log("Selected date:", selectedDate.toDateString());
+
+    // Format date as YYYY-MM-DD
+    const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    console.log('🔄 Redirecting to date:', formattedDate);
+
+    // Redirect to dashboard with selected date parameter
+    window.location.href = `?date=${formattedDate}`;
+}
+
+// Plant Donut Charts
+const plantCharts = [
+    { id: 'plant1Chart', value: 63.79, color: '#f97316' },
+    { id: 'plant2Chart', value: 95.05, color: '#3b82f6' },
+    { id: 'plant3Chart', value: 86.94, color: '#3b82f6' },
+    { id: 'plant4Chart', value: 75.65, color: '#f97316' }
+];
+
+// Plugin to always draw center text (fixes disappearing on hover)
+const centerTextPlugin = {
+    id: "centerText",
+    afterDraw(chart, args, options) {
+        const { ctx, chartArea: { left, right, top, bottom } } = chart;
+
+        const centerX = left + (right - left) / 2;
+        const centerY = top + (bottom - top) / 2;
+
+        ctx.save();
+        ctx.font = "bold 20px Inter";
+        ctx.fillStyle = "#1e293b";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(options.text, centerX, centerY);
+        ctx.restore();
+    }
+};
+
+plantCharts.forEach(plant => {
+    const canvas = document.getElementById(plant.id);
+    if (!canvas) return;
+
+    let progress = 0;
+    let target = plant.value;
+
+    const chart = new Chart(canvas, {
+        type: "doughnut",
         data: {
-            labels: ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM'],
             datasets: [{
-                label: "Production Activity",
-                data: [70, 75, 78, 76, 79, 80, 78],
-                borderColor: 'rgba(99, 102, 241, 1)',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(99, 102, 241, 1)',
-                pointHoverBorderWidth: 2
+                data: [0, 100],
+                backgroundColor: [plant.color, "#e2e8f0"],
+                borderWidth: 0
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            cutout: "75%",
+            animation: false,
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        font: {
-                            size: 12,
-                            weight: 'bold'
-                        },
-                        color: '#374151',
-                        padding: 15
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    titleFont: {
-                        size: 14,
-                        weight: 'bold'
-                    },
-                    bodyFont: {
-                        size: 13
-                    },
-                    cornerRadius: 8,
-                    displayColors: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                        stepSize: 10,
-                        font: {
-                            size: 11
-                        },
-                        color: '#6b7280'
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    ticks: {
-                        font: {
-                            size: 11
-                        },
-                        color: '#6b7280'
-                    },
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    }
-                }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'index'
+                legend: { display: false },
+                tooltip: { enabled: false },
+                centerText: { text: "0%" }
             }
-        }
+        },
+        plugins: [centerTextPlugin]
     });
-}
 
-// Utility function to escape HTML and prevent XSS
-function escapeHtml(text) {
-    if (text === null || text === undefined) return 'N/A';
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return String(text).replace(/[&<>"']/g, m => map[m]);
-}
+    function animate() {
+        progress += 1;
 
-// Add smooth scroll behavior
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
-});
+        chart.data.datasets[0].data = [progress, 100 - progress];
+        chart.options.plugins.centerText.text = progress + "%";
+        chart.update();
 
-// Auto-refresh data every 30 seconds (optional)
-let autoRefreshInterval;
-
-function startAutoRefresh() {
-    autoRefreshInterval = setInterval(() => {
-        // Reload the page to get fresh data
-        location.reload();
-    }, 30000); // 30 seconds
-}
-
-// Uncomment the line below to enable auto-refresh
-// startAutoRefresh();
-
-// Stop auto-refresh on page unload
-window.addEventListener('beforeunload', () => {
-    if (autoRefreshInterval) {
-        clearInterval(autoRefreshInterval);
+        if (progress < target) requestAnimationFrame(animate);
     }
+
+    requestAnimationFrame(animate);
 });

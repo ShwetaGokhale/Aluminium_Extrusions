@@ -199,17 +199,17 @@
                 value="{% if edit_mode and report.no_of_billet %}{{ report.no_of_billet }}{% endif %}">
         </div>
 
-        <!-- Weight -->
+        <!-- Weight (Auto-calculated) -->
         <div>
-            <label for="weight">Weight</label>
-            <input type="number" step="0.01" name="weight" id="weight"
+            <label for="weight">Weight <span class="auto-gen-label">(Auto-calculated)</span></label>
+            <input type="number" step="0.01" name="weight" id="weight" readonly
                 value="{% if edit_mode and report.weight %}{{ report.weight }}{% endif %}">
         </div>
 
-        <!-- Input -->
+        <!-- Input (Auto-calculated) -->
         <div>
-            <label for="input_qty">Input</label>
-            <input type="number" step="0.01" name="input_qty" id="input_qty"
+            <label for="input_qty">Input <span class="auto-gen-label">(Auto-calculated)</span></label>
+            <input type="number" step="1" name="input_qty" id="input_qty" readonly
                 value="{% if edit_mode and report.input_qty %}{{ report.input_qty }}{% endif %}">
         </div>
 

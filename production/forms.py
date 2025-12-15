@@ -157,7 +157,8 @@ class OnlineProductionReportForm(forms.ModelForm):
                     'class': 'form-control',
                     'step': '0.01',
                     'min': '0',
-                    'placeholder': 'Weight'
+                    'placeholder': 'Weight (Auto-calculated)',
+                    'readonly': True
                 }
             ),
             'input_qty': forms.NumberInput(
@@ -165,7 +166,8 @@ class OnlineProductionReportForm(forms.ModelForm):
                     'class': 'form-control',
                     'step': '0.01',
                     'min': '0',
-                    'placeholder': 'Input Quantity'
+                    'placeholder': 'Input Quantity (Auto-calculated)',
+                    'readonly': True
                 }
             ),
             'wt_per_piece_output': forms.NumberInput(
@@ -209,8 +211,8 @@ class OnlineProductionReportForm(forms.ModelForm):
             'end_time': 'End Time',
             'billet_size': 'Billet Size (mm)',
             'no_of_billet': 'No of Billet',
-            'weight': 'Weight',
-            'input_qty': 'Input',
+            'weight': 'Weight (Auto-calculated)',
+            'input_qty': 'Input (Auto-calculated)',
             'wt_per_piece_output': 'WT per Piece',
             'no_of_pieces': 'No of Pieces',
             'status': 'Status'

@@ -19,21 +19,6 @@ from django.db.models import Q
 # ─────────────────────────────────────────────────────────────────────────────
 # Views for Online Production Report functionality
 # ─────────────────────────────────────────────────────────────────────────────
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views import View
-from django.http import JsonResponse
-from django.core.paginator import Paginator
-from django.db.models import Q
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from datetime import datetime
-import json
-
-from .models import OnlineProductionReport
-from master.models import CompanyPress, CompanyShift, Staff
-from planning.models import DieRequisition, ProductionPlan
-
-
 class OnlineProductionReportListView(View):
     """Render the online production report list page"""
     

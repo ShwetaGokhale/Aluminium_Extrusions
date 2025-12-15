@@ -16,9 +16,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const billetSize = document.getElementById("billet_size");
     const noOfBillet = document.getElementById("no_of_billet");
     const weight = document.getElementById("weight");
+    const inputQty = document.getElementById("input_qty");
     const wtPerPieceOutput = document.getElementById("wt_per_piece_output");
     const noOfPieces = document.getElementById("no_of_pieces");
     const totalOutput = document.getElementById("total_output");
+
+    // Fixed constants for calculations
+    const PI = 3.146;
+    const RADIUS = 75;
+    const DENSITY = 2700;
 
     // ---------------- Popup Message ----------------
     function showMessage(type, text) {
@@ -56,6 +62,49 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // ---------------- Calculate Weight ----------------
+    function calculateWeight() {
+        const billetSizeValue = parseFloat(billetSize.value);
+
+        if (!billetSizeValue || billetSizeValue <= 0) {
+            weight.value = '';
+            calculateInput(); // Recalculate input
+            return;
+        }
+
+        // Formula: V = π × r² × h
+        const volume = PI * (RADIUS * RADIUS) * billetSizeValue;
+
+        // Convert to cubic meters: V / 1000000000
+        const volumeInCubicMeters = volume / 1000000000;
+
+        // Calculate weight: Weight = Density × Volume
+        const calculatedWeight = DENSITY * volumeInCubicMeters;
+
+        // Set weight value with 2 decimal places
+        weight.value = calculatedWeight.toFixed(2);
+
+        // Recalculate input
+        calculateInput();
+    }
+
+    // ---------------- Calculate Input ----------------
+    function calculateInput() {
+        const weightValue = parseFloat(weight.value);
+        const noOfBilletValue = parseInt(noOfBillet.value);
+
+        if (!weightValue || !noOfBilletValue || weightValue <= 0 || noOfBilletValue <= 0) {
+            inputQty.value = '';
+            return;
+        }
+
+        // Formula: Input = No of Billet × Weight
+        const calculatedInput = noOfBilletValue * weightValue;
+
+        // Set input value as integer (no decimals)
+        inputQty.value = Math.round(calculatedInput);
+    }
+
     // ---------------- Calculate Total Output ----------------
     function calculateTotalOutput() {
         const wtOutput = parseFloat(wtPerPieceOutput.value) || 0;
@@ -69,12 +118,27 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Add event listeners for auto-calculation
+    // Add event listeners for auto-calculations
+    if (billetSize) {
+        billetSize.addEventListener('input', calculateWeight);
+    }
+
+    if (noOfBillet) {
+        noOfBillet.addEventListener('input', calculateInput);
+    }
+
     if (wtPerPieceOutput) {
         wtPerPieceOutput.addEventListener('input', calculateTotalOutput);
     }
+
     if (noOfPieces) {
         noOfPieces.addEventListener('input', calculateTotalOutput);
+    }
+
+    // Calculate on page load if editing
+    if (window.editMode) {
+        calculateWeight();
+        calculateTotalOutput();
     }
 
     // ---------------- Load Die Requisitions by Date of Production ----------------
@@ -141,6 +205,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     plannedQty.value = details.planned_qty || '';
                     billetSize.value = details.billet_size || '';
                     noOfBillet.value = details.no_of_billet || '';
+
+                    // Trigger weight calculation after populating billet size
+                    calculateWeight();
                 } else {
                     showMessage("error", "Error loading die requisition details");
                 }
@@ -164,6 +231,8 @@ document.addEventListener("DOMContentLoaded", function () {
         plannedQty.value = '';
         billetSize.value = '';
         noOfBillet.value = '';
+        weight.value = '';
+        inputQty.value = '';
     }
 
     // ---------------- Custom Clock Picker Implementation ----------------
@@ -402,7 +471,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 no_of_pieces: formData.get("no_of_pieces") ? parseInt(formData.get("no_of_pieces")) : null,
                 status: formData.get("status")
             };
-
 
             console.log("Payload being sent:", payload);
 
