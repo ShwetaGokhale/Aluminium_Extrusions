@@ -18,9 +18,12 @@
 
             <!-- Today / Weekly / Monthly filter buttons -->
             <div class="filter-buttons">
-                <button class="filter-btn {% if filter_type == 'today' or not filter_type %}active{% endif %}" onclick="setFilter('today')">Today</button>
-                <button class="filter-btn {% if filter_type == 'weekly' %}active{% endif %}" onclick="setFilter('weekly')">Weekly</button>
-                <button class="filter-btn {% if filter_type == 'monthly' %}active{% endif %}" onclick="setFilter('monthly')">Monthly</button>
+                <button class="filter-btn {% if filter_type == 'today' or not filter_type %}active{% endif %}"
+                    onclick="setFilter('today')">Today</button>
+                <button class="filter-btn {% if filter_type == 'weekly' %}active{% endif %}"
+                    onclick="setFilter('weekly')">Weekly</button>
+                <button class="filter-btn {% if filter_type == 'monthly' %}active{% endif %}"
+                    onclick="setFilter('monthly')">Monthly</button>
             </div>
         </div>
     </div>
@@ -172,52 +175,53 @@
 
                 <!-- Tab Buttons -->
                 <div class="tabs">
-                    <div class="tab active">OEE</div>
+                    <div class="tab active">Press Wise Recovery</div>
+                    <!-- <div class="tab active">OEE</div>
                     <div class="tab">Downtime</div>
                     <div class="tab">Production</div>
                     <div class="tab">Production Rate</div>
                     <div class="tab">Quality</div>
-                    <div class="tab">Utilization</div>
+                    <div class="tab">Utilization</div> -->
                 </div>
 
-                <!-- Plant Circular Progress Cards -->
-                <div class="plants-grid">
+                <!-- Press Wise Recovery -->
+                <div class="plants-grid" id="pressWiseRecoveryContainer">
 
                     <!-- Plant 1 -->
-                    <div class="plant-card">
+                    <!-- <div class="plant-card">
                         <div class="plant-circle">
                             <canvas id="plant1Chart"></canvas>
                         </div>
                         <div class="plant-name">Plant - 1</div>
                         <div class="plant-trend up">↑ 5%</div>
-                    </div>
+                    </div> -->
 
                     <!-- Plant 2 -->
-                    <div class="plant-card">
+                    <!-- <div class="plant-card">
                         <div class="plant-circle">
                             <canvas id="plant2Chart"></canvas>
                         </div>
                         <div class="plant-name">Plant - 2</div>
                         <div class="plant-trend up">↑ 13%</div>
-                    </div>
+                    </div> -->
 
                     <!-- Plant 3 -->
-                    <div class="plant-card">
+                    <!-- <div class="plant-card">
                         <div class="plant-circle">
                             <canvas id="plant3Chart"></canvas>
                         </div>
                         <div class="plant-name">Plant - 3</div>
                         <div class="plant-trend down">↓ 8%</div>
-                    </div>
+                    </div> -->
 
                     <!-- Plant 4 -->
-                    <div class="plant-card">
+                    <!-- <div class="plant-card">
                         <div class="plant-circle">
                             <canvas id="plant4Chart"></canvas>
                         </div>
                         <div class="plant-name">Plant - 4</div>
                         <div class="plant-trend down">↓ 18%</div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
@@ -281,7 +285,7 @@
                 </table>
             </div>
 
-            <!-- ========🔵 ORDER TABLE ========== -->
+             <!-- ========🔵 ORDER TABLE ========== -->
             <div class="table-card">
                 <div class="table-header">
                     <div class="table-title">

@@ -223,16 +223,18 @@ async function loadOrderTableData() {
                 console.log(`Order ${index}:`, order);
                 const row = document.createElement('tr');
 
-                // Determine status badge
+                // Map Requisition status to badges
                 let statusBadge = '';
                 if (order.status === 'completed') {
                     statusBadge = '<span class="status-badge completed">Completed</span>';
-                } else if (order.status === 'in_progress') {
-                    statusBadge = '<span class="status-badge in-progress">In Progress</span>';
-                } else if (order.status === 'on_hold') {
-                    statusBadge = '<span class="status-badge on-hold">On Hold</span>';
-                } else if (order.status === 'cancelled') {
-                    statusBadge = '<span class="status-badge cancelled">Cancelled</span>';
+                } else if (order.status === 'in_production') {
+                    statusBadge = '<span class="status-badge in-progress">In Production</span>';
+                } else if (order.status === 'in_planning') {
+                    statusBadge = '<span class="status-badge on-hold">In Planning</span>';
+                } else if (order.status === 'rejected') {
+                    statusBadge = '<span class="status-badge cancelled">Rejected</span>';
+                } else if (order.status === 'created') {
+                    statusBadge = '<span class="status-badge created">Created</span>';
                 } else {
                     statusBadge = '<span class="status-badge idle">-</span>';
                 }
@@ -375,15 +377,114 @@ function selectDate(year, month, day) {
     window.location.href = `?date=${formattedDate}`;
 }
 
-// Plant Donut Charts
-const plantCharts = [
-    { id: 'plant1Chart', value: 63.79, color: '#f97316' },
-    { id: 'plant2Chart', value: 95.05, color: '#3b82f6' },
-    { id: 'plant3Chart', value: 86.94, color: '#3b82f6' },
-    { id: 'plant4Chart', value: 75.65, color: '#f97316' }
-];
+// ==================== LIVE PRESS WISE RECOVERY ====================
 
-// Plugin to always draw center text (fixes disappearing on hover)
+async function loadPressWiseRecovery() {
+    const filter = window.currentFilter || 'today';
+    const selectedDate = getSelectedDate();
+
+    let url = `/dashboard/api/dashboard-recovery-table/?filter=${filter}`;
+    if (selectedDate) url += `&date=${selectedDate}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.success || !data.reports.length) return;
+
+    const container = document.getElementById("pressWiseRecoveryContainer");
+    container.innerHTML = "";
+
+    // Group by press
+    const pressMap = {};
+    data.reports.forEach(r => {
+        if (!r.press) return;
+
+        if (!pressMap[r.press]) {
+            pressMap[r.press] = { input: 0, output: 0 };
+        }
+        pressMap[r.press].input += r.input_qty || 0;
+        pressMap[r.press].output += r.total_output || 0;
+    });
+
+    Object.entries(pressMap).forEach(([pressName, values], index) => {
+        const recovery =
+            values.output > 0
+                ? Math.round((values.input / values.output) * 100)
+                : 0;
+
+        const canvasId = `pressChart_${index}`;
+
+        const card = document.createElement("div");
+        card.className = "plant-card";
+        card.innerHTML = `
+            <div class="plant-circle">
+                <canvas id="${canvasId}"></canvas>
+            </div>
+            <div class="plant-name">${pressName}</div>
+            <div class="plant-trend ${recovery >= 80 ? 'up' : 'down'}">
+                ${recovery >= 80 ? '↑' : '↓'} ${recovery}%
+            </div>
+        `;
+
+        container.appendChild(card);
+        drawPressDonut(canvasId, recovery);
+    });
+}
+
+function drawPressDonut(canvasId, targetValue) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+
+    let currentValue = 0;
+
+    const chart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            datasets: [{
+                data: [0, 100],
+                backgroundColor: [
+                    targetValue >= 80 ? "#22c55e" : "#ef4444",
+                    "#e5e7eb"
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: "75%",
+            animation: false, // ❗ we control animation manually
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false },
+                centerText: {
+                    text: "0%"
+                }
+            }
+        },
+        plugins: [centerTextPlugin]
+    });
+
+    // 🔥 Smooth alive animation
+    function animate() {
+        if (currentValue >= targetValue) return;
+
+        currentValue += 1; // speed controller (1 = slow, 2 = faster)
+
+        chart.data.datasets[0].data = [
+            currentValue,
+            100 - currentValue
+        ];
+
+        chart.options.plugins.centerText.text = currentValue + "%";
+        chart.update();
+
+        requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+}
+
+
+// ==================== CENTER TEXT PLUGIN ====================
 const centerTextPlugin = {
     id: "centerText",
     afterDraw(chart, args, options) {
@@ -393,7 +494,7 @@ const centerTextPlugin = {
         const centerY = top + (bottom - top) / 2;
 
         ctx.save();
-        ctx.font = "bold 20px Inter";
+        ctx.font = "bold 18px Inter";
         ctx.fillStyle = "#1e293b";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -402,46 +503,10 @@ const centerTextPlugin = {
     }
 };
 
-plantCharts.forEach(plant => {
-    const canvas = document.getElementById(plant.id);
-    if (!canvas) return;
 
-    let progress = 0;
-    let target = plant.value;
+// Load with dashboard
+document.addEventListener("DOMContentLoaded", loadPressWiseRecovery);
 
-    const chart = new Chart(canvas, {
-        type: "doughnut",
-        data: {
-            datasets: [{
-                data: [0, 100],
-                backgroundColor: [plant.color, "#e2e8f0"],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: "75%",
-            animation: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: false },
-                centerText: { text: "0%" }
-            }
-        },
-        plugins: [centerTextPlugin]
-    });
-
-    function animate() {
-        progress += 1;
-
-        chart.data.datasets[0].data = [progress, 100 - progress];
-        chart.options.plugins.centerText.text = progress + "%";
-        chart.update();
-
-        if (progress < target) requestAnimationFrame(animate);
-    }
-
-    requestAnimationFrame(animate);
-});
 
 // ==================== RECOVERY BAR LOGIC (SAFE ADDITION) ====================
 

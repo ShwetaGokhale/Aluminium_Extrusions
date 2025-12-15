@@ -76,12 +76,12 @@ class DashboardView(View):
         return {
             'recovery_percent': recovery_percent,
             'press_count': unique_presses,
-            'total_input': round(total_input, 2),
-            'total_output': round(total_output, 2)
+            'total_input': round(total_input),
+            'total_output': round(total_output)
         }
     
     def get_order_stats(self, filter_type, selected_date=None):
-        """Calculate order statistics from OnlineProductionReport"""
+        """Calculate order statistics from OnlineProductionReport based on date_of_production"""
         
         if selected_date:
             try:
@@ -108,6 +108,8 @@ class DashboardView(View):
                 start_date = today
                 end_date = today
         
+        # Fetch from OnlineProductionReport model based on date_of_production
+        # This is ONLY for the Order Summary Card (CARD 3)
         reports = OnlineProductionReport.objects.filter(
             date_of_production__gte=start_date,
             date_of_production__lte=end_date
@@ -182,7 +184,7 @@ class DashboardRecoveryTableAPI(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class DashboardOrderTableAPI(View):
-    """API to fetch order table data from OnlineProductionReport for dashboard"""
+    """API to fetch order table data from Requisition for dashboard"""
     
     def get(self, request):
         filter_type = request.GET.get('filter', 'today')
@@ -213,17 +215,17 @@ class DashboardOrderTableAPI(View):
                 start_date = today
                 end_date = today
         
-        # Fetch from OnlineProductionReport instead of Requisition
-        reports = OnlineProductionReport.objects.filter(
-            date_of_production__gte=start_date,
-            date_of_production__lte=end_date
-        ).order_by('-date_of_production')[:10]
+        # Fetch from Requisition model (unchanged - for Order Table only)
+        requisitions = Requisition.objects.filter(
+            date__gte=start_date,
+            date__lte=end_date
+        ).order_by('-created_at')[:10]
         
         orders_list = []
-        for report in reports:
+        for req in requisitions:
             orders_list.append({
-                'production_id': report.production_id,
-                'status': report.status
+                'production_id': req.requisition_id,  # Using requisition_id (ORD00001 format)
+                'status': req.status  # created, in_planning, in_production, completed, rejected
             })
         
         return JsonResponse({
