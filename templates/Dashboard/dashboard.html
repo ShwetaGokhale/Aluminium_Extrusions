@@ -145,19 +145,19 @@
                 </div>
                 <div class="stat-content">
                     <div class="stat-item">
-                        <span class="stat-value">32</span>
+                        <span class="stat-value">{{ order_stats.total_orders }}</span>
                         <span class="stat-label">Orders</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">16</span>
+                        <span class="stat-value">{{ order_stats.completed }}</span>
                         <span class="stat-label">Completed</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">8</span>
+                        <span class="stat-value">{{ order_stats.in_progress }}</span>
                         <span class="stat-label">In Progress</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">4</span>
+                        <span class="stat-value">{{ order_stats.cancelled }}</span>
                         <span class="stat-label">Cancelled</span>
                     </div>
                 </div>

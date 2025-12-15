@@ -3,7 +3,7 @@ from django.views import View
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta, datetime
 
@@ -20,9 +20,11 @@ class DashboardView(View):
         filter_type = request.GET.get('filter', 'today')
         selected_date = request.GET.get('date', None)
         recovery_stats = self.get_recovery_stats(filter_type, selected_date)
+        order_stats = self.get_order_stats(filter_type, selected_date)
         
         context = {
             'recovery_stats': recovery_stats,
+            'order_stats': order_stats,
             'filter_type': filter_type,
             'selected_date': selected_date
         }
@@ -76,6 +78,51 @@ class DashboardView(View):
             'press_count': unique_presses,
             'total_input': round(total_input, 2),
             'total_output': round(total_output, 2)
+        }
+    
+    def get_order_stats(self, filter_type, selected_date=None):
+        """Calculate order statistics from OnlineProductionReport"""
+        
+        if selected_date:
+            try:
+                date_obj = datetime.strptime(selected_date, '%Y-%m-%d').date()
+                start_date = date_obj
+                end_date = date_obj
+            except ValueError:
+                today = timezone.now().date()
+                start_date = today
+                end_date = today
+        else:
+            today = timezone.now().date()
+            
+            if filter_type == 'today':
+                start_date = today
+                end_date = today
+            elif filter_type == 'weekly':
+                start_date = today - timedelta(days=7)
+                end_date = today
+            elif filter_type == 'monthly':
+                start_date = today - timedelta(days=30)
+                end_date = today
+            else:
+                start_date = today
+                end_date = today
+        
+        reports = OnlineProductionReport.objects.filter(
+            date_of_production__gte=start_date,
+            date_of_production__lte=end_date
+        )
+        
+        total_orders = reports.count()
+        completed = reports.filter(status='completed').count()
+        in_progress = reports.filter(status='in_progress').count()
+        cancelled = reports.filter(status='cancelled').count()
+        
+        return {
+            'total_orders': total_orders,
+            'completed': completed,
+            'in_progress': in_progress,
+            'cancelled': cancelled
         }
 
 
@@ -135,7 +182,7 @@ class DashboardRecoveryTableAPI(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class DashboardOrderTableAPI(View):
-    """API to fetch order table data from Requisition for dashboard"""
+    """API to fetch order table data from OnlineProductionReport for dashboard"""
     
     def get(self, request):
         filter_type = request.GET.get('filter', 'today')
@@ -166,17 +213,17 @@ class DashboardOrderTableAPI(View):
                 start_date = today
                 end_date = today
         
-        orders = Requisition.objects.filter(
-            date__gte=start_date,
-            date__lte=end_date
-        ).order_by('-date')[:10]
+        # Fetch from OnlineProductionReport instead of Requisition
+        reports = OnlineProductionReport.objects.filter(
+            date_of_production__gte=start_date,
+            date_of_production__lte=end_date
+        ).order_by('-date_of_production')[:10]
         
         orders_list = []
-        for order in orders:
+        for report in reports:
             orders_list.append({
-                'requisition_id': order.requisition_id,
-                'requisition_no': order.requisition_no,
-                'status': order.status
+                'production_id': report.production_id,
+                'status': report.status
             })
         
         return JsonResponse({

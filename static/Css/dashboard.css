@@ -587,25 +587,27 @@
   border-radius: 4px 4px 0 0;
 }
 
+/* === RECOVERY BAR – UI ALIGNED COLORS === */
+
+/* Today → Primary Blue (matches buttons, icons, charts) */
 .recovery-bar-fill.today {
-  height: 90%;
   background: linear-gradient(
     180deg,
-    rgba(251, 191, 36, 0.3) 0%,
-    rgba(251, 191, 36, 0.4) 100%
+    rgba(59, 130, 246, 0.35) 0%,
+    rgba(59, 130, 246, 0.55) 100%
   );
-  border: 2px solid rgba(251, 191, 36, 0.5);
+  border: 2px solid rgba(59, 130, 246, 0.6);
   border-bottom: none;
 }
 
+/* Yesterday → Soft Slate (comparison, not alert) */
 .recovery-bar-fill.yesterday {
-  height: 90%;
   background: linear-gradient(
     180deg,
-    rgba(239, 68, 68, 0.15) 0%,
-    rgba(239, 68, 68, 0.25) 100%
+    rgba(148, 163, 184, 0.35) 0%,
+    rgba(148, 163, 184, 0.55) 100%
   );
-  border: 2px solid rgba(239, 68, 68, 0.4);
+  border: 2px solid rgba(148, 163, 184, 0.5);
   border-bottom: none;
 }
 

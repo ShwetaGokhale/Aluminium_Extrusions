@@ -227,20 +227,18 @@ async function loadOrderTableData() {
                 let statusBadge = '';
                 if (order.status === 'completed') {
                     statusBadge = '<span class="status-badge completed">Completed</span>';
-                } else if (order.status === 'in_production') {
-                    statusBadge = '<span class="status-badge in-progress">In Production</span>';
-                } else if (order.status === 'in_planning') {
-                    statusBadge = '<span class="status-badge pending">In Planning</span>';
-                } else if (order.status === 'rejected') {
-                    statusBadge = '<span class="status-badge cancelled">Rejected</span>';
-                } else if (order.status === 'created') {
-                    statusBadge = '<span class="status-badge created">Created</span>';
+                } else if (order.status === 'in_progress') {
+                    statusBadge = '<span class="status-badge in-progress">In Progress</span>';
+                } else if (order.status === 'on_hold') {
+                    statusBadge = '<span class="status-badge on-hold">On Hold</span>';
+                } else if (order.status === 'cancelled') {
+                    statusBadge = '<span class="status-badge cancelled">Cancelled</span>';
                 } else {
-                    statusBadge = '<span class="status-badge pending">-</span>';
+                    statusBadge = '<span class="status-badge idle">-</span>';
                 }
 
                 row.innerHTML = `
-                    <td>${order.requisition_id || '-'}</td>
+                    <td>${order.production_id || '-'}</td>
                     <td>${statusBadge}</td>
                 `;
 
@@ -444,3 +442,86 @@ plantCharts.forEach(plant => {
 
     requestAnimationFrame(animate);
 });
+
+// ==================== RECOVERY BAR LOGIC (SAFE ADDITION) ====================
+
+// Get recovery percent from API for a given filter/date
+async function fetchRecoveryPercent(filter, date = null) {
+    let url = `/dashboard/api/dashboard-recovery-table/?filter=${filter}`;
+    if (date) url += `&date=${date}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.success || !data.reports || data.reports.length === 0) {
+        return 0;
+    }
+
+    let totalInput = 0;
+    let totalOutput = 0;
+
+    data.reports.forEach(r => {
+        totalInput += r.input_qty || 0;
+        totalOutput += r.total_output || 0;
+    });
+
+    return totalOutput > 0 ? Math.round((totalInput / totalOutput) * 100) : 0;
+}
+
+// ==================== ALIVE RECOVERY BAR ANIMATION ====================
+
+// Animate bar from 0% → target %
+function animateRecoveryBar(selector, targetPercent, duration = 2000) {
+    const bar = document.querySelector(selector);
+    if (!bar) return;
+
+    let start = null;
+    const target = Math.min(Math.max(targetPercent, 0), 100);
+
+    // start from zero
+    bar.style.height = "0%";
+
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = timestamp - start;
+
+        const percent = Math.min((progress / duration) * target, target);
+        bar.style.height = percent + "%";
+
+        if (percent < target) {
+            requestAnimationFrame(step);
+        }
+    }
+
+    requestAnimationFrame(step);
+}
+
+
+// Load Today vs Yesterday bars
+async function loadRecoveryBars() {
+    try {
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+
+        const format = d =>
+            `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+        const todayRecovery = await fetchRecoveryPercent('today');
+        const yesterdayRecovery = await fetchRecoveryPercent('today', format(yesterday));
+
+        animateRecoveryBar('.recovery-bar-fill.today', todayRecovery);
+        animateRecoveryBar('.recovery-bar-fill.yesterday', yesterdayRecovery);
+
+        console.log('📊 Recovery Bars:', {
+            today: todayRecovery + '%',
+            yesterday: yesterdayRecovery + '%'
+        });
+
+    } catch (err) {
+        console.error('❌ Recovery bar error:', err);
+    }
+}
+
+// Run after page load
+document.addEventListener('DOMContentLoaded', loadRecoveryBars);
