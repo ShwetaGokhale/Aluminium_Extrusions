@@ -1,0 +1,380 @@
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Table styling */
+.table-container {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: none;
+  margin: 32px auto;
+  width: 95%;
+  max-width: 100%;
+  overflow-x: auto;
+  animation: slideUp 0.5s ease forwards;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: visible;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse !important;
+  border-spacing: 0;
+  min-width: 720px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: none;
+  animation: slideUp 0.5s ease forwards;
+}
+
+th {
+  background-color: white;
+  color: gray;
+  font-weight: normal;
+  border: none !important;
+  padding: 14px 10px;
+  text-align: left;
+  font-size: 0.875rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+th:first-child {
+  border-top-left-radius: 12px;
+}
+
+th:last-child {
+  border-top-right-radius: 12px;
+}
+
+td {
+  padding: 12px 8px;
+  border: none !important;
+  text-align: left;
+  font-size: 0.875rem;
+  color: black;
+  animation: slideUp 0.5s ease forwards;
+  vertical-align: middle;
+}
+
+thead tr {
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+tbody tr {
+  border-bottom: 0 !important;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h2 {
+  animation: slideUp 0.8s ease forwards;
+  transform: translateY(20px);
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f7fafc;
+}
+
+tbody tr:hover {
+  background-color: #edf2f7;
+  transform: scale(1.002);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+/* Action buttons */
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 0 4px;
+  transition: color 0.2s ease, transform 0.2s ease;
+  padding: 4px;
+}
+
+.edit-btn {
+  color: #2196f3;
+}
+
+.edit-btn:hover {
+  color: #1976d2;
+  transform: scale(1.15);
+}
+
+.delete-btn {
+  color: #f44336;
+}
+
+.delete-btn:hover {
+  color: #d32f2f;
+  transform: scale(1.15);
+}
+
+/* Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+  animation: fadeInOverlay 0.3s forwards;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #f0f4f8, #e9ecf0);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid #dcdcdc;
+  animation: slideInModal 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-content p {
+  font-size: 1.1em;
+  margin-bottom: 25px;
+  color: #333;
+  font-weight: 500;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.modal-buttons button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.modal-buttons .yes-btn {
+  background-color: #e53935;
+  color: white;
+}
+
+.modal-buttons .yes-btn:hover {
+  background-color: #c62828;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.modal-buttons .no-btn {
+  background-color: #e0e0e0;
+  color: #555;
+}
+
+.modal-buttons .no-btn:hover {
+  background-color: #c0c0c0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+/* Success Popup */
+.success-popup {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4caf50;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+  text-align: center;
+  z-index: 9999;
+  opacity: 0;
+  transition: top 0.5s ease-out, opacity 0.5s ease-out;
+  min-width: 250px;
+}
+
+.success-popup.show {
+  top: 20px;
+  opacity: 1;
+}
+
+#confirmationMessage {
+  font-family: "Arial", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #1e3a8a;
+  text-align: center;
+}
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.pagination {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-link {
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #374151;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.page-link:hover {
+  background-color: #1e3a8a;
+  color: white;
+  border-color: #1e3a8a;
+}
+
+.page-link.active {
+  background-color: #1e3a8a;
+  color: white;
+  border-color: #1e3a8a;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  th,
+  td {
+    font-size: 0.7rem;
+    padding: 8px 6px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .table-container {
+    width: 98%;
+    padding: 15px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 1200px;
+    table-layout: auto;
+  }
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    padding: 12px;
+    margin-top: 15px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+
+  th,
+  td {
+    padding: 6px 4px;
+    font-size: 0.65rem;
+  }
+
+  table {
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-container {
+    padding: 10px;
+  }
+
+  th,
+  td {
+    font-size: 0.6rem;
+    padding: 5px 3px;
+  }
+
+  table {
+    min-width: 900px;
+  }
+}

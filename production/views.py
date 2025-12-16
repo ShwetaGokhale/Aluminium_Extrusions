@@ -8,9 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import OnlineProductionReport
 from master.models import CompanyPress, CompanyShift, Staff
 from planning.models import ProductionPlan, DieRequisition
-from .models import ProductionReport
+from .models import DailyProductionReport
 from .forms import OnlineProductionReportForm
-from .forms import ProductionFilterForm
 from raw_data.models import Raw_data
 from master.models import Die
 from datetime import datetime
@@ -531,114 +530,565 @@ class OnlineProductionReportDeleteView(View):
         
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Views for Total Production Report functionality
+# Views for Daily Production Report functionality
 # ─────────────────────────────────────────────────────────────────────────────
-class TotalProductionReportView(View):
-    """Render and filter Total Production Report"""
+class DailyProductionReportListView(View):
+    """Render the daily production report list page"""
     
     def get(self, request):
-        # Get unique order numbers from OnlineProductionReport
-        order_choices = OnlineProductionReport.objects.values_list(
-            'production_id', 'production_id'
-        ).distinct()
+        # ---------------- Global Search ----------------
+        search_query = request.GET.get("global_search", "")
+        if search_query:
+            reports = DailyProductionReport.objects.filter(
+                Q(report_id__icontains=search_query) |
+                Q(die_no__icontains=search_query) |
+                Q(section_no__icontains=search_query)
+            ).select_related(
+                'online_production_report'
+            ).order_by("-created_at")
+        else:
+            reports = DailyProductionReport.objects.all().select_related(
+                'online_production_report'
+            ).order_by("-created_at")
         
-        # Get unique press names from Raw_data
-        press_choices = Raw_data.objects.values_list(
-            'sensor_name', 'sensor_name'
-        ).distinct()
+        # ---------------- Pagination ----------------
+        paginator = Paginator(reports, 10)  # 10 per page
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
         
-        form = ProductionFilterForm()
-        form.fields['order_no'].choices = [('', 'Select Order No')] + list(order_choices)
-        form.fields['press'].choices = [('', 'Select Press')] + list(press_choices)
+        start_page = max(page_obj.number - 2, 1)
+        end_page = min(page_obj.number + 2, paginator.num_pages)
+        page_range = range(start_page, end_page + 1)
         
-        return render(request, "Production/Total_Production_Report/total_production_report.html", {"form": form})
+        # ---------------- JSON Response for API/Postman ----------------
+        if (
+            request.headers.get("Accept") == "application/json"
+            or request.GET.get("format") == "json"
+        ):
+            reports_list = []
+            for report in page_obj:
+                reports_list.append({
+                    'id': report.id,
+                    'report_id': report.report_id,
+                    'date': report.date.strftime("%Y-%m-%d") if report.date else '',
+                    'die_no': report.die_no,
+                    'section_no': report.section_no,
+                    'section_name': report.section_name,
+                    'input_qty': str(report.input_qty) if report.input_qty else '',
+                    'output': str(report.output) if report.output else '',
+                })
+            
+            return JsonResponse(
+                {
+                    "reports": reports_list,
+                    "current_page": page_obj.number,
+                    "total_pages": paginator.num_pages,
+                    "start_page": start_page,
+                    "end_page": end_page,
+                    "global_search": search_query,
+                }
+            )
+        
+        # ---------------- HTML Rendering ----------------
+        return render(
+            request,
+            "Production/Daily_Production_Report_List/daily_production_report_list.html",
+            {
+                "page_obj": page_obj,
+                "page_range": page_range,
+                "current_page": page_obj.number,
+                "start_page": start_page,
+                "end_page": end_page,
+                "total_pages": paginator.num_pages,
+                "global_search": search_query,
+            },
+        )
+
+
+class DailyProductionReportFormView(View):
+    """Render the daily production report form page"""
+    
+    def get(self, request):
+        # Generate preview of next Report ID
+        next_report_id = DailyProductionReport.generate_report_id()
+        
+        # Get ALL online production reports (removed status filter)
+        online_reports = OnlineProductionReport.objects.all().order_by('-created_at')
+
+        return render(
+            request,
+            "Production/Daily_Production_Report/daily_production_report.html",
+            {
+                "edit_mode": False,
+                "next_report_id": next_report_id,
+                "online_reports": online_reports,
+            },
+        )
+
+
+class DailyProductionReportEditView(View):
+    """Render the daily production report edit form page"""
+    
+    def get(self, request, pk):
+        try:
+            report = DailyProductionReport.objects.select_related(
+                'online_production_report'
+            ).get(id=pk)
+        except DailyProductionReport.DoesNotExist:
+            return redirect("daily_production_report_list")
+        
+        # Get ALL online production reports (removed status filter)
+        online_reports = OnlineProductionReport.objects.all().order_by('-created_at')
+        
+        return render(
+            request,
+            "Production/Daily_Production_Report/daily_production_report.html",
+            {
+                "report": report,
+                "edit_mode": True,
+                "online_reports": online_reports,
+            },
+        )
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class DailyProductionReportAPI(View):
+    """API for CRUD on Daily Production Report"""
+    
+    def get(self, request):
+        """Get all reports, next Report ID, or online production report details"""
+        
+        # Check if requesting next Report ID
+        if request.GET.get('action') == 'get_next_id':
+            next_id = DailyProductionReport.generate_report_id()
+            return JsonResponse({
+                'success': True,
+                'next_report_id': next_id
+            })
+        
+        # Get online production report details
+        if request.GET.get('action') == 'get_online_report_details':
+            online_report_id = request.GET.get('online_report_id')
+            
+            try:
+                online_report = OnlineProductionReport.objects.select_related(
+                    'die_requisition'
+                ).get(id=online_report_id)
+                
+                # Get NOP BP from production plan
+                nop_bp_value = None
+                if online_report.die_requisition and online_report.date_of_production:
+                    production_plan = ProductionPlan.objects.filter(
+                        die_requisition=online_report.die_requisition,
+                        date_of_production=online_report.date_of_production
+                    ).first()
+                    
+                    if production_plan and production_plan.no_of_billet:
+                        nop_bp_value = production_plan.no_of_billet
+                
+                return JsonResponse({
+                    'success': True,
+                    'details': {
+                        'die_no': online_report.die_no,
+                        'section_no': online_report.section_no,
+                        'section_name': online_report.section_name,
+                        'cavity': online_report.no_of_cavity,
+                        'start_time': online_report.start_time.strftime("%H:%M") if online_report.start_time else '',
+                        'end_time': online_report.end_time.strftime("%H:%M") if online_report.end_time else '',
+                        'billet_size': online_report.billet_size,
+                        'no_of_billet': online_report.no_of_billet if online_report.no_of_billet else '',
+                        'input_qty': str(online_report.input_qty) if online_report.input_qty else '',
+                        'cut_length': online_report.cut_length,
+                        'wt_per_piece': str(online_report.wt_per_piece_output) if online_report.wt_per_piece_output else '',
+                        'no_of_ok_pcs': online_report.no_of_pieces if online_report.no_of_pieces else '',
+                        'output': str(online_report.total_output) if online_report.total_output else '',
+                        'nop_bp': nop_bp_value if nop_bp_value else '',
+                        'nop_ba': online_report.no_of_billet if online_report.no_of_billet else ''
+                    }
+                })
+            except OnlineProductionReport.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Online Production Report not found'
+                })
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': str(e)
+                })
+        
+        # Otherwise return all reports
+        reports = DailyProductionReport.objects.all().select_related(
+            'online_production_report'
+        ).order_by("-created_at")
+        
+        formatted = []
+        for report in reports:
+            formatted.append({
+                "id": report.id,
+                "report_id": report.report_id,
+                "date": report.date.strftime("%Y-%m-%d") if report.date else '',
+                "die_no": report.die_no,
+                "section_no": report.section_no,
+                "section_name": report.section_name,
+                "cavity": report.cavity,
+                "start_time": report.start_time.strftime("%H:%M") if report.start_time else '',
+                "end_time": report.end_time.strftime("%H:%M") if report.end_time else '',
+                "billet_size": report.billet_size,
+                "no_of_billet": report.no_of_billet,
+                "input_qty": str(report.input_qty) if report.input_qty else '',
+                "cut_length": report.cut_length,
+                "wt_per_piece": str(report.wt_per_piece) if report.wt_per_piece else '',
+                "no_of_ok_pcs": report.no_of_ok_pcs,
+                "output": str(report.output) if report.output else '',
+                "recovery": str(report.recovery) if report.recovery else '',
+                "nop_bp": report.nop_bp,
+                "nop_ba": report.nop_ba,
+                "nrt": str(report.nrt) if report.nrt else '',
+                "created_at": report.created_at.strftime("%Y-%m-%d"),
+            })
+        return JsonResponse({"success": True, "reports": formatted})
     
     def post(self, request):
+        """Create a new daily production report"""
         try:
-            order_no = request.POST.get("order_no")
-            press = request.POST.get("press")
+            data = json.loads(request.body)
             
-            # Get the OnlineProductionReport to find die_no
-            production_order = OnlineProductionReport.objects.filter(
-                production_id=order_no
-            ).first()
-            
-            if not production_order:
+            # Validate required fields
+            if not data.get('date'):
                 return JsonResponse({
                     "success": False,
-                    "message": "Order not found"
+                    "message": "Date is required."
                 })
             
-            # Get matching raw data
-            raw_data_entries = Raw_data.objects.filter(
-                sensor_name=press,
-                die_number=production_order.die_no
-            ).order_by("datetime")
-            
-            if not raw_data_entries.exists():
+            if not data.get('online_production_report'):
                 return JsonResponse({
                     "success": False,
-                    "message": "No records found for the selected filters."
+                    "message": "Die No (Online Production Report) is required."
                 })
             
-            # Get die information to retrieve die_name
-            die = Die.objects.filter(die_no=production_order.die_no).first()
-            die_name = die.die_name if die and die.die_name else "N/A"
+            # Parse time fields if they are strings
+            from datetime import datetime, time
             
-            # Calculate total length
-            total_length = sum(entry.length for entry in raw_data_entries)
+            start_time_value = data.get('start_time')
+            end_time_value = data.get('end_time')
             
-            # Prepare data for response
-            data = [
+            # Convert string time to time object if needed
+            if start_time_value and isinstance(start_time_value, str):
+                try:
+                    start_time_value = datetime.strptime(start_time_value, '%H:%M').time()
+                except (ValueError, TypeError):
+                    start_time_value = None
+            
+            if end_time_value and isinstance(end_time_value, str):
+                try:
+                    end_time_value = datetime.strptime(end_time_value, '%H:%M').time()
+                except (ValueError, TypeError):
+                    end_time_value = None
+            
+            # Create daily production report
+            report = DailyProductionReport.objects.create(
+                date=data.get('date'),
+                online_production_report_id=data.get('online_production_report'),
+                die_no=data.get('die_no', ''),
+                section_no=data.get('section_no', ''),
+                section_name=data.get('section_name', ''),
+                cavity=data.get('cavity', ''),
+                start_time=start_time_value,
+                end_time=end_time_value,
+                billet_size=data.get('billet_size', ''),
+                no_of_billet=data.get('no_of_billet') or None,
+                input_qty=data.get('input_qty') or None,
+                cut_length=data.get('cut_length', ''),
+                wt_per_piece=data.get('wt_per_piece') or None,
+                no_of_ok_pcs=data.get('no_of_ok_pcs') or None,
+                output=data.get('output') or None,
+                nop_bp=data.get('nop_bp') or None,
+                nop_ba=data.get('nop_ba') or None
+            )
+            
+            return JsonResponse(
                 {
-                    "s_no": i + 1,
-                    "date": entry.datetime.date().strftime("%Y-%m-%d"),
-                    "time": entry.datetime.time().strftime("%H:%M:%S"),
-                    "press": entry.sensor_name,
-                    "die_name": die_name,
-                    "order_no": production_order.production_id,
-                    "length": float(entry.length),
+                    "success": True,
+                    "created": True,
+                    "message": "Daily Production Report created successfully!",
+                    "report": {
+                        "id": report.id,
+                        "report_id": report.report_id,
+                        "recovery": str(report.recovery) if report.recovery else '',
+                        "nrt": str(report.nrt) if report.nrt else ''
+                    },
                 }
-                for i, entry in enumerate(raw_data_entries)
-            ]
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class DailyProductionReportDetailAPI(View):
+    """API for get, edit & delete Daily Production Report"""
+    
+    def get(self, request, pk):
+        """Get a single daily production report"""
+        try:
+            report = get_object_or_404(DailyProductionReport.objects.select_related(
+                'online_production_report'
+            ), id=pk)
+            
+            report_data = {
+                "id": report.id,
+                "report_id": report.report_id,
+                "date": report.date.strftime("%Y-%m-%d") if report.date else '',
+                "online_production_report_id": report.online_production_report.id if report.online_production_report else None,
+                "die_no": report.die_no,
+                "section_no": report.section_no,
+                "section_name": report.section_name,
+                "cavity": report.cavity,
+                "start_time": report.start_time.strftime("%H:%M") if report.start_time else '',
+                "end_time": report.end_time.strftime("%H:%M") if report.end_time else '',
+                "billet_size": report.billet_size,
+                "no_of_billet": report.no_of_billet,
+                "input_qty": str(report.input_qty) if report.input_qty else '',
+                "cut_length": report.cut_length,
+                "wt_per_piece": str(report.wt_per_piece) if report.wt_per_piece else '',
+                "no_of_ok_pcs": report.no_of_ok_pcs,
+                "output": str(report.output) if report.output else '',
+                "recovery": str(report.recovery) if report.recovery else '',
+                "nop_bp": report.nop_bp,
+                "nop_ba": report.nop_ba,
+                "nrt": str(report.nrt) if report.nrt else '',
+                "created_at": report.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "updated_at": report.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
             
             return JsonResponse({
                 "success": True,
-                "records": data,
-                "total_records": len(data),
-                "total_length": float(total_length),
+                "report": report_data
             })
-            
         except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    
+    def post(self, request, pk):
+        """Update daily production report"""
+        try:
+            report = get_object_or_404(DailyProductionReport, id=pk)
+            data = json.loads(request.body)
+            
+            # Validate required fields
+            if not data.get('date'):
+                return JsonResponse({
+                    "success": False,
+                    "message": "Date is required."
+                })
+            
+            if not data.get('online_production_report'):
+                return JsonResponse({
+                    "success": False,
+                    "message": "Die No (Online Production Report) is required."
+                })
+            
+            # Parse time fields if they are strings
+            from datetime import datetime, time
+            
+            start_time_value = data.get('start_time')
+            end_time_value = data.get('end_time')
+            
+            # Convert string time to time object if needed
+            if start_time_value and isinstance(start_time_value, str):
+                try:
+                    start_time_value = datetime.strptime(start_time_value, '%H:%M').time()
+                except (ValueError, TypeError):
+                    start_time_value = None
+            elif not start_time_value:
+                start_time_value = report.start_time
+            
+            if end_time_value and isinstance(end_time_value, str):
+                try:
+                    end_time_value = datetime.strptime(end_time_value, '%H:%M').time()
+                except (ValueError, TypeError):
+                    end_time_value = None
+            elif not end_time_value:
+                end_time_value = report.end_time
+            
+            # Update fields
+            report.date = data.get('date', report.date)
+            report.online_production_report_id = data.get('online_production_report', report.online_production_report_id)
+            report.die_no = data.get('die_no', report.die_no)
+            report.section_no = data.get('section_no', report.section_no)
+            report.section_name = data.get('section_name', report.section_name)
+            report.cavity = data.get('cavity', report.cavity)
+            report.start_time = start_time_value
+            report.end_time = end_time_value
+            report.billet_size = data.get('billet_size', report.billet_size)
+            report.no_of_billet = data.get('no_of_billet') or report.no_of_billet
+            report.input_qty = data.get('input_qty') or report.input_qty
+            report.cut_length = data.get('cut_length', report.cut_length)
+            report.wt_per_piece = data.get('wt_per_piece') or report.wt_per_piece
+            report.no_of_ok_pcs = data.get('no_of_ok_pcs') or report.no_of_ok_pcs
+            report.output = data.get('output') or report.output
+            report.nop_bp = data.get('nop_bp') or report.nop_bp
+            report.nop_ba = data.get('nop_ba') or report.nop_ba
+            report.save()
+            
             return JsonResponse({
-                "success": False, 
-                "message": str(e)
+                "success": True,
+                "updated": True,
+                "message": "Daily Production Report updated successfully!",
+                "recovery": str(report.recovery) if report.recovery else '',
+                "nrt": str(report.nrt) if report.nrt else ''
             })
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    
+    def delete(self, request, pk):
+        """Delete daily production report"""
+        try:
+            report = get_object_or_404(DailyProductionReport, id=pk)
+            report_id = report.report_id
+            report.delete()
+            return JsonResponse({
+                "success": True,
+                "message": f"Daily Production Report {report_id} deleted successfully!"
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
 
 
-def populate_production_reports():
-    """Populate ProductionReport from Raw_data and OnlineProductionReport"""
-    from .models import Raw_data, OnlineProductionReport, ProductionReport
+class DailyProductionReportDeleteView(View):
+    """Delete daily production report view"""
     
-    ProductionReport.objects.all().delete()  # Clear old data
+    def post(self, request, pk):
+        try:
+            report = get_object_or_404(DailyProductionReport, id=pk)
+            report_id = report.report_id
+            report.delete()
+            return JsonResponse({
+                "success": True,
+                "message": f"Daily Production Report {report_id} deleted successfully!"
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class TotalProductionReportView(View):
+#     """Render and filter Total Production Report"""
     
-    all_raw_data = Raw_data.objects.all()
-    created_count = 0
-    
-    for raw_entry in all_raw_data:
-        production_order = OnlineProductionReport.objects.filter(
-            die_no=raw_entry.die_number
-        ).first()
+#     def get(self, request):
+#         # Get unique order numbers from OnlineProductionReport
+#         order_choices = OnlineProductionReport.objects.values_list(
+#             'production_id', 'production_id'
+#         ).distinct()
         
-        if production_order:
-            ProductionReport.objects.create(
-                date=raw_entry.datetime.date(),
-                time=raw_entry.datetime.time(),
-                press=raw_entry.sensor_name,
-                die_no=raw_entry.die_number,
-                order_no=production_order.production_id,
-                length=raw_entry.length
-            )
-            created_count += 1
+#         # Get unique press names from Raw_data
+#         press_choices = Raw_data.objects.values_list(
+#             'sensor_name', 'sensor_name'
+#         ).distinct()
+        
+#         form = ProductionFilterForm()
+#         form.fields['order_no'].choices = [('', 'Select Order No')] + list(order_choices)
+#         form.fields['press'].choices = [('', 'Select Press')] + list(press_choices)
+        
+#         return render(request, "Production/Total_Production_Report/total_production_report.html", {"form": form})
     
-    return created_count
+#     def post(self, request):
+#         try:
+#             order_no = request.POST.get("order_no")
+#             press = request.POST.get("press")
+            
+#             # Get the OnlineProductionReport to find die_no
+#             production_order = OnlineProductionReport.objects.filter(
+#                 production_id=order_no
+#             ).first()
+            
+#             if not production_order:
+#                 return JsonResponse({
+#                     "success": False,
+#                     "message": "Order not found"
+#                 })
+            
+#             # Get matching raw data
+#             raw_data_entries = Raw_data.objects.filter(
+#                 sensor_name=press,
+#                 die_number=production_order.die_no
+#             ).order_by("datetime")
+            
+#             if not raw_data_entries.exists():
+#                 return JsonResponse({
+#                     "success": False,
+#                     "message": "No records found for the selected filters."
+#                 })
+            
+#             # Get die information to retrieve die_name
+#             die = Die.objects.filter(die_no=production_order.die_no).first()
+#             die_name = die.die_name if die and die.die_name else "N/A"
+            
+#             # Calculate total length
+#             total_length = sum(entry.length for entry in raw_data_entries)
+            
+#             # Prepare data for response
+#             data = [
+#                 {
+#                     "s_no": i + 1,
+#                     "date": entry.datetime.date().strftime("%Y-%m-%d"),
+#                     "time": entry.datetime.time().strftime("%H:%M:%S"),
+#                     "press": entry.sensor_name,
+#                     "die_name": die_name,
+#                     "order_no": production_order.production_id,
+#                     "length": float(entry.length),
+#                 }
+#                 for i, entry in enumerate(raw_data_entries)
+#             ]
+            
+#             return JsonResponse({
+#                 "success": True,
+#                 "records": data,
+#                 "total_records": len(data),
+#                 "total_length": float(total_length),
+#             })
+            
+#         except Exception as e:
+#             return JsonResponse({
+#                 "success": False, 
+#                 "message": str(e)
+#             })
+
+
+# def populate_production_reports():
+#     """Populate ProductionReport from Raw_data and OnlineProductionReport"""
+#     from .models import Raw_data, OnlineProductionReport, ProductionReport
+    
+#     ProductionReport.objects.all().delete()  # Clear old data
+    
+#     all_raw_data = Raw_data.objects.all()
+#     created_count = 0
+    
+#     for raw_entry in all_raw_data:
+#         production_order = OnlineProductionReport.objects.filter(
+#             die_no=raw_entry.die_number
+#         ).first()
+        
+#         if production_order:
+#             ProductionReport.objects.create(
+#                 date=raw_entry.datetime.date(),
+#                 time=raw_entry.datetime.time(),
+#                 press=raw_entry.sensor_name,
+#                 die_no=raw_entry.die_number,
+#                 order_no=production_order.production_id,
+#                 length=raw_entry.length
+#             )
+#             created_count += 1
+    
+#     return created_count

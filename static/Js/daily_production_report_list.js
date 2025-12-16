@@ -1,0 +1,153 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const tableBody = document.getElementById("dailyReportTableBody");
+    const modalOverlay = document.getElementById("confirmationModalOverlay");
+    const confirmYesBtn = document.getElementById("confirmYesBtn");
+    const confirmNoBtn = document.getElementById("confirmNoBtn");
+    const confirmationMessage = document.getElementById("confirmationMessage");
+    const successPopup = document.getElementById("successPopup");
+
+    let currentIdToDelete = null;
+
+    // ---------------- Show Success Popup ----------------
+    function showSuccessPopup(message) {
+        if (successPopup) {
+            successPopup.textContent = message;
+            successPopup.classList.add("show");
+            setTimeout(() => successPopup.classList.remove("show"), 2500);
+        }
+    }
+
+    // ---------------- Show Confirmation Modal ----------------
+    function showConfirmationModal(message, onConfirm) {
+        if (!modalOverlay) return;
+
+        if (confirmationMessage) {
+            confirmationMessage.textContent = message;
+        }
+
+        // Show modal using display flex
+        modalOverlay.style.display = "flex";
+
+        // Clone buttons to remove old event listeners
+        const newYesBtn = confirmYesBtn.cloneNode(true);
+        const newNoBtn = confirmNoBtn.cloneNode(true);
+        confirmYesBtn.parentNode.replaceChild(newYesBtn, confirmYesBtn);
+        confirmNoBtn.parentNode.replaceChild(newNoBtn, confirmNoBtn);
+
+        // Add new event listeners
+        newYesBtn.onclick = () => {
+            modalOverlay.style.display = "none";
+            if (onConfirm) onConfirm();
+        };
+
+        newNoBtn.onclick = () => {
+            modalOverlay.style.display = "none";
+            currentIdToDelete = null;
+        };
+
+        // Close on overlay click
+        modalOverlay.onclick = (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.style.display = "none";
+                currentIdToDelete = null;
+            }
+        };
+    }
+
+    // ---------------- Handle Delete Button Clicks via Event Delegation ----------------
+    if (tableBody) {
+        tableBody.addEventListener("click", function (e) {
+            const deleteBtn = e.target.closest(".delete-btn");
+
+            if (deleteBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                currentIdToDelete = deleteBtn.dataset.reportId;
+
+                if (!currentIdToDelete) {
+                    console.error("No report ID found");
+                    return;
+                }
+
+                const row = deleteBtn.closest("tr");
+                let reportId = "";
+
+                // Try to get report ID from table
+                const cells = row.querySelectorAll("td");
+                if (cells.length > 1) {
+                    reportId = cells[1].textContent.trim();
+                }
+
+                const message = reportId
+                    ? `Are you sure you want to delete Daily Production Report "${reportId}"?`
+                    : "Are you sure you want to delete this Daily Production Report?";
+
+                showConfirmationModal(message, confirmDelete);
+            }
+        });
+    }
+
+    // ---------------- Confirm Delete Function ----------------
+    async function confirmDelete() {
+        if (!currentIdToDelete) {
+            console.error("No ID to delete");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/production/daily-production-report/delete/${currentIdToDelete}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken(),
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showSuccessPopup(data.message || "Daily Production Report deleted successfully!");
+
+                // Remove the row from table
+                const row = document.querySelector(`tr[data-report-id="${currentIdToDelete}"]`);
+                if (row) {
+                    row.style.transition = "opacity 0.3s ease";
+                    row.style.opacity = "0";
+                    setTimeout(() => {
+                        row.remove();
+                        // Update serial numbers
+                        updateSerialNumbers();
+                    }, 300);
+                }
+
+                currentIdToDelete = null;
+            } else {
+                alert(data.message || "Failed to delete daily production report. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error deleting daily production report:", error);
+            alert("Network error while deleting daily production report. Please try again.");
+        }
+    }
+
+    // ---------------- Update Serial Numbers After Deletion ----------------
+    function updateSerialNumbers() {
+        const rows = tableBody.querySelectorAll("tr");
+        rows.forEach((row, index) => {
+            const firstCell = row.querySelector("td:first-child");
+            if (firstCell && !row.querySelector("td[colspan]")) {
+                firstCell.textContent = index + 1;
+            }
+        });
+    }
+
+    // ---------------- Get CSRF Token ----------------
+    function getCSRFToken() {
+        const name = "csrftoken";
+        const cookie = document.cookie
+            .split("; ")
+            .find((r) => r.startsWith(name + "="));
+        return cookie ? cookie.split("=")[1] : null;
+    }
+});

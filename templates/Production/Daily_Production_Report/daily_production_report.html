@@ -1,0 +1,208 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'css/daily_production_report.css' %}">
+
+<!-- Popup Notification -->
+<div id="popupMessage" class="popup-message hidden"></div>
+
+<div class="form-container">
+    <!-- Header -->
+    <div class="form-header">
+        <h3 class="text-2xl font-bold italic" style="color: #1e3a8a;">
+            {% if edit_mode %}Edit Daily Production Report{% else %}Daily Production Report Form{% endif %}
+        </h3>
+    </div>
+
+    <form id="dailyProductionReportForm" method="post">
+        {% csrf_token %}
+        {% if edit_mode %}
+        <input type="hidden" name="report_id" value="{{ report.id }}">
+        {% endif %}
+
+        <!-- ============ GENERAL SECTION ============ -->
+        <div class="section-heading">
+            <h4>General Details</h4>
+        </div>
+
+        <!-- Report ID -->
+        <div>
+            <label for="report_id_display">Report ID <span class="auto-gen-label">(Auto-generated)</span> <span style="color: red;">*</span></label>
+            <input type="text" id="report_id_display"
+                value="{% if edit_mode %}{{ report.report_id }}{% else %}{{ next_report_id }}{% endif %}"
+                readonly>
+        </div>
+
+        <!-- Date -->
+        <div>
+            <label for="date">Date <span style="color: red;">*</span></label>
+            <input type="date" name="date" id="date" required
+                value="{% if edit_mode %}{{ report.date|date:'Y-m-d' }}{% endif %}">
+        </div>
+
+        <!-- Die No (Dropdown - Online Production Report) -->
+        <div>
+            <label for="online_production_report">Die No <span style="color: red;">*</span></label>
+            <select name="online_production_report" id="online_production_report" required>
+                <option value="">Select Die No</option>
+                {% for online_report in online_reports %}
+                <option value="{{ online_report.id }}" 
+                    data-die-no="{{ online_report.die_no }}"
+                    {% if edit_mode and report.online_production_report and report.online_production_report.id == online_report.id %}selected{% endif %}>
+                    {{ online_report.production_id }} - {{ online_report.die_no }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- ============ PRODUCTION DETAILS SECTION ============ -->
+        <div class="section-heading">
+            <h4>Production Details</h4>
+        </div>
+
+        <!-- Die No (Display) -->
+        <div>
+            <label for="die_no">Die No</label>
+            <input type="text" name="die_no" id="die_no"
+                value="{% if edit_mode %}{{ report.die_no }}{% endif %}">
+        </div>
+
+        <!-- Section No -->
+        <div>
+            <label for="section_no">Section No</label>
+            <input type="text" name="section_no" id="section_no"
+                value="{% if edit_mode %}{{ report.section_no }}{% endif %}">
+        </div>
+
+        <!-- Section Name -->
+        <div>
+            <label for="section_name">Section Name</label>
+            <input type="text" name="section_name" id="section_name"
+                value="{% if edit_mode %}{{ report.section_name }}{% endif %}">
+        </div>
+
+        <!-- Cavity -->
+        <div>
+            <label for="cavity">Cavity</label>
+            <input type="text" name="cavity" id="cavity"
+                value="{% if edit_mode %}{{ report.cavity }}{% endif %}">
+        </div>
+
+        <!-- Start Time -->
+        <div>
+            <label for="start_time">Start Time</label>
+            <input type="time" name="start_time" id="start_time"
+                value="{% if edit_mode and report.start_time %}{{ report.start_time|time:'H:i' }}{% endif %}">
+        </div>
+
+        <!-- End Time -->
+        <div>
+            <label for="end_time">End Time</label>
+            <input type="time" name="end_time" id="end_time"
+                value="{% if edit_mode and report.end_time %}{{ report.end_time|time:'H:i' }}{% endif %}">
+        </div>
+
+        <!-- Billet Size -->
+        <div>
+            <label for="billet_size">Billet Size (mm)</label>
+            <input type="text" name="billet_size" id="billet_size"
+                value="{% if edit_mode %}{{ report.billet_size }}{% endif %}">
+        </div>
+
+        <!-- No of Billet -->
+        <div>
+            <label for="no_of_billet">No of Billet</label>
+            <input type="number" name="no_of_billet" id="no_of_billet" min="0"
+                value="{% if edit_mode and report.no_of_billet %}{{ report.no_of_billet }}{% endif %}">
+        </div>
+
+        <!-- Input -->
+        <div>
+            <label for="input_qty">Input</label>
+            <input type="number" step="0.01" name="input_qty" id="input_qty" min="0"
+                value="{% if edit_mode and report.input_qty %}{{ report.input_qty }}{% endif %}">
+        </div>
+
+        <!-- Cut Length -->
+        <div>
+            <label for="cut_length">Cut Length</label>
+            <input type="text" name="cut_length" id="cut_length"
+                value="{% if edit_mode %}{{ report.cut_length }}{% endif %}">
+        </div>
+
+        <!-- WT per Piece -->
+        <div>
+            <label for="wt_per_piece">WT per Piece</label>
+            <input type="number" step="0.01" name="wt_per_piece" id="wt_per_piece" min="0"
+                value="{% if edit_mode and report.wt_per_piece %}{{ report.wt_per_piece }}{% endif %}">
+        </div>
+
+        <!-- No of OK PCS -->
+        <div>
+            <label for="no_of_ok_pcs">No of OK PCS</label>
+            <input type="number" name="no_of_ok_pcs" id="no_of_ok_pcs" min="0"
+                value="{% if edit_mode and report.no_of_ok_pcs %}{{ report.no_of_ok_pcs }}{% endif %}">
+        </div>
+
+        <!-- Output -->
+        <div>
+            <label for="output">Output</label>
+            <input type="number" step="0.01" name="output" id="output" min="0"
+                value="{% if edit_mode and report.output %}{{ report.output }}{% endif %}">
+        </div>
+
+        <!-- Recovery (Auto-calculated) -->
+        <div>
+            <label for="recovery">Recovery (%) <span class="auto-gen-label">(Auto-calculated)</span></label>
+            <input type="text" id="recovery"
+                value="{% if edit_mode and report.recovery %}{{ report.recovery }}{% endif %}"
+                readonly>
+        </div>
+
+        <!-- NOP BP -->
+        <div>
+            <label for="nop_bp">NOP BP</label>
+            <input type="number" name="nop_bp" id="nop_bp" min="0"
+                value="{% if edit_mode and report.nop_bp %}{{ report.nop_bp }}{% endif %}">
+        </div>
+
+        <!-- NOP BA -->
+        <div>
+            <label for="nop_ba">NOP BA</label>
+            <input type="number" name="nop_ba" id="nop_ba" min="0"
+                value="{% if edit_mode and report.nop_ba %}{{ report.nop_ba }}{% endif %}">
+        </div>
+
+        <!-- NRT (Auto-calculated) -->
+        <div>
+            <label for="nrt">NRT (Hours) <span class="auto-gen-label">(Auto-calculated)</span></label>
+            <input type="text" id="nrt"
+                value="{% if edit_mode and report.nrt %}{{ report.nrt }}{% endif %}"
+                readonly>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="full-width">
+            {% if edit_mode %}Update Daily Production Report{% else %}Save Daily Production Report{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Pass data to JavaScript -->
+{% if edit_mode %}
+<script>
+    window.editMode = true;
+    window.reportId = {{ report.id }};
+</script>
+{% else %}
+<script>
+    window.editMode = false;
+</script>
+{% endif %}
+
+<!-- JavaScript -->
+<script src="{% static 'js/daily_production_report.js' %}"></script>
+
+{% endblock %}

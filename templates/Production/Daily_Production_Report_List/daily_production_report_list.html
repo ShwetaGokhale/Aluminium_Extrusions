@@ -1,0 +1,267 @@
+{% extends "Master/Base/base.html" %}
+{% block content %}
+{% load static %}
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'css/daily_production_report_list.css' %}">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    /* ===== PAGE LAYOUT ===== */
+    .page-layout {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .main-content-area {
+        flex: 1;
+        min-width: 0;
+        max-width: calc(100% - 300px);
+    }
+
+    .info-sidebar {
+        width: 280px;
+        min-width: 280px;
+        background: rgb(246, 243, 243);
+        border-radius: 12px;
+        padding: 24px;
+        color: black;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        height: calc(100vh - 20px);
+        overflow-y: auto;
+        position: sticky;
+        top: 20px;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .sidebar-section {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 18px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-section h3 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #8b7fc0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-item {
+        padding: 10px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #8a8a8a;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #222;
+        padding: 4px 12px;
+        border-radius: 6px;
+    }
+
+    @media (max-width: 992px) {
+        .page-layout {
+            flex-direction: column;
+        }
+
+        .info-sidebar {
+            width: 100%;
+            position: static;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 15px;
+            order: -1;
+        }
+
+        .sidebar-section {
+            flex: 1;
+            min-width: 250px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .info-sidebar {
+            flex-direction: column;
+            padding: 16px;
+            gap: 12px;
+        }
+    }
+</style>
+
+
+<!-- PAGE WRAPPER -->
+<div class="page-layout">
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content-area">
+
+        <main class="table-container">
+            <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+                <h2 class="text-xl lg:text-3xl font-bold"
+                    style="color: black; flex-shrink: 1; white-space: nowrap; margin: 0;">
+                    Daily Report List
+                </h2>
+
+                <!-- Search -->
+                <form method="GET" class="flex items-center space-x-2 mr-3">
+                    <input type="text" name="global_search" value="{{ global_search|default:'' }}"
+                        placeholder="Search By Report ID..." class="rounded-lg px-3 py-2 text-sm text-gray-800 border border-gray-300 shadow-sm
+               focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+
+                    <button type="submit"
+                        class="font-bold py-2 px-4 rounded-lg shadow flex items-center transition duration-200"
+                        style="background-color: #e5e7eb; color: black;">
+                        <i class="fas fa-search mr-1" style="color: black;"></i>
+                    </button>
+                </form>
+
+                <!-- Buttons -->
+                <div class="flex space-x-3">
+                    <a href="{% url 'daily_production_report' %}"
+                        class="bg-white hover:bg-gray-200 text-blue-600 py-2 px-3 rounded-lg flex items-center gap-2"
+                        style="font-size: 0.875rem; font-weight: normal;" title="Add New">
+                        <i class="fas fa-plus mr-2"></i>
+                        <span>Add New Report</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Table Wrapper -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">#</th>
+                            <th style="text-align: center;">Report ID</th>
+                            <th style="text-align: center;">Date</th>
+                            <th style="text-align: center;">Die No</th>
+                            <th style="text-align: center;">Section No</th>
+                            <th style="text-align: center;">Section Name</th>
+                            <th style="text-align: center;">Input</th>
+                            <th style="text-align: center;">Output</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="dailyReportTableBody">
+                        {% for report in page_obj %}
+                        <tr data-report-id="{{ report.id }}">
+                            <td style="text-align: center;">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                            <td style="text-align: center;">{{ report.report_id }}</td>
+                            <td style="text-align: center;">{{ report.date|date:"Y-m-d" }}</td>
+                            <td style="text-align: center;">{{ report.die_no|default:"-" }}</td>
+                            <td style="text-align: center;">{{ report.section_no|default:"-" }}</td>
+                            <td style="text-align: center;">{{ report.section_name|default:"-" }}</td>
+                            <td style="text-align: center;">{{ report.input_qty|default:"-" }}</td>
+                            <td style="text-align: center;">{{ report.output|default:"-" }}</td>
+
+                            <td style="white-space: nowrap; text-align: center;">
+                                <a href="{% url 'daily_production_report_edit' report.id %}"
+                                    class="action-btn edit-btn" title="Edit">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </a>
+                                <button type="button" class="action-btn delete-btn" data-report-id="{{ report.id }}"
+                                    title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-gray-500 italic">No daily production reports found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="pagination-container">
+                <nav class="pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1{% if global_search %}&global_search={{ global_search }}{% endif %}" 
+                       class="page-link">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if global_search %}&global_search={{ global_search }}{% endif %}" 
+                       class="page-link">Previous</a>
+                    {% endif %}
+
+                    {% for num in page_range %}
+                    <a href="?page={{ num }}{% if global_search %}&global_search={{ global_search }}{% endif %}"
+                       class="page-link {% if num == current_page %}active{% endif %}">{{ num }}</a>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if global_search %}&global_search={{ global_search }}{% endif %}" 
+                       class="page-link">Next</a>
+                    <a href="?page={{ total_pages }}{% if global_search %}&global_search={{ global_search }}{% endif %}" 
+                       class="page-link">Last</a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+
+        </main>
+
+    </div>
+
+    <!-- ================= RIGHT SIDEBAR ================= -->
+    <aside class="info-sidebar">
+
+        <div class="sidebar-section">
+            <h3><i class="fas fa-chart-line"></i> Overview</h3>
+
+            <div class="stat-item">
+                <span class="stat-label">Total Reports</span>
+                <span class="stat-value">{{ page_obj.paginator.count }}</span>
+            </div>
+            </div>
+
+        </div>
+
+    </aside>
+
+</div> <!-- END WRAPPER -->
+
+
+<!-- Modal for delete confirm -->
+<div id="confirmationModalOverlay" class="modal-overlay">
+    <div class="modal-content">
+        <p id="confirmationMessage"></p>
+        <div class="modal-buttons">
+            <button id="confirmYesBtn" class="yes-btn">Yes</button>
+            <button id="confirmNoBtn" class="no-btn">No</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success popup -->
+<div id="successPopup" class="success-popup">Action successful!</div>
+
+<!-- Custom JS -->
+<script src="{% static 'js/daily_production_report_list.js' %}"></script>
+
+{% endblock %}

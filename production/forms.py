@@ -2,7 +2,7 @@ from django import forms
 from .models import OnlineProductionReport
 from master.models import CompanyPress, CompanyShift, Staff
 from planning.models import ProductionPlan, DieRequisition
-from .models import ProductionReport
+from .models import DailyProductionReport
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Form for Online Production Report functionality
@@ -313,17 +313,258 @@ class OnlineProductionReportForm(forms.ModelForm):
         return instance
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Forms for Total Production Report functionality
+# Forms for Daily Production Report functionality
 # ─────────────────────────────────────────────────────────────────────────────
-class ProductionFilterForm(forms.Form):
-    order_no = forms.ChoiceField(choices=[], required=True)
-    press = forms.ChoiceField(choices=[], required=True)
-
+class DailyProductionReportForm(forms.ModelForm):
+    """Form for Daily Production Report"""
+    
+    class Meta:
+        model = DailyProductionReport
+        fields = [
+            'date',
+            'online_production_report',
+            'die_no',
+            'section_no',
+            'section_name',
+            'cavity',
+            'start_time',
+            'end_time',
+            'billet_size',
+            'no_of_billet',
+            'input_qty',
+            'cut_length',
+            'wt_per_piece',
+            'no_of_ok_pcs',
+            'output',
+            'nop_bp',
+            'nop_ba'
+        ]
+        
+        widgets = {
+            'date': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control',
+                    'placeholder': 'Select Date',
+                    'required': True
+                }
+            ),
+            'online_production_report': forms.Select(
+                attrs={
+                    'class': 'form-control select2',
+                    'data-placeholder': 'Select Die No',
+                    'required': True
+                }
+            ),
+            'die_no': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Die No',
+                    'readonly': False
+                }
+            ),
+            'section_no': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Section No',
+                    'readonly': False
+                }
+            ),
+            'section_name': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Section Name',
+                    'readonly': False
+                }
+            ),
+            'cavity': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Cavity',
+                    'readonly': False
+                }
+            ),
+            'start_time': forms.TimeInput(
+                attrs={
+                    'type': 'time',
+                    'class': 'form-control',
+                    'placeholder': 'Start Time',
+                    'readonly': False
+                }
+            ),
+            'end_time': forms.TimeInput(
+                attrs={
+                    'type': 'time',
+                    'class': 'form-control',
+                    'placeholder': 'End Time',
+                    'readonly': False
+                }
+            ),
+            'billet_size': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Billet Size (mm)',
+                    'readonly': False
+                }
+            ),
+            'no_of_billet': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'min': '0',
+                    'placeholder': 'No of Billet',
+                    'readonly': False
+                }
+            ),
+            'input_qty': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'step': '0.01',
+                    'min': '0',
+                    'placeholder': 'Input',
+                    'readonly': False
+                }
+            ),
+            'cut_length': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Cut Length',
+                    'readonly': False
+                }
+            ),
+            'wt_per_piece': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'step': '0.01',
+                    'min': '0',
+                    'placeholder': 'WT per Piece',
+                    'readonly': False
+                }
+            ),
+            'no_of_ok_pcs': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'min': '0',
+                    'placeholder': 'No of OK PCS',
+                    'readonly': False
+                }
+            ),
+            'output': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'step': '0.01',
+                    'min': '0',
+                    'placeholder': 'Output',
+                    'readonly': False
+                }
+            ),
+            'nop_bp': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'min': '0',
+                    'placeholder': 'NOP BP',
+                    'readonly': False
+                }
+            ),
+            'nop_ba': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'min': '0',
+                    'placeholder': 'NOP BA',
+                    'readonly': False
+                }
+            )
+        }
+        
+        labels = {
+            'date': 'Date',
+            'online_production_report': 'Die No',
+            'die_no': 'Die No',
+            'section_no': 'Section No',
+            'section_name': 'Section Name',
+            'cavity': 'Cavity',
+            'start_time': 'Start Time',
+            'end_time': 'End Time',
+            'billet_size': 'Billet Size (mm)',
+            'no_of_billet': 'No of Billet',
+            'input_qty': 'Input',
+            'cut_length': 'Cut Length',
+            'wt_per_piece': 'WT per Piece',
+            'no_of_ok_pcs': 'No of OK PCS',
+            'output': 'Output',
+            'nop_bp': 'NOP BP',
+            'nop_ba': 'NOP BA'
+        }
+    
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['order_no'].choices = [('', 'Select Order No')] + list(
-            ProductionReport.objects.values_list('order_no', 'order_no').distinct()
-        )
-        self.fields['press'].choices = [('', 'Select Press')] + list(
-            ProductionReport.objects.values_list('press', 'press').distinct()
-        )
+        super(DailyProductionReportForm, self).__init__(*args, **kwargs)
+        
+        # Set today's date as default for new forms
+        if not self.instance.pk:
+            from datetime import date
+            self.initial['date'] = date.today()
+        
+        # Set required fields
+        self.fields['date'].required = True
+        self.fields['online_production_report'].required = True
+        
+        # Set optional fields
+        for field_name in self.fields:
+            if field_name not in ['date', 'online_production_report']:
+                self.fields[field_name].required = False
+        
+        # Set queryset for dropdown - only completed production reports
+        self.fields['online_production_report'].queryset = OnlineProductionReport.objects.filter(
+            status='completed'
+        ).order_by('-created_at')
+        
+        # Customize empty label
+        self.fields['online_production_report'].empty_label = "Select Die No"
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        online_production_report = cleaned_data.get('online_production_report')
+        
+        # Validate required fields
+        if not date:
+            raise forms.ValidationError("Date is required.")
+        
+        if not online_production_report:
+            raise forms.ValidationError("Die No (Online Production Report) is required.")
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        
+        # Recovery and NRT will be automatically calculated in the model's save method
+        
+        if commit:
+            instance.save()
+        return instance
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class ProductionFilterForm(forms.Form):
+#     order_no = forms.ChoiceField(choices=[], required=True)
+#     press = forms.ChoiceField(choices=[], required=True)
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['order_no'].choices = [('', 'Select Order No')] + list(
+#             ProductionReport.objects.values_list('order_no', 'order_no').distinct()
+#         )
+#         self.fields['press'].choices = [('', 'Select Press')] + list(
+#             ProductionReport.objects.values_list('press', 'press').distinct()
+#         )
