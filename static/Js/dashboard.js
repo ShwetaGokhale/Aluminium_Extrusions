@@ -67,28 +67,22 @@ async function loadRecoveryTableData() {
         url += `&date=${selectedDate}`;
     }
 
-    console.log('🔍 Fetching URL:', url);
 
     try {
         const response = await fetch(url);
-        console.log('📡 Response Status:', response.status);
-        console.log('📡 Response OK:', response.ok);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('📦 Response Data:', data);
 
         const tbody = document.getElementById('recoveryTableBody');
 
         if (data.success && data.reports && data.reports.length > 0) {
-            console.log('✅ Found', data.reports.length, 'reports');
             tbody.innerHTML = '';
 
             data.reports.forEach((report, index) => {
-                console.log(`Report ${index}:`, report);
                 const row = document.createElement('tr');
 
                 // Calculate recovery: (input / output) * 100
@@ -109,12 +103,9 @@ async function loadRecoveryTableData() {
                 tbody.appendChild(row);
             });
         } else {
-            console.log('⚠️ No reports found');
             tbody.innerHTML = '<tr><td colspan="6" class="text-center">No data available</td></tr>';
         }
     } catch (error) {
-        console.error('❌ Error Details:', error);
-        console.error('❌ Error Message:', error.message);
         document.getElementById('recoveryTableBody').innerHTML =
             `<tr><td colspan="6" class="text-center">Error: ${error.message}</td></tr>`;
     }
@@ -131,27 +122,19 @@ async function loadProductionTableData() {
         url += `&date=${selectedDate}`;
     }
 
-    console.log('🔍 Fetching Production URL:', url);
-
     try {
         const response = await fetch(url);
-        console.log('📡 Production Response Status:', response.status);
-
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('📦 Production Response Data:', data);
-
         const tbody = document.getElementById('productionTableBody');
 
         if (data.success && data.reports && data.reports.length > 0) {
-            console.log('✅ Found', data.reports.length, 'production reports');
             tbody.innerHTML = '';
 
             data.reports.forEach((report, index) => {
-                console.log(`Production Report ${index}:`, report);
                 const row = document.createElement('tr');
 
                 // Determine status badge
@@ -178,12 +161,9 @@ async function loadProductionTableData() {
                 tbody.appendChild(row);
             });
         } else {
-            console.log('⚠️ No production reports found');
             tbody.innerHTML = '<tr><td colspan="4" class="text-center">No data available</td></tr>';
         }
     } catch (error) {
-        console.error('❌ Production Error Details:', error);
-        console.error('❌ Production Error Message:', error.message);
         document.getElementById('productionTableBody').innerHTML =
             `<tr><td colspan="4" class="text-center">Error: ${error.message}</td></tr>`;
     }
@@ -200,27 +180,21 @@ async function loadOrderTableData() {
         url += `&date=${selectedDate}`;
     }
 
-    console.log('🔍 Fetching Order URL:', url);
 
     try {
         const response = await fetch(url);
-        console.log('📡 Order Response Status:', response.status);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('📦 Order Response Data:', data);
-
         const tbody = document.getElementById('orderTableBody');
 
         if (data.success && data.orders && data.orders.length > 0) {
-            console.log('✅ Found', data.orders.length, 'orders');
             tbody.innerHTML = '';
 
             data.orders.forEach((order, index) => {
-                console.log(`Order ${index}:`, order);
                 const row = document.createElement('tr');
 
                 // Map Requisition status to badges
@@ -247,12 +221,9 @@ async function loadOrderTableData() {
                 tbody.appendChild(row);
             });
         } else {
-            console.log('⚠️ No orders found');
             tbody.innerHTML = '<tr><td colspan="2" class="text-center">No data available</td></tr>';
         }
     } catch (error) {
-        console.error('❌ Order Error Details:', error);
-        console.error('❌ Order Error Message:', error.message);
         document.getElementById('orderTableBody').innerHTML =
             `<tr><td colspan="2" class="text-center">Error: ${error.message}</td></tr>`;
     }
@@ -260,10 +231,6 @@ async function loadOrderTableData() {
 
 // Load tables on page load
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('🚀 Dashboard loaded, initializing tables...');
-    console.log('📅 Current Filter:', window.currentFilter);
-    console.log('📅 Selected Date:', getSelectedDate());
-
     loadRecoveryTableData();
     loadProductionTableData();
     loadOrderTableData();
@@ -271,7 +238,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Filter functionality
 function setFilter(filter) {
-    console.log('🔄 Setting filter to:', filter);
     // Redirect to same page with filter parameter (remove date parameter)
     window.location.href = `?filter=${filter}`;
 }
@@ -366,12 +332,8 @@ function renderCalendar() {
 function selectDate(year, month, day) {
     selectedDate = new Date(year, month, day);
 
-    console.log("Selected date:", selectedDate.toDateString());
-
     // Format date as YYYY-MM-DD
     const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-    console.log('🔄 Redirecting to date:', formattedDate);
 
     // Redirect to dashboard with selected date parameter
     window.location.href = `?date=${formattedDate}`;
