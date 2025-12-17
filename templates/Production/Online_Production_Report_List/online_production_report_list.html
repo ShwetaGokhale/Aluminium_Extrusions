@@ -172,7 +172,7 @@
                             <th style="text-align: center;">Die No</th>
                             <th style="text-align: center;">C/L</th>
                             <th style="text-align: center;">Operator</th>
-                            <th style="text-align: center;">Status</th> 
+                            <th style="text-align: center;">Status</th>
                             <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
@@ -187,7 +187,11 @@
                             <td style="text-align: center;">{{ report.die_no|default:"-" }}</td>
                             <td style="text-align: center;">{{ report.cut_length|default:"-" }}</td>
                             <td style="text-align: center;">{{ report.operator.get_full_name|default:"-" }}</td>
-                            <td style="text-align: center;">{{ report.status|default:"-" }}</td>
+                            <td style="text-align: center;">
+                                <span class="status-badge status-{{ report.status }}">
+                                    {{ report.status|default:"-" }}
+                                </span>
+                            </td>
 
                             <td style="white-space: nowrap; text-align: center;">
                                 <a href="{% url 'online_production_report_edit' report.id %}"
