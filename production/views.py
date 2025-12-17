@@ -11,7 +11,7 @@ from planning.models import ProductionPlan, DieRequisition
 from .forms import OnlineProductionReportForm
 from raw_data.models import Raw_data
 from master.models import Die
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db.models import Q
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -533,11 +533,11 @@ class OnlineProductionReportDeleteView(View):
 # ─────────────────────────────────────────────────────────────────────────────
 class DailyProductionReportView(View):
     """Render the daily production report page"""
-    
+
     def get(self, request):
         # ---------------- Date Filter ----------------
         selected_date = request.GET.get('date', None)
-        
+
         # Base queryset with related data
         reports = OnlineProductionReport.objects.select_related(
             'die_requisition',
@@ -545,7 +545,7 @@ class DailyProductionReportView(View):
             'shift',
             'operator'
         ).all()
-        
+
         # Filter by date if provided
         if selected_date:
             try:
@@ -553,7 +553,7 @@ class DailyProductionReportView(View):
                 reports = reports.filter(date_of_production=filter_date)
             except ValueError:
                 pass
-        
+
         # ---------------- Global Search ----------------
         search_query = request.GET.get("global_search", "")
         if search_query:
@@ -563,36 +563,34 @@ class DailyProductionReportView(View):
                 Q(section_no__icontains=search_query) |
                 Q(section_name__icontains=search_query)
             )
-        
+
         # Order by created date
         reports = reports.order_by("-created_at")
-        
+
         # ---------------- Pagination ----------------
-        paginator = Paginator(reports, 20)  # 20 per page for reports
+        paginator = Paginator(reports, 20)
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
-        
+
         start_page = max(page_obj.number - 2, 1)
         end_page = min(page_obj.number + 2, paginator.num_pages)
         page_range = range(start_page, end_page + 1)
-        
-        # Get production plans for NOP BP (No of Billet from Production Plan)
+
+        # Get production plans for NOP BP
         production_plans = {}
         for report in page_obj:
             if report.die_requisition:
-                # Get the production plan associated with this die requisition
                 plan = ProductionPlan.objects.filter(
                     die_requisition=report.die_requisition
                 ).first()
                 if plan:
                     production_plans[report.id] = plan
-        
+
         # Prepare data for template
         report_data = []
         for report in page_obj:
-            # Get associated production plan for NOP BP
             plan = production_plans.get(report.id, None)
-            
+
             report_data.append({
                 'id': report.id,
                 'production_id': report.production_id,
@@ -612,36 +610,40 @@ class DailyProductionReportView(View):
                 'nop_bp': plan.no_of_billet if plan else None,
                 'nop_ba': report.no_of_billet,
             })
-        
-        # ---------------- JSON Response for API/Postman ----------------
+
+        # ---------------- JSON Response ----------------
         if (
             request.headers.get("Accept") == "application/json"
             or request.GET.get("format") == "json"
         ):
             reports_list = []
+
             for data in report_data:
-                # Calculate recovery
+                # -------- Recovery --------
                 recovery = None
                 if data['total_output'] and data['input_qty'] and data['input_qty'] != 0:
-                    recovery = round((float(data['total_output']) / float(data['input_qty'])) * 100, 2)
-                
-                # Calculate NRT
+                    recovery = round(
+                        (float(data['total_output']) / float(data['input_qty'])) * 100, 2
+                    )
+
+                # -------- NRT (FIXED – NO NEGATIVE) --------
                 nrt = None
                 if data['start_time'] and data['end_time']:
-                    start_hour = data['start_time'].hour
-                    start_min = data['start_time'].minute
-                    end_hour = data['end_time'].hour
-                    end_min = data['end_time'].minute
-                    
-                    hours = end_hour - start_hour
-                    minutes = end_min - start_min
-                    
-                    if minutes < 0:
-                        hours -= 1
-                        minutes += 60
-                    
-                    nrt = f"{hours}h {minutes}m"
-                
+                    start_dt = datetime.combine(datetime.today(), data['start_time'])
+                    end_dt = datetime.combine(datetime.today(), data['end_time'])
+
+                    # ✅ Overnight shift handling
+                    if end_dt < start_dt:
+                        end_dt += timedelta(days=1)
+
+                    duration = end_dt - start_dt
+                    total_minutes = int(duration.total_seconds() // 60)
+
+                    hours = total_minutes // 60
+                    minutes = total_minutes % 60
+
+                    nrt = f"{hours} hrs"
+
                 reports_list.append({
                     'production_id': data['production_id'],
                     'die_no': data['die_no'] or '',
@@ -662,19 +664,17 @@ class DailyProductionReportView(View):
                     'nop_ba': data['nop_ba'],
                     'nrt': nrt,
                 })
-            
-            return JsonResponse(
-                {
-                    "reports": reports_list,
-                    "current_page": page_obj.number,
-                    "total_pages": paginator.num_pages,
-                    "start_page": start_page,
-                    "end_page": end_page,
-                    "selected_date": selected_date,
-                    "global_search": search_query,
-                }
-            )
-        
+
+            return JsonResponse({
+                "reports": reports_list,
+                "current_page": page_obj.number,
+                "total_pages": paginator.num_pages,
+                "start_page": start_page,
+                "end_page": end_page,
+                "selected_date": selected_date,
+                "global_search": search_query,
+            })
+
         # ---------------- HTML Rendering ----------------
         return render(
             request,

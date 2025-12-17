@@ -126,28 +126,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Calculate NRT for each row
+    // Calculate NRT for each row (FINAL FIX – OVERNIGHT SAFE)
     const nrtFields = document.querySelectorAll('td.calculated-field[data-start]');
     nrtFields.forEach(function (cell) {
         const startTime = cell.getAttribute('data-start');
         const endTime = cell.getAttribute('data-end');
 
-        if (startTime && endTime && startTime !== 'None' && endTime !== 'None') {
-            const [startHour, startMin] = startTime.split(':').map(Number);
-            const [endHour, endMin] = endTime.split(':').map(Number);
-
-            let hours = endHour - startHour;
-            let minutes = endMin - startMin;
-
-            if (minutes < 0) {
-                hours -= 1;
-                minutes += 60;
-            }
-
-            //Show hours
-            cell.textContent = hours + ' hrs';
-        } else {
+        if (!startTime || !endTime || startTime === 'None' || endTime === 'None') {
             cell.textContent = 'N/A';
+            return;
         }
+
+        const [sh, sm] = startTime.split(':').map(Number);
+        const [eh, em] = endTime.split(':').map(Number);
+
+        let startMinutes = sh * 60 + sm;
+        let endMinutes = eh * 60 + em;
+
+        // ✅ overnight shift
+        if (endMinutes < startMinutes) {
+            endMinutes += 24 * 60;
+        }
+
+        const diffMinutes = endMinutes - startMinutes;
+        const hours = Math.floor(diffMinutes / 60);
+
+        cell.textContent = hours + ' hrs';
     });
+
 });
