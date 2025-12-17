@@ -68,8 +68,8 @@ class DashboardView(View):
         total_output = reports.aggregate(total=Sum('total_output'))['total'] or 0
         unique_presses = reports.values('press').distinct().count()
         
-        if total_output > 0:
-            recovery_percent = round((total_input / total_output) * 100)
+        if total_input > 0:
+            recovery_percent = round((total_output / total_input) * 100)
         else:
             recovery_percent = 0
         

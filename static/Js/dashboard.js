@@ -98,7 +98,9 @@ async function loadRecoveryTableData() {
                     <td>${report.press || '-'}</td>
                     <td>${report.input_qty || 0}kg</td>
                     <td>${report.total_output || 0}kg</td>
-                    <td>${recovery}%</td>
+                    <td class="${recovery >= 80 ? 'recovery-good' : 'recovery-bad'}">
+                        ${recovery}%
+                    </td>
                 `;
 
                 tbody.appendChild(row);
@@ -372,7 +374,8 @@ async function loadPressWiseRecovery() {
     Object.entries(pressMap).forEach(([pressName, values], index) => {
         const recovery =
             values.output > 0
-                ? Math.round((values.input / values.output) * 100)
+                // ? Math.round((values.input / values.output) * 100)
+                ? Math.round((values.output / values.input) * 100)  // Changed
                 : 0;
 
         const canvasId = `pressChart_${index}`;
@@ -493,7 +496,8 @@ async function fetchRecoveryPercent(filter, date = null) {
         totalOutput += r.total_output || 0;
     });
 
-    return totalOutput > 0 ? Math.round((totalInput / totalOutput) * 100) : 0;
+    // return totalOutput > 0 ? Math.round((totalInput / totalOutput) * 100) : 0;
+    return totalInput > 0 ? Math.round((totalOutput / totalInput) * 100) : 0;
 }
 
 // ==================== ALIVE RECOVERY BAR ANIMATION ====================
