@@ -358,3 +358,155 @@ tbody tr:hover {
 .filter-section button:hover {
   background-color: #1e40af;
 }
+
+/* Export Actions Styling */
+.export-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.export-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.pdf-btn {
+  background-color: #dc2626;
+  color: white;
+}
+
+.pdf-btn:hover {
+  background-color: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+}
+
+.print-btn {
+  background-color: #059669;
+  color: white;
+}
+
+.print-btn:hover {
+  background-color: #047857;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+}
+
+/* Print media query - Enhanced */
+@media print {
+  /* Hide unnecessary elements */
+  .filter-section,
+  .main-header,
+  footer,
+  .export-actions,
+  .sidebar,
+  nav {
+    display: none !important;
+  }
+
+  /* Reset page margins and layout */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  .content-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .table-container {
+    box-shadow: none;
+    margin: 0;
+    padding: 10px;
+    width: 100%;
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  .page-header {
+    margin-bottom: 10px;
+    page-break-inside: avoid;
+  }
+
+  .page-header h1 {
+    font-size: 18px;
+    margin: 5px 0;
+  }
+
+  .page-header .date-info {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+
+  /* Table print styles */
+  .table-wrapper {
+    overflow: visible !important;
+    width: 100%;
+  }
+
+  table {
+    width: 100% !important;
+    min-width: 100% !important;
+    font-size: 8px !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  th {
+    font-size: 7px !important;
+    padding: 4px 2px !important;
+    background-color: #f3f4f6 !important;
+    color: #000 !important;
+    border: 1px solid #ccc !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  td {
+    font-size: 7px !important;
+    padding: 3px 2px !important;
+    border: 1px solid #ccc !important;
+    word-wrap: break-word;
+    overflow: visible !important;
+  }
+
+  /* Ensure calculated fields show background color in print */
+  .calculated-field {
+    background-color: #fef3c7 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ensure even rows show background color in print */
+  tbody tr:nth-child(even) {
+    background-color: #f9fafb !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Set page to landscape */
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+}
