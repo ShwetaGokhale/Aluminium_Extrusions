@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Fixed constants for calculations
     const PI = 3.146;
-    const RADIUS = 75;
+    const RADIUS = 140;
     const DENSITY = 2700;
 
     // ---------------- Popup Message ----------------

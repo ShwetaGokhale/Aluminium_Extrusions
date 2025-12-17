@@ -88,7 +88,8 @@ async function loadRecoveryTableData() {
                 // Calculate recovery: (input / output) * 100
                 let recovery = 0;
                 if (report.total_output > 0) {
-                    recovery = Math.round((report.input_qty / report.total_output) * 100);
+                    // recovery = Math.round((report.input_qty / report.total_output) * 100);
+                    recovery = Math.round((report.total_output / report.input_qty) * 100);
                 }
 
                 row.innerHTML = `
